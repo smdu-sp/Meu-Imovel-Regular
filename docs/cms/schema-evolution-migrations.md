@@ -1,0 +1,141 @@
+# SPEC-028 - Evolucao de schema e migrations
+
+Esta nota define o processo para alterar schemas de `Pages`, Blocks, Globals, `Media` e `Users` sem tratar dados persistidos como detalhe secundario.
+
+## Classificacao obrigatoria
+
+Toda mudanca de schema deve ser classificada antes do patch:
+
+| Mudanca | Risco | Acao minima |
+|---|---|---|
+| Novo Block | Medio | Fixture nova, renderizacao testada e registro no catalogo. |
+| Novo field opcional | Baixo | Fallback de renderizacao e documentacao. |
+| Novo field obrigatorio | Alto | Migration ou default seguro para documentos existentes. |
+| Novo enum ou variant | Medio | Normalizador/fallback para valores antigos e desconhecidos. |
+| Rename | Alto | Plano de migration; nao tratar como simples renomeacao. |
+| Remocao | Alto | Migration, backup e validacao humana antes de aplicar. |
+| Mudanca de tipo | Alto | Migration explicita e fixture com dado antigo. |
+| Mudanca de relationship | Alto | Migration explicita e teste com relacionamento antigo/novo. |
+
+## Estado atual
+
+As mudancas de schema registradas neste projeto foram classificadas assim:
+
+| Area | Mudanca | Classificacao | Migration |
+|---|---|---|---|
+| `Pages.layout` | Novos Blocks `iconGrid`, `faqAccordion`, `alertBox`, `actionBanners` | Novo Block | Nao exige migration; dados antigos continuam renderizando. |
+| `Pages.layout` | Novo Block `imageBlock` | Novo Block | Nao exige migration; dados antigos continuam renderizando. |
+| `Pages.layout` | Novo Block `gallery` | Novo Block | Nao exige migration; dados antigos continuam renderizando. |
+| `Pages.layout` | Novo Block `carousel` | Novo Block | Nao exige migration; dados antigos continuam renderizando. |
+| `hero.imageMode` | Novo select opcional para sem imagem, fundo ou imagem lateral; `variant`, `image` e `background` preservados | Novo field opcional | Nao exige backfill de conteudo. Sem valor, o renderer usa a apresentacao antiga; o deploy precisa da atualizacao incremental do schema do banco. |
+| `cards.items` | Campos de midia reordenados no Admin sem alterar nomes, tipos ou relacionamentos | Ordem de fields | Nao exige migration; os documentos existentes conservam os mesmos caminhos e valores. |
+| `cards.items.imageLayout` | Novo select opcional para imagem contida ou ocupando o topo | Novo field opcional | Nao exige backfill; valores ausentes ou desconhecidos usam a imagem contida. O deploy precisa da atualizacao incremental do schema do banco. |
+| `carousel.display.contentAlignment` | Novo select opcional para alinhar textos e link de cada slide | Novo field opcional | Nao exige backfill; valores ausentes ou desconhecidos ficam alinhados a esquerda. O deploy precisa da atualizacao incremental do schema do banco. |
+| `Footer.logo` | Novo upload/relacionamento opcional com `Media` | Novo relacionamento opcional | Plano de migration incremental abaixo; registros antigos permanecem com `null`, sem backfill. |
+| `Footer.socialLinks[].label` | Nome passa a opcional quando ha icone social valido | Relaxamento de validacao | Links antigos continuam validos. Renderer usa o nome do catalogo de icones como nome acessivel para links sem texto. |
+| `Media.upload.mimeTypes` | SVG e AVIF passam a ser formatos de imagem permitidos; SVG recebe verificacao do Payload e CSP restritiva | Politica de upload | Nao altera colunas nem exige migration; arquivos antigos continuam validos. |
+| `richText.content` | Novos valores opcionais de fonte e cor semantica no estado Lexical | Expansao compativel do JSON | Nao exige migration; estados antigos e desconhecidos continuam com a aparencia padrao. |
+| `cards.items.description`, `cta.description` | Descricao do card passa a opcional e aceita ate 300 caracteres; CTA aceita ate 300 caracteres | Relaxamento de validacao | Dados antigos permanecem validos; atualizar o schema incrementalmente para permitir `null` no card. |
+| `cta.title`, `faqAccordion.title`, `iconGrid.title`, `imageText.title` | Titulos de secao passam a opcionais | Relaxamento de validacao | Dados antigos permanecem validos; atualizar constraints de nulidade no banco e omitir headings vazios no renderer. |
+| `cta.appearance` | Paleta opcional expandida de `background`, `foreground` e `accent` para `background`, `foreground`, `brand`, `action` e `accent`; novo valor `custom` no tema | Novos fields opcionais e novo enum | Nao exige migration de conteudo; documentos antigos continuam usando presets, e valores customizados inativos permanecem armazenados. |
+| `imageBlock.appearance` | Novo grupo opcional com presets e paleta customizada restrita a `background` e `foreground` no Admin | Novos fields opcionais e novo enum | Nao exige migration; documentos antigos continuam usando o tema `default`. |
+| `videoBlock.appearance` | Novo grupo opcional com presets e paleta customizada restrita a `background` e `foreground` no Admin | Novos fields opcionais e novo enum | Nao exige migration; documentos antigos continuam usando o tema `default`. |
+| `gallery.appearance` | Grupo existente expandido com presets e paleta customizada restrita a `background` e `foreground` no Admin | Novos fields opcionais e novo enum | Nao exige migration; spacing e interaction existentes permanecem compativeis. |
+| `carousel.appearance` | Novo grupo opcional com presets e paleta customizada restrita a `background` e `foreground` no Admin | Novos fields opcionais e novo enum | Nao exige migration; documentos antigos continuam usando o tema `default`. |
+| `iconGrid.appearance` | Grupo existente expandido com `custom` e paleta restrita a `background`, `foreground` e `accent` no Admin | Novos fields opcionais e novo enum | Nao exige migration; scheme e spacing existentes permanecem compativeis. |
+| `cards.appearance` | Grupo existente expandido com `custom` e paleta restrita a `background`, `foreground` e `accent` no Admin | Novos fields opcionais e novo enum | Nao exige migration; scheme, spacing e interaction existentes permanecem compativeis. |
+| `faqAccordion.appearance` | Grupo existente expandido com `custom` e paleta restrita a `background` e `foreground` no Admin | Novos fields opcionais e novo enum | Nao exige migration; scheme existente permanece compativel e o default continua `muted`. |
+| `alertBox.appearance` | Novo grupo opcional com presets e paleta customizada restrita a `background` e `foreground` no Admin | Novos fields opcionais e novo enum | Nao exige migration; documentos antigos preservam a superficie `surface` como fallback. |
+| `actionBanners.appearance` | Novo grupo opcional com presets e paleta customizada restrita a `background` e `foreground` na secao externa | Novos fields opcionais e novo enum | Nao exige migration; documentos antigos preservam o tema `default` como fallback. |
+| `fullWidthImageBanner.appearance` | Paleta customizada restrita a `background`, unico papel ainda consumido pelo overlay sem texto | Fields opcionais preservados no schema compartilhado e ocultos no Admin | Nao exige migration; o overlay padrao passa a ser `none`. |
+| `fullWidthImageBanner.content` e `contentPosition` | Removidos; novo `link` opcional sem rotulo transforma a imagem inteira em link | Remocao destrutiva e novo grupo opcional | Por decisao do projeto, as paginas existentes eram apenas exemplos: nao ha migration/backfill. Recriar a base local e executar o seed atualizado apos a mudanca. |
+| `hero.appearance` | Grupo existente expandido com `custom` e paleta restrita a `background`, `foreground`, `action` e `accent` | Novos fields opcionais e novo enum | Nao exige migration; scheme e alignment existentes permanecem compativeis e o default continua `brand`. |
+| CSS tokens | Novos papeis semanticos `brand`, `action`, `heading`, `link`, `surface`, `muted`, `accent` | Compatibilidade de tema | Nao exige migration; tokens antigos continuam existindo. |
+| Block theme | Novo contrato local e aliases CSS `--block-*` | Refatoracao interna | Nao exige migration; `appearance.tone` e campos existentes sao preservados. |
+| `cards.variant` | Nova variant `modalities` | Novo enum/variant | Nao exige migration; fallback de `Cards` retorna `default`. |
+| `hero.variant` | `image` legado mapeado para `split` | Compatibilidade de enum | Nao exige migration; fallback preservado no componente. |
+| `cta.variant` | `primary` legado mapeado para `brand`; desconhecidos para `default` | Compatibilidade de enum | Nao exige migration; fallback preservado no componente. |
+| `imageText` | `imagePosition` legado aceito como fallback de `variant` | Campo legado absorvido | Nao exige migration neste ciclo. |
+| `richText` | `width` legado aceito como fallback de `variant` | Campo legado absorvido | Nao exige migration neste ciclo. |
+| `actionBanners.banners[].appearance` | Aparencias fechadas no Design System | Novo enum/variant | Nao exige migration; aparencia desconhecida vira `surface`. |
+| `Header`, `Footer`, `SiteSettings` | Links globais mantidos em formatos existentes | Preservacao de schema | Nao exige migration; resolver central aceita formatos legados. |
+| `Header.navigationMode` | Novo enum `normal` ou `submenus` com default `normal` | Novo enum com default | Nao exige migration de conteudo; documentos existentes e valores desconhecidos usam o menu normal. |
+| `Header.menuItems` | Novo array opcional de paginas diretas ou categorias com links internos | Novo field opcional | Nao exige migration; `Header.navigation` permanece intacto como fallback. |
+| `Header.enableSearch` | Novo checkbox opcional com default `false` | Novo field opcional | Nao exige migration; a busca nao aparece ate ser habilitada pelo editor. |
+| `Header.appearance` | Novo grupo opcional com presets e paleta customizada restrita a `background` e `foreground` | Novos fields opcionais e novo enum | Nao exige migration de conteudo; documentos antigos continuam usando o preset `default`. |
+| `Footer.socialLinks[].icon` | Novo select opcional de icone social controlado | Novo field opcional | Nao exige migration de conteudo; itens existentes permanecem sem icone ate configuracao editorial. |
+| `Footer.appearance` | Novo grupo opcional com presets e paleta customizada restrita a `background` e `foreground` | Novos fields opcionais e novo enum | Nao exige migration de conteudo; documentos antigos continuam usando o preset `muted`. |
+| `SiteSettings.theme.typography` | Novos links opcionais para fontes globais de texto e titulos | Novos fields opcionais | Nao exige migration; configuracoes existentes continuam usando Lato e os fallbacks institucionais. |
+| `themes` | Nova Collection de temas nomeados com cores e tipografia controladas | Nova Collection | Exige migration incremental de banco; nao exige backfill de conteudo. Ver `docs/cms/alternative-themes.md`. |
+| `SiteSettings.activeTheme` | Relacionamento opcional com `themes` | Novo relacionamento opcional | Exige migration incremental de banco; `null` preserva `SiteSettings.theme` como fallback e nao exige conversao de documentos existentes. |
+| `Media.usage` | Novo field obrigatorio com default `content` | Novo field obrigatorio | Nao exige migration manual porque ha default seguro; revisar banco antes de producao. |
+| `Pages.layout` - campos `imagePresentation.canvas`, Canvas de Hero background e Banner desktop/mobile | Novos fields JSON opcionais por ocorrencia de imagem; Galeria e Carrossel recebem tambem o grupo de apresentacao por item com defaults seguros | Novos groups com defaults e fields opcionais | Exige apenas a atualizacao incremental do schema do banco no deploy; nao exige backfill de conteudo. Renderers normalizam valor ausente e preservam os defaults anteriores e o ponto focal de `Media`. |
+| `Media.parentMedia`, `isDerived`, `focalPoint` e `editingMetadata` | Fields legados de uma implementacao de derivados recebida por merge | Preservacao temporaria de schema | Permanecem no schema para nao remover dados persistidos neste ciclo. O endpoint de derivados foi desativado. Remocao futura exige baseline, migration incremental, inventario de registros/arquivos derivados, backup e validacao humana. |
+| `Users.role` | Field passa a ser obrigatorio e perde o default privilegiado | Novo field obrigatorio sem default | Exige backfill controlado por `20261005_000000_backfill_user_roles`; role ausente ou invalida nunca e inferida como Admin. |
+| `Pages.lifecycleStatus` | Novo field obrigatorio com default `active` | Novo field obrigatorio com default | Nao exige migration destrutiva; bases existentes devem ser auditadas antes de producao. |
+
+## Processo
+
+1. Classificar a mudanca na tabela acima.
+2. Identificar documentos persistidos afetados.
+3. Definir se precisa migration, fallback em runtime ou ambos.
+4. Criar fixture antiga e fixture nova quando o schema de `Pages.layout` ou Blocks mudar.
+5. Gerar migration apenas quando houver rename, remocao, mudanca de tipo, mudanca de relationship ou novo campo obrigatorio sem default seguro.
+6. Submeter migration a revisao humana antes de aplicar em ambiente compartilhado.
+7. Aplicar localmente, rodar seed/fixture quando aplicavel e validar renderizacao antiga e nova.
+8. Executar lint, typecheck, testes e build.
+
+## Backfill de `Users.role`
+
+A migration `src/migrations/20261005_000000_backfill_user_roles.ts` identifica
+todos os usuários cuja role não seja exatamente `admin` ou `editor`. Antes de
+qualquer escrita, ela exige que cada registro afetado possua um mapeamento explícito
+em `CMS_USER_ROLE_BACKFILL`.
+
+As chaves aceitas são prefixadas para evitar colisões:
+
+```dotenv
+CMS_USER_ROLE_BACKFILL={"id:1":"admin","login:usuario.editor":"editor","email:outro@prefeitura.sp.gov.br":"editor"}
+```
+
+Um usuário pode ser identificado por ID, login ou e-mail. Mapeamentos ausentes,
+inválidos, conflitantes ou não utilizados abortam toda a migration antes da primeira
+atualização. Roles já válidas não são alteradas. Não existe regra `null -> admin`.
+
+O backfill não possui rollback automático, pois restaurar valores ausentes ou
+inválidos recriaria o estado inseguro. Antes de aplicar em ambiente compartilhado:
+
+1. gerar backup e validar a restauração;
+2. auditar os usuários e aprovar a role de cada registro afetado;
+3. estabelecer a baseline de migrations do schema existente;
+4. configurar temporariamente `CMS_USER_ROLE_BACKFILL` com todos os afetados;
+5. aplicar primeiro em uma cópia da base;
+6. validar login e permissões de Admin e Editor;
+7. aplicar em produção e remover a variável temporária.
+
+Como o repositório ainda não possui baseline integral do schema Payload, o arquivo
+de backfill não deve ser interpretado como essa baseline nem aplicado isoladamente
+em uma base vazia.
+
+## Plano incremental para `Footer.logo`
+
+1. Antes do deploy, criar backup da base e validar restauracao em copia. Confirmar a baseline de migrations Payload usada pelo ambiente. Este repositorio ainda nao fornece baseline integral, portanto a alteracao nao deve ser executada como migration isolada.
+2. Aplicar uma alteracao incremental que adicione `footer.logo` como relacao nullable para `media`, preservando os demais campos do Global. Nao converter nem preencher os registros atuais.
+3. Publicar o renderer condicional junto ao schema. Quando o relacionamento estiver vazio ou nao populado, manter o rodape atual.
+4. Em copia da base, validar leitura e edicao de Footer antigo, gravacao e remocao do novo logo, e renderizacao de rodape com e sem logo. Em producao, aplicar a mesma migration antes de disponibilizar o novo campo no Admin.
+5. Rollback de codigo: manter a coluna nullable; sua remocao posterior exigiria inventario de referencias, backup e outra migration. Nao executar rollback destrutivo automatico.
+
+## Fixture de compatibilidade
+
+`src/cms-schema-evolution.test.ts` mantem:
+
+- uma Page com Blocks e variants legados;
+- uma Page com Blocks novos da expansao visual;
+- renderizacao server-side das duas fixtures por `RenderBlocks`;
+- verificacao de que fallbacks de variants continuam ativos.
+
+## Limites
+
+- Nenhuma migration destrutiva foi criada nesta SPEC porque o estado atual nao exige rename, remocao, mudanca de tipo ou mudanca de relationship.
+- `counterNumbers` nao foi convertido em prazo dinamico.
+- `Media & Text` nao foi renomeado destrutivamente; a compatibilidade fica no fallback de `ImageText`.

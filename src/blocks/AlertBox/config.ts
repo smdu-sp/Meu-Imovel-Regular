@@ -1,0 +1,87 @@
+import type { Block } from "payload";
+import { characterLimitAdmin } from "../../fields/character-limit";
+import {
+  createAppearanceGroup,
+  createBlockContrastStatusField,
+  createControlledColorAppearanceFields,
+  createSchemeField,
+} from "../../fields/block-appearance";
+import { closedSelect, requiredRichText } from "../../fields/editorial-validation";
+import { createLinkFields } from "../../fields/link";
+import { createBlockAdmin } from "../shared/admin";
+
+// AlertBox customizes its surface while preserving semantic status markers.
+const alertBoxColorTokens = ["background", "foreground"] as const;
+
+export const AlertBoxBlock: Block = {
+  slug: "alertBox",
+  interfaceName: "AlertBoxBlock",
+  admin: createBlockAdmin("Conteúdo", {
+    slug: "alert-box",
+    alt: "Prévia de uma caixa de aviso",
+  }),
+  labels: {
+    singular: "Caixa de aviso",
+    plural: "Caixas de aviso",
+  },
+  fields: [
+    {
+      name: "title",
+      type: "text",
+      label: "Titulo do aviso",
+      maxLength: 80,
+      admin: {
+        ...characterLimitAdmin(80),
+        description:
+          "Opcional. Use quando o aviso precisar de uma chamada curta.",
+      },
+    },
+    {
+      name: "content",
+      type: "richText",
+      label: "Conteudo do aviso",
+      required: true,
+      validate: requiredRichText("Escreva o conteudo da caixa de aviso."),
+      admin: {
+        description:
+          "Texto do aviso. Mantenha linguagem orientativa e evite conclusoes definitivas.",
+      },
+    },
+    {
+      name: "type",
+      type: "select",
+      label: "Tipo de aviso",
+      required: true,
+      defaultValue: "info",
+      validate: closedSelect(
+        ["info", "success", "warning", "danger"],
+        "Escolha um tipo de aviso aprovado.",
+      ),
+      admin: {
+        description:
+          "Define o estado semantico do aviso. O Design System resolve cor, icone e borda.",
+      },
+      options: [
+        { label: "Informativo", value: "info" },
+        { label: "Sucesso", value: "success" },
+        { label: "Atencao", value: "warning" },
+        { label: "Erro ou impedimento", value: "danger" },
+      ],
+    },
+    {
+      name: "link",
+      type: "group",
+      label: "Link complementar",
+      admin: {
+        description:
+          "Opcional. Use para encaminhar o usuario a uma pagina ou servico oficial.",
+      },
+      fields: createLinkFields(),
+    },
+    createAppearanceGroup([
+      createSchemeField(["default", "surface", "muted", "custom"], "surface"),
+      ...createControlledColorAppearanceFields(alertBoxColorTokens),
+      createBlockContrastStatusField(alertBoxColorTokens),
+    ]),
+  ],
+};

@@ -1,0 +1,92 @@
+import type { Block } from "payload";
+import { characterLimitAdmin } from "../../fields/character-limit";
+import { colorSchemes } from "../../lib/theme/block-color-theme";
+import {
+  createAppearanceGroup,
+  createBlockContrastStatusField,
+  createControlledColorAppearanceFields,
+  createEmphasisField,
+  createSpacingField,
+  createSchemeField,
+} from "../../fields/block-appearance";
+
+import { closedSelect } from "../../fields/editorial-validation";
+import { createLinkFields } from "../../fields/link";
+import { createBlockAdmin } from "../shared/admin";
+
+// The current CTA surface consumes only these editable semantic roles.
+const ctaColorTokens = ["background", "foreground", "action"] as const;
+
+export const CTABlock: Block = {
+  slug: "cta",
+  interfaceName: "CTABlock",
+  admin: createBlockAdmin("Ações", {
+    slug: "cta",
+    alt: "Prévia de uma chamada de ação",
+  }),
+  labels: {
+    singular: "Chamada de acao",
+    plural: "Chamadas de acao",
+  },
+  fields: [
+    {
+      name: "title",
+      type: "text",
+      label: "Titulo",
+      maxLength: 100,
+      admin: {
+        ...characterLimitAdmin(100),
+        description:
+          "Opcional. Mensagem curta que encerra uma secao ou orienta o proximo passo.",
+      },
+    },
+    {
+      name: "description",
+      type: "textarea",
+      label: "Descricao",
+      maxLength: 300,
+      admin: {
+        ...characterLimitAdmin(300, "textarea"),
+        description:
+          "Texto opcional para explicar o contexto da chamada.",
+      },
+    },
+    {
+      name: "action",
+      type: "group",
+      label: "Link da acao",
+      admin: {
+        description:
+          "Destino obrigatorio da chamada. Use pagina interna ou URL oficial externa.",
+      },
+      fields: createLinkFields(true),
+    },
+    {
+      name: "variant",
+      type: "select",
+      label: "Modelo de chamada",
+      required: true,
+      defaultValue: "default",
+      validate: closedSelect(
+        ["default", "brand", "compact"],
+        "Escolha um modelo de chamada aprovado.",
+      ),
+      admin: {
+        description:
+          "Padrao serve para chamadas gerais; Destaque institucional usa fundo forte; Compacta funciona melhor em encerramentos repetidos.",
+      },
+      options: [
+        { label: "Padrao", value: "default" },
+        { label: "Destaque institucional", value: "brand" },
+        { label: "Compacta", value: "compact" },
+      ],
+    },
+    createAppearanceGroup([
+      createSchemeField([...colorSchemes, "custom"]),
+      createSpacingField(["compact", "default", "spacious"], "default"),
+      createEmphasisField(["subtle", "default", "strong"], "default"),
+      ...createControlledColorAppearanceFields(ctaColorTokens),
+      createBlockContrastStatusField(ctaColorTokens),
+    ]),
+  ],
+};

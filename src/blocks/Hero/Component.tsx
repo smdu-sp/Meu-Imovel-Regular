@@ -1,0 +1,286 @@
+import type { ReactNode } from "react";
+import type { HeroBlock as HeroBlockProps } from "../../payload-types";
+import { BlockThemeScope, Container, Heading, MediaColorScope, Section, Text } from "../../components/ui";
+import { classNames } from "../../components/ui/classNames";
+import type { EditorialColorOverrides } from "../../lib/theme/block-color-theme";
+import {
+  getFocalPointStyle,
+  type ImagePresentation,
+} from "../shared/image-presentation";
+import { MediaImage } from "../shared/MediaImage";
+import { PresentedMediaImage } from "../shared/PresentedMediaImage";
+import { BlockLink } from "../shared/BlockLink";
+
+type HeroVariant = "centered" | "default" | "split";
+type HeroImageMode = "background" | "none" | "side";
+type HeroOverlay = "dark" | "light" | "none";
+type FocalPoint = "bottom" | "center" | "left" | "right" | "top";
+
+type HeroBackground = {
+  desktopCanvas?: unknown;
+  focalPoint?: FocalPoint | string | null;
+  image?: HeroBlockProps["image"];
+  mobileCanvas?: unknown;
+  mobileImage?: HeroBlockProps["image"];
+  overlay?: HeroOverlay | string | null;
+};
+
+type HeroAppearance = {
+  alignment?: "center" | "left" | string | null;
+  colors?: EditorialColorOverrides | null;
+  scheme?: "brand" | "custom" | "default" | "muted" | "surface" | string | null;
+};
+
+type HeroBlockWithBackgroundProps = Omit<HeroBlockProps, "appearance" | "background"> & {
+  appearance?: HeroAppearance | null;
+  background?: HeroBackground | null;
+  imageMode?: HeroImageMode | string | null;
+};
+
+export function normalizeHeroVariant(
+  variant: HeroBlockProps["variant"] | "image" | string | null | undefined,
+): HeroVariant {
+  if (variant === "centered" || variant === "split") return variant;
+  if (variant === "image") return "split";
+  return "default";
+}
+
+export function normalizeHeroTone(
+  tone?: string | null,
+): "brand" | "default" | "muted" | "surface" {
+  if (tone === "default" || tone === "surface" || tone === "muted") return tone;
+  return "brand";
+}
+
+export function normalizeHeroAlignment(
+  alignment?: string | null,
+  fallbackCentered = false,
+): "center" | "left" {
+  if (alignment === "center" || (!alignment && fallbackCentered)) return "center";
+  return "left";
+}
+
+export function normalizeHeroOverlay(
+  overlay: HeroOverlay | string | null | undefined,
+): HeroOverlay {
+  if (overlay === "light" || overlay === "none") return overlay;
+  return "dark";
+}
+
+export function normalizeFocalPoint(
+  focalPoint: FocalPoint | string | null | undefined,
+): FocalPoint {
+  if (
+    focalPoint === "bottom" ||
+    focalPoint === "left" ||
+    focalPoint === "right" ||
+    focalPoint === "top"
+  ) {
+    return focalPoint;
+  }
+  return "center";
+}
+
+const focalPointClasses: Record<FocalPoint, string> = {
+  bottom: "object-bottom",
+  center: "object-center",
+  left: "object-left",
+  right: "object-right",
+  top: "object-top",
+};
+
+const overlayClasses: Record<HeroOverlay, string> = {
+  dark: "bg-[var(--block-background)] opacity-85",
+  light: "bg-[var(--block-background)] opacity-85",
+  none: "",
+};
+
+export function resolveHeroMediaVisibility({
+  hasBackgroundImage,
+  hasSideImage,
+  imageMode,
+  variant,
+}: {
+  hasBackgroundImage: boolean;
+  hasSideImage: boolean;
+  imageMode?: HeroImageMode | string | null;
+  variant: HeroVariant;
+}): { hasBackground: boolean; split: boolean } {
+  if (imageMode === "none") return { hasBackground: false, split: false };
+  if (imageMode === "background") {
+    return { hasBackground: hasBackgroundImage, split: false };
+  }
+  if (imageMode === "side") {
+    return { hasBackground: false, split: hasSideImage };
+  }
+
+  // Existing Pages have no imageMode and may intentionally contain both images.
+  return { hasBackground: hasBackgroundImage, split: variant === "split" && hasSideImage };
+}
+
+export function HeroBlock({
+  appearance,
+  background,
+  cta,
+  description,
+  eyebrow,
+  image,
+  imageMode,
+  imagePresentation,
+  title,
+  variant,
+}: HeroBlockWithBackgroundProps) {
+  const normalizedVariant = normalizeHeroVariant(variant);
+  const normalizedAlignment = normalizeHeroAlignment(
+    appearance?.alignment,
+    normalizedVariant === "centered",
+  );
+  const centered = normalizedAlignment === "center";
+  const normalizedTone = normalizeHeroTone(appearance?.scheme);
+  const customTheme = appearance?.scheme === "custom";
+  const hasImage = Boolean(image && typeof image === "object" && image.url);
+  const backgroundImage = background?.image;
+  const mobileBackgroundImage = background?.mobileImage;
+  const hasBackgroundImage = Boolean(
+    backgroundImage && typeof backgroundImage === "object" && backgroundImage.url,
+  );
+  const { hasBackground, split } = resolveHeroMediaVisibility({
+    hasBackgroundImage,
+    hasSideImage: hasImage,
+    imageMode,
+    variant: normalizedVariant,
+  });
+  const hasMobileBackground = Boolean(
+    hasBackground &&
+      mobileBackgroundImage &&
+      typeof mobileBackgroundImage === "object" &&
+      mobileBackgroundImage.url,
+  );
+  const overlay = normalizeHeroOverlay(background?.overlay);
+  const focalPoint = normalizeFocalPoint(background?.focalPoint);
+  const contentAlignment = centered ? "items-center text-center" : "items-start";
+  const contentWidth = split ? "max-w-container-md" : "max-w-container-sm";
+  const toneForSection = customTheme ? "default" : hasBackground ? "brand" : normalizedTone;
+
+  const section = (
+    <Section spacing={hasBackground ? "sm" : "xl"} scheme={toneForSection}>
+      <HeroContentScope
+        enabled={hasBackground && !customTheme}
+        mode={overlay === "light" ? "light" : "dark"}
+        className={classNames(
+          "relative overflow-hidden",
+          hasBackground && "min-h-[30rem] py-16 sm:py-20",
+        )}
+      >
+        {hasBackground ? (
+          <>
+            <MediaImage
+              className={classNames(
+                "object-cover",
+                focalPointClasses[focalPoint],
+                hasMobileBackground && "hidden sm:block",
+              )}
+              fill
+              media={backgroundImage}
+              preload
+              sizes="100vw"
+              style={getFocalPointStyle(
+                typeof backgroundImage === "object" ? backgroundImage : null,
+                { aspectRatio: "original", canvas: background?.desktopCanvas, fit: "cover" },
+              )}
+            />
+            {hasMobileBackground ? (
+              <MediaImage
+                className={classNames(
+                  "object-cover sm:hidden",
+                  focalPointClasses[focalPoint],
+                )}
+                fill
+                media={mobileBackgroundImage}
+                preload
+                sizes="100vw"
+                style={getFocalPointStyle(
+                  typeof mobileBackgroundImage === "object" ? mobileBackgroundImage : null,
+                  { aspectRatio: "original", canvas: background?.mobileCanvas, fit: "cover" },
+                )}
+              />
+            ) : null}
+            {overlay !== "none" ? (
+              <div
+                aria-hidden="true"
+                className={classNames("absolute inset-0", overlayClasses[overlay])}
+              />
+            ) : null}
+          </>
+        ) : null}
+        <Container size="lg">
+          <div
+            className={classNames(
+              "relative z-10 grid w-full gap-10 lg:gap-16",
+              split && "items-center lg:grid-cols-2",
+            )}
+          >
+            <div
+              className={
+                centered
+                  ? `mx-auto flex ${contentWidth} flex-col ${contentAlignment}`
+                  : `flex ${contentWidth} flex-col ${contentAlignment}`
+              }
+            >
+              {eyebrow ? (
+                <Text
+                  as="span"
+                  tone="accent"
+                  transform="uppercase"
+                  variant="small"
+                  weight="semibold"
+                >
+                  {eyebrow}
+                </Text>
+              ) : null}
+              <div className="mt-3">
+                <Heading
+                  align={centered ? "center" : "start"}
+                  level={1}
+                  size="display"
+                >
+                  <span className="text-balance break-words">{title}</span>
+                </Heading>
+              </div>
+              {description ? (
+                <div className="mt-6 max-w-container-sm">
+                  <Text variant="lead">
+                    {description}
+                  </Text>
+                </div>
+              ) : null}
+              {cta?.label ? (
+                <div className="mt-8">
+                  <BlockLink appearance="solid" link={cta} />
+                </div>
+              ) : null}
+            </div>
+            {split ? (
+              <PresentedMediaImage
+                className="rounded-xl border border-(--block-border)"
+                media={image}
+                presentation={imagePresentation as ImagePresentation}
+                priority
+                sizes="(min-width: 1024px) 50vw, 100vw"
+              />
+            ) : null}
+          </div>
+        </Container>
+      </HeroContentScope>
+    </Section>
+  );
+
+  return customTheme
+    ? <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
+    : section;
+}
+function HeroContentScope({ enabled, children, ...props }: {
+  enabled: boolean; children: ReactNode; mode: "light" | "dark"; className: string;
+}) {
+  return enabled ? <MediaColorScope {...props} paint={false}>{children}</MediaColorScope> : <div className={props.className}>{children}</div>;
+}

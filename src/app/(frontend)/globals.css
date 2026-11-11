@@ -1,0 +1,207 @@
+@import "tailwindcss";
+@import "../../styles/tokens.css";
+
+@theme inline {
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-heading: var(--color-heading);
+  --color-surface: var(--color-surface);
+  --color-surface-foreground: var(--color-surface-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-brand: var(--color-brand);
+  --color-brand-foreground: var(--color-brand-foreground);
+  --color-action: var(--color-action);
+  --color-action-foreground: var(--color-action-foreground);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-border: var(--color-border);
+  --color-focus: var(--color-focus);
+  --color-info: var(--color-info);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+
+  --font-sans: var(--font-family-sans);
+  --font-heading: var(--font-family-heading);
+  --font-mono: var(--font-family-mono);
+
+  --text-xs: var(--font-size-xs);
+  --text-sm: var(--font-size-sm);
+  --text-base: var(--font-size-base);
+  --text-lg: var(--font-size-lg);
+  --text-xl: var(--font-size-xl);
+  --text-2xl: var(--font-size-2xl);
+  --text-heading-md: var(--font-size-xl);
+  --text-heading-lg: var(--font-size-3xl);
+  --text-display-md: var(--font-size-4xl);
+  --text-display-lg: var(--font-size-5xl);
+
+  --leading-tight: var(--line-height-tight);
+  --leading-normal: var(--line-height-normal);
+  --leading-relaxed: var(--line-height-relaxed);
+
+  --font-weight-normal: var(--font-weight-normal);
+  --font-weight-medium: var(--font-weight-medium);
+  --font-weight-semibold: var(--font-weight-semibold);
+  --font-weight-bold: var(--font-weight-bold);
+
+  --spacing-1: var(--space-1);
+  --spacing-2: var(--space-2);
+  --spacing-3: var(--space-3);
+  --spacing-4: var(--space-4);
+  --spacing-5: var(--space-5);
+  --spacing-6: var(--space-6);
+  --spacing-7: var(--space-7);
+  --spacing-8: var(--space-8);
+  --spacing-10: var(--space-10);
+  --spacing-12: var(--space-12);
+  --spacing-14: var(--space-14);
+  --spacing-16: var(--space-16);
+  --spacing-24: var(--space-24);
+  --spacing-container: var(--container-padding);
+  --spacing-container-wide: var(--container-padding-wide);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+
+  --container-container-sm: var(--container-sm);
+  --container-container-md: var(--container-md);
+  --container-container-lg: var(--container-lg);
+  --container-container-xl: var(--container-xl);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-family-sans);
+}
+
+:focus-visible {
+  outline: var(--space-1) solid var(--color-focus);
+  outline-offset: var(--space-1);
+}
+
+.cms-rich-text {
+  color: var(--block-foreground);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+}
+
+.cms-rich-text :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--block-heading);
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-block: var(--space-8) var(--space-4);
+  text-wrap: balance;
+}
+
+.cms-rich-text :where(h1) {
+  font-size: var(--font-size-4xl);
+}
+
+.cms-rich-text :where(h2) {
+  font-size: var(--font-size-3xl);
+}
+
+.cms-rich-text :where(h3) {
+  font-size: var(--font-size-2xl);
+}
+
+.cms-rich-text :where(h4, h5, h6) {
+  font-size: var(--font-size-xl);
+}
+
+.cms-rich-text :where(strong) {
+  color: var(--block-heading);
+  font-weight: var(--font-weight-bold);
+}
+
+.cms-rich-text :where(a) {
+  color: var(--block-foreground);
+  font-weight: var(--font-weight-bold);
+  border-radius: 0.125rem;
+  text-decoration: underline;
+  text-decoration-thickness: 0.125em;
+  text-underline-offset: 0.2em;
+  transition: background-color 150ms ease, text-decoration-thickness 150ms ease;
+}
+
+.cms-rich-text :where(a:hover) {
+  background-color: color-mix(in srgb, var(--block-foreground) 10%, transparent);
+  text-decoration-thickness: 0.25em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cms-rich-text :where(a) {
+    transition: none;
+  }
+}
+
+.cms-rich-text :where(p, ul, ol, blockquote, table) {
+  margin-block: var(--space-4);
+}
+
+.cms-rich-text :where(ul, ol) {
+  padding-inline-start: var(--space-6);
+}
+
+.cms-rich-text :where(ul) {
+  list-style: disc;
+}
+
+.cms-rich-text :where(ol) {
+  list-style: decimal;
+}
+
+.cms-rich-text :where(li) {
+  margin-block: var(--space-2);
+  padding-inline-start: var(--space-1);
+}
+
+.cms-rich-text :where(blockquote) {
+  border-inline-start: var(--space-1) solid var(--block-border);
+  color: var(--block-foreground);
+  padding-inline-start: var(--space-5);
+}
+
+.cms-rich-text :where(img) {
+  border-radius: var(--radius-lg);
+  height: auto;
+  max-width: 100%;
+}
+
+.cms-rich-text :where(table) {
+  border-collapse: collapse;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.cms-rich-text :where(th, td) {
+  border: 1px solid var(--block-border);
+  padding: var(--space-3);
+  text-align: start;
+  vertical-align: top;
+}
+
+.cms-rich-text :where(th) {
+  color: var(--block-heading);
+  font-weight: var(--font-weight-semibold);
+}
+
+.cms-rich-text > :first-child {
+  margin-block-start: 0;
+}
+
+.cms-rich-text > :last-child {
+  margin-block-end: 0;
+}
+
+.cms-rich-text--wide {
+  column-gap: var(--space-10);
+}

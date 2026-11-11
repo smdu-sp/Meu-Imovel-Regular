@@ -1,0 +1,237 @@
+import type { Block, SelectFieldSingleValidation } from "payload";
+import { characterLimitAdmin } from "../../fields/character-limit";
+import {
+  createAlignmentField,
+  createAppearanceGroup,
+  createBlockContrastStatusField,
+  createControlledColorAppearanceFields,
+  createSchemeField,
+} from "../../fields/block-appearance";
+
+import { closedSelect, requiredText } from "../../fields/editorial-validation";
+import {
+  createImageCanvasField,
+  createImagePresentationFields,
+} from "../../fields/image-presentation";
+import { createLinkFields } from "../../fields/link";
+import { createBlockAdmin } from "../shared/admin";
+
+// Hero text, overlay, eyebrow and CTA consume these roles directly.
+const heroColorTokens = ["background", "foreground", "action", "accent"] as const;
+const imageModes = ["none", "background", "side"] as const;
+
+const overlayOptions = [
+  { label: "Sem sobreposicao", value: "none" },
+  { label: "Clara", value: "light" },
+  { label: "Escura", value: "dark" },
+];
+
+const focalPointOptions = [
+  { label: "Centro", value: "center" },
+  { label: "Topo", value: "top" },
+  { label: "Base", value: "bottom" },
+  { label: "Esquerda", value: "left" },
+  { label: "Direita", value: "right" },
+];
+
+export const HeroBlock: Block = {
+  slug: "hero",
+  interfaceName: "HeroBlock",
+  admin: createBlockAdmin("Conteúdo", {
+    slug: "hero",
+    alt: "Prévia de um destaque principal",
+  }),
+  labels: {
+    singular: "Destaque principal",
+    plural: "Destaques principais",
+  },
+  fields: [
+    {
+      name: "eyebrow",
+      type: "text",
+      label: "Chamada superior",
+      maxLength: 50,
+      admin: {
+        ...characterLimitAdmin(50),
+        description:
+          "Texto curto acima do titulo, usado para contextualizar a pagina.",
+      },
+    },
+    {
+      name: "title",
+      type: "text",
+      label: "Titulo principal",
+      required: true,
+      maxLength: 120,
+      validate: requiredText("Informe o titulo principal do destaque."),
+      admin: {
+        ...characterLimitAdmin(120),
+        description:
+          "Mensagem principal da pagina. Pode ser longo, mas prefira uma frase clara.",
+      },
+    },
+    {
+      name: "description",
+      type: "textarea",
+      label: "Resumo",
+      maxLength: 220,
+      admin: {
+        ...characterLimitAdmin(220, "textarea"),
+        description:
+          "Texto opcional abaixo do titulo para orientar o usuario antes da acao.",
+      },
+    },
+    {
+      name: "imageMode",
+      type: "select",
+      label: "Uso da imagem",
+      validate: ((value) =>
+        !value || imageModes.includes(value as typeof imageModes[number])
+          ? true
+          : "Escolha como a imagem sera usada no destaque.") satisfies SelectFieldSingleValidation,
+      admin: {
+        description:
+          "Escolha Sem imagem, Imagem de fundo ou Imagem lateral. As configuracoes correspondentes aparecem logo abaixo. Destaques antigos mantem a apresentacao atual ate uma escolha ser feita. Este bloco nao possui contador nem timer automatico.",
+      },
+      options: [
+        { label: "Sem imagem", value: "none" },
+        { label: "Imagem de fundo", value: "background" },
+        { label: "Imagem lateral (ao lado do texto)", value: "side" },
+      ],
+    },
+    {
+      name: "image",
+      type: "upload",
+      relationTo: "media",
+      label: "Imagem",
+      admin: {
+        condition: (_, siblingData) =>
+          siblingData?.imageMode === "side" ||
+          (!siblingData?.imageMode && siblingData?.variant === "split"),
+        description:
+          "Exibida quando Uso da imagem e Imagem lateral. Em telas pequenas, a imagem fica empilhada abaixo do texto.",
+      },
+    },
+    {
+      name: "imagePresentation",
+      type: "group",
+      label: "Apresentação da imagem",
+      admin: {
+        condition: (_, siblingData) =>
+          siblingData?.imageMode === "side" ||
+          (!siblingData?.imageMode && siblingData?.variant === "split"),
+        description:
+          "Define como esta imagem é exibida neste bloco. O arquivo original na Mídia não é alterado.",
+      },
+      fields: createImagePresentationFields({
+        canvas: { mediaFieldName: "image" },
+        defaultSize: "full",
+        defaultAspectRatio: "16:9",
+        defaultFit: "cover",
+      }),
+    },
+    {
+      name: "background",
+      type: "group",
+      label: "Imagem de fundo",
+      admin: {
+        condition: (_, siblingData) =>
+          siblingData?.imageMode === "background" ||
+          (!siblingData?.imageMode && Boolean(siblingData?.background?.image)),
+        description:
+          "Use midia cadastrada quando Uso da imagem for Imagem de fundo. O arquivo original nao e alterado.",
+      },
+      fields: [
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          label: "Imagem desktop",
+          admin: {
+            description:
+              "Imagem principal do fundo. Se ausente, o destaque usa o visual padrao.",
+          },
+        },
+        {
+          name: "mobileImage",
+          type: "upload",
+          relationTo: "media",
+          label: "Imagem mobile",
+          admin: {
+            condition: (_, siblingData) => Boolean(siblingData?.image),
+            description:
+              "Opcional. Use quando a composicao desktop nao funcionar bem em telas estreitas.",
+          },
+        },
+        createImageCanvasField(
+          "image",
+          "desktopCanvas",
+          "Enquadramento visual desktop",
+        ),
+        createImageCanvasField(
+          "mobileImage",
+          "mobileCanvas",
+          "Enquadramento visual mobile",
+        ),
+        {
+          name: "overlay",
+          type: "select",
+          label: "Sobreposicao",
+          defaultValue: "dark",
+          validate: closedSelect(
+            ["none", "light", "dark"],
+            "Escolha uma sobreposicao aprovada.",
+          ),
+          options: overlayOptions,
+        },
+        {
+          name: "focalPoint",
+          type: "select",
+          label: "Foco visual",
+          defaultValue: "center",
+          validate: closedSelect(
+            ["center", "top", "bottom", "left", "right"],
+            "Escolha um foco visual aprovado.",
+          ),
+          options: focalPointOptions,
+        },
+      ],
+    },
+    {
+      name: "cta",
+      type: "group",
+      label: "Acao principal",
+      admin: {
+        description:
+          "Link opcional exibido como botao principal da abertura.",
+      },
+      fields: createLinkFields(),
+    },
+    {
+      name: "variant",
+      type: "select",
+      label: "Modelo de apresentação",
+      required: true,
+      defaultValue: "default",
+      validate: closedSelect(
+        ["default", "centered", "split"],
+        "Escolha um modelo de apresentação aprovado.",
+      ),
+      admin: {
+        hidden: true,
+        description: "Campo legado preservado para compatibilidade com destaques existentes.",
+      },
+      options: [
+        { label: "Padrao", value: "default" },
+        { label: "Centralizado", value: "centered" },
+        { label: "Imagem lateral", value: "split" },
+      ],
+    },
+    createAppearanceGroup([
+      createSchemeField(["brand", "default", "surface", "muted", "custom"], "brand"),
+      createAlignmentField(["left", "center"], "left"),
+      ...createControlledColorAppearanceFields(heroColorTokens),
+      createBlockContrastStatusField(heroColorTokens),
+    ]),
+  ],
+};

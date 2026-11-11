@@ -1,0 +1,114 @@
+import type { IconGridBlock as IconGridBlockProps } from "../../payload-types";
+import { BlockThemeScope, Card, Container, Heading, Section, Text } from "../../components/ui";
+import type { EditorialColorOverrides } from "../../lib/theme/block-color-theme";
+import { BlockIcon } from "../shared/BlockIcon";
+import { BlockLink } from "../shared/BlockLink";
+
+type IconGridVariant = "compact" | "default";
+
+type IconGridAppearance = {
+  colors?: EditorialColorOverrides | null;
+  spacing?: "compact" | "default" | "spacious" | string | null;
+  scheme?: "custom" | "default" | "muted" | "surface" | string | null;
+};
+
+type IconGridBlockWithAppearanceProps = IconGridBlockProps & {
+  appearance?: IconGridAppearance | null;
+};
+
+type IconGridItem = IconGridBlockProps["items"][number] & {
+  iconSource?: "custom" | "none" | "standard" | string | null;
+  standardIcon?: string | null;
+};
+
+export function normalizeIconGridVariant(
+  variant: IconGridBlockProps["variant"] | string | null | undefined,
+): IconGridVariant {
+  return variant === "compact" ? "compact" : "default";
+}
+
+export function normalizeIconGridTone(
+  tone?: string | null,
+): "default" | "muted" | "surface" {
+  if (tone === "muted" || tone === "surface" || tone === "default") return tone;
+  return "default";
+}
+
+export function normalizeIconGridSpacing(
+  spacing?: string | null,
+  fallbackSpacing: "compact" | "default" = "default",
+): "compact" | "default" | "spacious" {
+  if (spacing === "compact" || spacing === "spacious" || spacing === "default") return spacing;
+  return fallbackSpacing;
+}
+
+export function IconGridBlock({
+  appearance,
+  description,
+  items,
+  title,
+  variant,
+}: IconGridBlockWithAppearanceProps) {
+  const normalizedVariant = normalizeIconGridVariant(variant);
+  const compact = normalizedVariant === "compact";
+  const customTheme = appearance?.scheme === "custom";
+  const effectiveTone = normalizeIconGridTone(appearance?.scheme);
+  const effectiveSpacing = normalizeIconGridSpacing(
+    appearance?.spacing,
+    compact ? "compact" : "default",
+  );
+
+  const section = (
+    <Section spacing={effectiveSpacing} scheme={customTheme ? "default" : effectiveTone}>
+      <Container size="lg">
+        {title ? (
+          <Heading level={2} size="lg">
+            <span className="text-balance break-words">{title}</span>
+          </Heading>
+        ) : null}
+        {description ? (
+          <div className={`${title ? "mt-4 " : ""}max-w-container-sm`}>
+            <Text variant="muted">{description}</Text>
+          </div>
+        ) : null}
+        <ul
+          className={`${title || description ? "mt-8 " : ""}grid gap-4 ${compact ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3"}`}
+        >
+          {items.map((rawItem) => {
+            const item = rawItem as IconGridItem;
+            return (
+              <li key={item.id}>
+                <Card fullHeight padding={compact ? "sm" : "md"}>
+                  <div className="flex gap-4">
+                    <BlockIcon
+                      className={`${compact ? "h-9 w-9" : "h-11 w-11"} shrink-0 object-contain`}
+                      icon={item.icon}
+                      iconSource={item.iconSource}
+                      sizes={compact ? "36px" : "44px"}
+                      standardIcon={item.standardIcon}
+                      tone="accent"
+                    />
+                    <div className="min-w-0">
+                      <Text weight="semibold">
+                        <span className="break-words">{item.description}</span>
+                      </Text>
+                      {item.link?.label ? (
+                        <div className="mt-4">
+                          <BlockLink link={item.link} size="sm" />
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </Card>
+              </li>
+            );
+          })}
+        </ul>
+      </Container>
+    </Section>
+  );
+
+  return customTheme
+    ? <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
+    : section;
+}

@@ -1,0 +1,284 @@
+import type { CardsBlock as CardsBlockProps } from "../../payload-types";
+import { BlockThemeScope, Card, Container, Heading, Section, Text } from "../../components/ui";
+import { classNames } from "../../components/ui/classNames";
+import type { EditorialColorOverrides } from "../../lib/theme/block-color-theme";
+import type { ImagePresentation } from "../shared/image-presentation";
+import { BlockIcon } from "../shared/BlockIcon";
+import { BlockLink } from "../shared/BlockLink";
+import { PresentedMediaImage } from "../shared/PresentedMediaImage";
+
+type CardsVariant = "default" | "modalities";
+type CardMediaSource = "icon" | "image" | "none";
+type CardMediaPosition = "left" | "right" | "top";
+type CardImageLayout = "contained" | "fullTop";
+type CardsInteraction = "none" | "subtle" | "default" | "emphasized";
+
+type CardsItem = CardsBlockProps["items"][number] & {
+  iconSource?: "custom" | "standard" | string | null;
+  image?: CardsBlockProps["items"][number]["icon"];
+  imageLayout?: CardImageLayout | string | null;
+  imagePresentation?: ImagePresentation;
+  mediaPosition?: CardMediaPosition | string | null;
+  mediaSource?: CardMediaSource | string | null;
+  standardIcon?: string | null;
+};
+
+type CardsAppearance = {
+  colors?: EditorialColorOverrides | null;
+  interaction?: CardsInteraction | string | null;
+  spacing?: "compact" | "default" | "spacious" | string | null;
+  scheme?: "custom" | "default" | "muted" | "surface" | string | null;
+};
+
+type CardsBlockWithAppearanceProps = Omit<CardsBlockProps, "appearance"> & {
+  appearance?: CardsAppearance | null;
+};
+
+export function normalizeCardsVariant(
+  variant: CardsBlockProps["variant"] | string | null | undefined,
+): CardsVariant {
+  return variant === "modalities" ? "modalities" : "default";
+}
+
+export function normalizeCardsTone(
+  tone?: string | null,
+  fallbackTone: "default" | "muted" | "surface" = "default",
+): "default" | "muted" | "surface" {
+  if (tone === "muted" || tone === "surface" || tone === "default") return tone;
+  return fallbackTone;
+}
+
+export function normalizeCardsSpacing(
+  spacing?: string | null,
+  fallbackSpacing: "compact" | "default" | "spacious" = "default",
+): "compact" | "default" | "spacious" {
+  if (spacing === "compact" || spacing === "spacious") return spacing;
+  return fallbackSpacing;
+}
+
+export function normalizeCardsInteraction(
+  interaction?: string | null,
+): CardsInteraction {
+  if (
+    interaction === "none" ||
+    interaction === "subtle" ||
+    interaction === "emphasized"
+  ) {
+    return interaction;
+  }
+  return "default";
+}
+
+const cardInteractionClasses: Record<CardsInteraction, string> = {
+  none: "",
+  subtle:
+    "transition-[border-color,box-shadow] duration-200 ease-out hover:border-current hover:shadow-sm focus-within:border-current focus-within:shadow-sm motion-reduce:transition-none",
+  default:
+    "transition-[border-color,box-shadow,translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-current hover:shadow-md focus-within:border-current focus-within:shadow-md motion-reduce:translate-none motion-reduce:transition-none",
+  emphasized:
+    "transition-[border-color,box-shadow,translate] duration-[1s,15s] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-2 hover:border-current hover:shadow-xl focus-within:border-current focus-within:shadow-xl motion-reduce:translate-none motion-reduce:transition-none",
+};
+
+export function normalizeCardMediaSource(item: CardsItem): CardMediaSource {
+  if (item.mediaSource === "image" && item.image) return "image";
+  if (item.mediaSource === "icon") return "icon";
+  if (!item.mediaSource && (item.icon || item.standardIcon)) return "icon";
+  return "none";
+}
+
+export function normalizeCardMediaPosition(
+  position: CardMediaPosition | string | null | undefined,
+): CardMediaPosition {
+  if (position === "left" || position === "right") return position;
+  return "top";
+}
+
+export function normalizeCardImageLayout(
+  layout: CardImageLayout | string | null | undefined,
+): CardImageLayout {
+  return layout === "fullTop" ? "fullTop" : "contained";
+}
+
+const iconSizeClasses = {
+  default: {
+    modalities: "h-14 w-14",
+    standard: "h-12 w-12",
+  },
+  side: {
+    modalities: "h-14 w-14",
+    standard: "h-12 w-12",
+  },
+} as const;
+
+const cardImageSizeClasses = {
+  top: {
+    small: "w-28 max-w-full mx-auto",
+    medium: "w-3/4 max-w-full mx-auto",
+    large: "w-full",
+  },
+  side: {
+    small: "w-20 shrink-0",
+    medium: "w-28 shrink-0",
+    large: "w-32 shrink-0",
+  },
+} as const;
+
+function CardMedia({
+  edgeToEdge,
+  item,
+  modalities,
+  position,
+  source,
+}: {
+  edgeToEdge: boolean;
+  item: CardsItem;
+  modalities: boolean;
+  position: CardMediaPosition;
+  source: CardMediaSource;
+}) {
+  if (source === "none") return null;
+
+  const side = position !== "top";
+
+  if (source === "icon") {
+    return (
+      <BlockIcon
+        className={classNames(
+          side
+            ? iconSizeClasses.side[modalities ? "modalities" : "standard"]
+            : iconSizeClasses.default[modalities ? "modalities" : "standard"],
+          side ? "mt-1" : "mb-5",
+          "shrink-0 object-contain",
+        )}
+        icon={item.icon}
+        iconSource={item.iconSource}
+        sizes="56px"
+        standardIcon={item.standardIcon}
+        tone="accent"
+      />
+    );
+  }
+
+  const presentation: NonNullable<ImagePresentation> = {
+    size: item.imagePresentation?.size ?? "medium",
+    aspectRatio: item.imagePresentation?.aspectRatio ?? (edgeToEdge ? "16:9" : "original"),
+    canvas: item.imagePresentation?.canvas,
+    fit: item.imagePresentation?.fit ?? "cover",
+  };
+
+  return (
+    <PresentedMediaImage
+      className={classNames(
+        !edgeToEdge && (side ? "mt-1" : "mb-5"),
+        !edgeToEdge && "rounded-md",
+        "bg-(--block-background)",
+      )}
+      media={item.image}
+      presentation={presentation}
+      sizeClassNames={edgeToEdge
+        ? { small: "w-full", medium: "w-full", large: "w-full" }
+        : side ? cardImageSizeClasses.side : cardImageSizeClasses.top}
+      sizes={side ? "128px" : "(min-width: 1024px) 33vw, 100vw"}
+    />
+  );
+}
+
+export function CardsBlock({
+  appearance,
+  description,
+  items,
+  title,
+  variant,
+}: CardsBlockWithAppearanceProps) {
+  const normalizedVariant = normalizeCardsVariant(variant);
+  const modalities = normalizedVariant === "modalities";
+  const customTheme = appearance?.scheme === "custom";
+  const effectiveTone = normalizeCardsTone(
+    appearance?.scheme,
+    modalities ? "default" : "muted",
+  );
+  const effectiveSpacing = normalizeCardsSpacing(
+    appearance?.spacing,
+    "default",
+  );
+  const effectiveInteraction = normalizeCardsInteraction(appearance?.interaction);
+
+  const section = (
+    <Section spacing={effectiveSpacing} scheme={customTheme ? "default" : effectiveTone}>
+      <Container size="lg">
+        {title ? (
+          <Heading level={2} size="lg">
+            <span className="text-balance wrap-break-word">{title}</span>
+          </Heading>
+        ) : null}
+        {description ? (
+          <div className="mt-4 max-w-container-sm">
+            <Text variant="muted">{description}</Text>
+          </div>
+        ) : null}
+        <ul className="mt-8 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((item) => {
+            const cardItem = item as CardsItem;
+            const mediaSource = normalizeCardMediaSource(cardItem);
+            const mediaPosition = normalizeCardMediaPosition(cardItem.mediaPosition);
+            const sideMedia = mediaSource !== "none" && mediaPosition !== "top";
+            const edgeToEdge = mediaSource === "image" &&
+              mediaPosition === "top" &&
+              normalizeCardImageLayout(cardItem.imageLayout) === "fullTop";
+
+            return (
+              <li key={item.id}>
+                <Card
+                  className={cardInteractionClasses[effectiveInteraction]}
+                  fullHeight
+                  padding={edgeToEdge ? "none" : modalities ? "lg" : "md"}
+                >
+                  <div
+                    className={classNames(
+                      sideMedia && "flex gap-5",
+                      sideMedia && mediaPosition === "right" && "flex-row-reverse",
+                    )}
+                  >
+                    <CardMedia
+                      edgeToEdge={edgeToEdge}
+                      item={cardItem}
+                      modalities={modalities}
+                      position={mediaPosition}
+                      source={mediaSource}
+                    />
+                    <div className={classNames(
+                      "min-w-0 flex-1",
+                      edgeToEdge && (modalities ? "px-8 pt-8" : "px-6 pt-6"),
+                      edgeToEdge && !item.link?.label && (modalities ? "pb-8" : "pb-6"),
+                    )}>
+                      <Heading level={3} size="md">
+                        <span className="wrap-break-word">{item.title}</span>
+                      </Heading>
+                      {item.description ? (
+                        <div className="mt-3">
+                          <Text>{item.description}</Text>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                  {item.link?.label ? (
+                    <div className={classNames(
+                      "mt-auto pt-5",
+                      edgeToEdge && (modalities ? "px-8 pb-8" : "px-6 pb-6"),
+                    )}>
+                      <BlockLink link={item.link} />
+                    </div>
+                  ) : null}
+                </Card>
+              </li>
+            );
+          })}
+        </ul>
+      </Container>
+    </Section>
+  );
+
+  return customTheme
+    ? <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
+    : section;
+}

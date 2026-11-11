@@ -1,0 +1,214 @@
+import type { Block, UploadFieldSingleValidation } from "payload";
+import { characterLimitAdmin } from "../../fields/character-limit";
+import {
+  createAppearanceGroup,
+  createBlockContrastStatusField,
+  createControlledColorAppearanceFields,
+  createSchemeField,
+} from "../../fields/block-appearance";
+import { closedSelect } from "../../fields/editorial-validation";
+import { createImagePresentationFields } from "../../fields/image-presentation";
+import { createLinkFields } from "../../fields/link";
+import { createBlockAdmin } from "../shared/admin";
+
+const slidesPerViewOptions = [
+  { label: "1 slide", value: "1" },
+  { label: "2 slides", value: "2" },
+  { label: "3 slides", value: "3" },
+];
+
+const navigationOptions = [
+  { label: "Setas", value: "arrows" },
+  { label: "Setas e indicadores", value: "arrows-dots" },
+];
+
+const autoplayOptions = [
+  { label: "Desligado", value: "off" },
+  { label: "Ligado", value: "on" },
+];
+
+// Carousel themes its outer section; cards and controls keep safe local surfaces.
+const carouselColorTokens = ["background", "foreground"] as const;
+
+export const CarouselBlock: Block = {
+  slug: "carousel",
+  dbName: "car",
+  interfaceName: "CarouselBlock",
+  admin: createBlockAdmin("Mídia", {
+    slug: "carousel",
+    alt: "Prévia de um carrossel de conteúdo",
+  }),
+  labels: {
+    singular: "Carrossel",
+    plural: "Carrosseis",
+  },
+  fields: [
+    {
+      name: "title",
+      type: "text",
+      label: "Titulo",
+      maxLength: 100,
+      admin: {
+        ...characterLimitAdmin(100),
+        description:
+          "Opcional. Use para nomear o conjunto sequencial apresentado no carrossel.",
+      },
+    },
+    {
+      name: "items",
+      type: "array",
+      label: "Slides",
+      required: true,
+      minRows: 1,
+      maxRows: 12,
+      validate: (value) =>
+        Array.isArray(value) && value.length > 0
+          ? true
+          : "Adicione ao menos um slide ao carrossel.",
+      admin: {
+        description:
+          "Adicione slides em ordem sequencial. Cada slide pode ter imagem, texto e link opcional.",
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          label: "Imagem",
+          required: true,
+          validate: ((value) =>
+            value ? true : "Selecione uma imagem para este slide.") satisfies UploadFieldSingleValidation,
+          admin: {
+            description:
+              "Imagem principal do slide. O arquivo original permanece preservado na biblioteca de midia.",
+          },
+        },
+        {
+          name: "title",
+          type: "text",
+          label: "Titulo do slide",
+          maxLength: 90,
+          admin: {
+            ...characterLimitAdmin(90),
+            description: "Opcional. Titulo curto exibido junto da imagem.",
+          },
+        },
+        {
+          name: "imagePresentation",
+          type: "group",
+          label: "Apresentacao da imagem",
+          admin: {
+            description:
+              "Ajustes exclusivos desta ocorrencia no slide, sem alterar a Midia original.",
+          },
+          fields: createImagePresentationFields({
+            canvas: { mediaFieldName: "image" },
+            sizes: ["full"],
+            aspectRatios: ["1:1", "4:3", "16:9", "portrait"],
+            defaultSize: "full",
+            defaultAspectRatio: "16:9",
+            defaultFit: "cover",
+          }),
+        },
+        {
+          name: "description",
+          type: "textarea",
+          label: "Descricao do slide",
+          maxLength: 180,
+          admin: {
+            ...characterLimitAdmin(180, "textarea"),
+            description:
+              "Opcional. Texto de apoio para explicar o slide sem transformar o carrossel em texto longo.",
+            rows: 3,
+          },
+        },
+        {
+          name: "link",
+          type: "group",
+          label: "Link do slide",
+          admin: {
+            description:
+              "Opcional. Use quando o slide deve encaminhar para outra pagina ou servico.",
+          },
+          fields: createLinkFields(),
+        },
+      ],
+    },
+    {
+      name: "display",
+      type: "group",
+      label: "Exibicao",
+      fields: [
+        {
+          name: "slidesPerView",
+          type: "select",
+          dbName: "spv",
+          label: "Slides por visualizacao",
+          required: true,
+          defaultValue: "1",
+          validate: closedSelect(
+            ["1", "2", "3"],
+            "Escolha uma quantidade de slides aprovada.",
+          ),
+          options: slidesPerViewOptions,
+        },
+        {
+          name: "navigation",
+          type: "select",
+          dbName: "nav",
+          label: "Navegacao",
+          required: true,
+          defaultValue: "arrows-dots",
+          validate: closedSelect(
+            ["arrows", "arrows-dots"],
+            "Escolha uma navegacao aprovada.",
+          ),
+          options: navigationOptions,
+        },
+        {
+          name: "contentAlignment",
+          type: "select",
+          label: "Alinhamento do conteudo dos slides",
+          defaultValue: "left",
+          validate: closedSelect(
+            ["left", "center"],
+            "Escolha um alinhamento de conteudo aprovado.",
+          ),
+          options: [
+            { label: "A esquerda", value: "left" },
+            { label: "Centralizado", value: "center" },
+          ],
+        },
+      ],
+    },
+    {
+      name: "behavior",
+      type: "group",
+      label: "Comportamento",
+      fields: [
+        {
+          name: "autoplay",
+          type: "select",
+          label: "Autoplay",
+          required: true,
+          defaultValue: "off",
+          validate: closedSelect(
+            ["off", "on"],
+            "Escolha uma opcao de autoplay aprovada.",
+          ),
+          admin: {
+            description:
+              "Desligado e o padrao. Quando ligado, o usuario pode pausar e a rotacao para ao interagir.",
+          },
+          options: autoplayOptions,
+        },
+      ],
+    },
+    createAppearanceGroup([
+      createSchemeField(["default", "surface", "muted", "custom"], "default"),
+      ...createControlledColorAppearanceFields(carouselColorTokens),
+      createBlockContrastStatusField(carouselColorTokens),
+    ]),
+  ],
+};

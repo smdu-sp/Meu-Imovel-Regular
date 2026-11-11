@@ -1,0 +1,358 @@
+import { normalizeColorScheme } from "../lib/theme/block-color-theme";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+
+import {
+  normalizeActionBannerAppearance,
+  normalizeActionBannersVariant,
+} from "./ActionBanners/Component";
+import { normalizeAlertBoxType } from "./AlertBox/Component";
+import {
+  normalizeCTAEmphasis,
+  normalizeCTASpacing,
+  normalizeCTAVariant,
+} from "./CTA/Component";
+import {
+  normalizeCardsSpacing,
+  normalizeCardsTone,
+  normalizeCardsVariant,
+} from "./Cards/Component";
+import { CardsBlock } from "./Cards/config";
+import { CarouselBlock } from "./Carousel/config";
+import {
+  normalizeCarouselAutoplay,
+  normalizeCarouselNavigation,
+  normalizeCarouselSlidesPerView,
+} from "./Carousel/Component";
+import { normalizeFAQTone, normalizeFAQVariant } from "./FAQ/Component";
+import {
+  normalizeBannerImageHeight,
+  normalizeBannerImageFit,
+  normalizeCustomBannerImageHeight,
+} from "./FullWidthImageBanner/Component";
+import { GalleryBlock } from "./Gallery/config";
+import {
+  normalizeGalleryColumns,
+  normalizeGalleryPreset,
+  normalizeGallerySpacing,
+  normalizeGalleryThumbnailEffect,
+} from "./Gallery/Component";
+import { HeroBlock } from "./Hero/config";
+import {
+  normalizeHeroAlignment,
+  normalizeHeroTone,
+  normalizeHeroVariant,
+} from "./Hero/Component";
+import {
+  normalizeIconGridSpacing,
+  normalizeIconGridTone,
+  normalizeIconGridVariant,
+} from "./IconGrid/Component";
+import { ImageBlock as ImageBlockConfig } from "./ImageBlock/config";
+import { normalizeImageBlockAlignment } from "./ImageBlock/Component";
+import { ImageTextBlock } from "./ImageText/config";
+import {
+  normalizeImageTextSpacing,
+  normalizeImageTextTone,
+  normalizeImageTextVariant,
+} from "./ImageText/Component";
+import {
+  normalizeRichTextSpacing,
+  normalizeRichTextVariant,
+  normalizeRichTextWidth,
+} from "./RichText/Component";
+
+describe("block variant fallbacks", () => {
+  it("keeps known Hero variants and maps the legacy image variant to split", () => {
+    assert.equal(normalizeHeroVariant("default"), "default");
+    assert.equal(normalizeHeroVariant("centered"), "centered");
+    assert.equal(normalizeHeroVariant("split"), "split");
+    assert.equal(normalizeHeroVariant("image"), "split");
+    assert.equal(normalizeHeroVariant("unknown"), "default");
+    assert.equal(normalizeHeroVariant(undefined), "default");
+  });
+
+  it("adds safe presentation groups without arbitrary numeric controls", () => {
+    const heroPresentation = HeroBlock.fields.find(
+      (field) => "name" in field && field.name === "imagePresentation",
+    );
+    const imageTextPresentation = ImageTextBlock.fields.find(
+      (field) => "name" in field && field.name === "imagePresentation",
+    );
+    const imageBlockPresentation = ImageBlockConfig.fields.find(
+      (field) => "name" in field && field.name === "imagePresentation",
+    );
+    const cardsItems = CardsBlock.fields.find(
+      (field) => "name" in field && field.name === "items",
+    );
+    const cardsPresentation =
+      cardsItems && "fields" in cardsItems
+        ? cardsItems.fields.find(
+            (field) => "name" in field && field.name === "imagePresentation",
+          )
+        : undefined;
+
+    assert.ok(heroPresentation && "type" in heroPresentation && heroPresentation.type === "group");
+    assert.ok(
+      imageTextPresentation && "type" in imageTextPresentation && imageTextPresentation.type === "group",
+    );
+    assert.ok(cardsPresentation && "type" in cardsPresentation && cardsPresentation.type === "group");
+
+    for (const presentation of [
+      heroPresentation,
+      imageBlockPresentation,
+      imageTextPresentation,
+      cardsPresentation,
+    ]) {
+      assert.ok(presentation && "fields" in presentation);
+      const nestedTypes = presentation.fields
+        .filter((field) => "type" in field)
+        .map((field) => field.type);
+      assert.ok(!nestedTypes.includes("number"));
+      assert.ok(!nestedTypes.includes("text"));
+    }
+
+    assert.ok(cardsPresentation && "fields" in cardsPresentation);
+    const cardRatioField = cardsPresentation.fields.find(
+      (field) => "name" in field && field.name === "aspectRatio",
+    );
+
+    assert.ok(cardRatioField && "options" in cardRatioField);
+    assert.ok(
+      cardRatioField.options.every(
+        (option) => typeof option !== "string" && option.value !== "square",
+      ),
+    );
+  });
+
+  it("keeps known CTA variants without legacy color aliases", () => {
+    assert.equal(normalizeCTAVariant("default"), "default");
+    assert.equal(normalizeCTAVariant("brand"), "brand");
+    assert.equal(normalizeCTAVariant("compact"), "compact");
+    assert.equal(normalizeCTAVariant("primary"), "default");
+    assert.equal(normalizeCTAVariant("secondary"), "default");
+    assert.equal(normalizeCTAVariant("unknown"), "default");
+  });
+
+  it("keeps ImageText variants and maps legacy image positions", () => {
+    assert.equal(normalizeImageTextVariant("image-left"), "image-left");
+    assert.equal(normalizeImageTextVariant("image-right"), "image-right");
+    assert.equal(normalizeImageTextVariant("left"), "image-left");
+    assert.equal(normalizeImageTextVariant("right"), "image-right");
+    assert.equal(normalizeImageTextVariant("unknown"), "image-left");
+  });
+
+  it("normalizes SPEC-042 image block alignment presets", () => {
+    assert.equal(normalizeImageBlockAlignment("left"), "left");
+    assert.equal(normalizeImageBlockAlignment("center"), "center");
+    assert.equal(normalizeImageBlockAlignment("right"), "right");
+    assert.equal(normalizeImageBlockAlignment("unknown"), "center");
+    assert.equal(normalizeImageBlockAlignment(undefined), "center");
+  });
+
+  it("normalizes SPEC-043 gallery layout presets", () => {
+    assert.equal(normalizeGalleryColumns("2"), "2");
+    assert.equal(normalizeGalleryColumns("3"), "3");
+    assert.equal(normalizeGalleryColumns("4"), "4");
+    assert.equal(normalizeGalleryColumns("8"), "8");
+    assert.equal(normalizeGalleryColumns("5"), "4");
+    assert.equal(normalizeGalleryColumns(undefined), "4");
+    assert.equal(normalizeGalleryPreset("grid"), "grid");
+    assert.equal(normalizeGalleryPreset("masonry"), "grid");
+    assert.equal(normalizeGalleryThumbnailEffect("grow"), "grow");
+    assert.equal(normalizeGalleryThumbnailEffect("none"), "none");
+    assert.equal(normalizeGalleryThumbnailEffect("fade"), "grow");
+
+    const layout = GalleryBlock.fields.find(
+      (field) => "name" in field && field.name === "layout",
+    );
+    assert.ok(layout && "fields" in layout);
+    const columns = layout.fields.find(
+      (field) => "name" in field && field.name === "columns",
+    );
+    assert.ok(columns && "options" in columns && Array.isArray(columns.options));
+    assert.deepEqual(
+      columns.options.map((option) => typeof option === "object" ? option.value : option),
+      ["2", "3", "4", "8"],
+    );
+    assert.ok("defaultValue" in columns);
+    assert.equal(columns.defaultValue, "4");
+    const thumbnailEffect = layout.fields.find(
+      (field) => "name" in field && field.name === "thumbnailEffect",
+    );
+    assert.ok(
+      thumbnailEffect &&
+        "options" in thumbnailEffect &&
+        Array.isArray(thumbnailEffect.options),
+    );
+    assert.deepEqual(
+      thumbnailEffect.options.map((option) => typeof option === "object" ? option.value : option),
+      ["none", "grow"],
+    );
+  });
+
+  it("normalizes SPEC-044 carousel display and behavior presets", () => {
+    assert.equal(normalizeCarouselSlidesPerView("1"), "1");
+    assert.equal(normalizeCarouselSlidesPerView("2"), "2");
+    assert.equal(normalizeCarouselSlidesPerView("3"), "3");
+    assert.equal(normalizeCarouselSlidesPerView("4"), "1");
+    assert.equal(normalizeCarouselSlidesPerView(undefined), "1");
+    assert.equal(normalizeCarouselNavigation("arrows"), "arrows");
+    assert.equal(normalizeCarouselNavigation("arrows-dots"), "arrows-dots");
+    assert.equal(normalizeCarouselNavigation("dots"), "arrows-dots");
+    assert.equal(normalizeCarouselAutoplay("on"), "on");
+    assert.equal(normalizeCarouselAutoplay("off"), "off");
+    assert.equal(normalizeCarouselAutoplay("auto"), "off");
+
+    const display = CarouselBlock.fields.find(
+      (field) => "name" in field && field.name === "display",
+    );
+    assert.ok(display && "fields" in display);
+    const slidesPerView = display.fields.find(
+      (field) => "name" in field && field.name === "slidesPerView",
+    );
+    assert.ok(
+      slidesPerView &&
+        "options" in slidesPerView &&
+        Array.isArray(slidesPerView.options),
+    );
+    assert.deepEqual(
+      slidesPerView.options.map((option) => typeof option === "object" ? option.value : option),
+      ["1", "2", "3"],
+    );
+  });
+
+  it("keeps RichText variants and maps legacy widths", () => {
+    assert.equal(normalizeRichTextVariant("default"), "default");
+    assert.equal(normalizeRichTextVariant("narrow"), "narrow");
+    assert.equal(normalizeRichTextVariant("content"), "narrow");
+    assert.equal(normalizeRichTextVariant("wide"), "default");
+    assert.equal(normalizeRichTextVariant("unknown"), "default");
+  });
+
+  it("keeps Cards variants and falls back to the general card list", () => {
+    assert.equal(normalizeCardsVariant("default"), "default");
+    assert.equal(normalizeCardsVariant("modalities"), "modalities");
+    assert.equal(normalizeCardsVariant("unknown"), "default");
+  });
+
+  it("normalizes newly added structural block variants", () => {
+    assert.equal(normalizeIconGridVariant("default"), "default");
+    assert.equal(normalizeIconGridVariant("compact"), "compact");
+    assert.equal(normalizeIconGridVariant("unknown"), "default");
+    assert.equal(normalizeFAQVariant("default"), "default");
+    assert.equal(normalizeFAQVariant("compact"), "compact");
+    assert.equal(normalizeFAQVariant("unknown"), "default");
+    assert.equal(normalizeFAQTone("default"), "default");
+    assert.equal(normalizeFAQTone("surface"), "surface");
+    assert.equal(normalizeFAQTone("unknown"), "muted");
+    assert.equal(normalizeAlertBoxType("info"), "info");
+    assert.equal(normalizeAlertBoxType("success"), "success");
+    assert.equal(normalizeAlertBoxType("warning"), "warning");
+    assert.equal(normalizeAlertBoxType("danger"), "danger");
+    assert.equal(normalizeAlertBoxType("unknown"), "info");
+  });
+
+  it("normalizes Action Banners variants and token-based appearances", () => {
+    assert.equal(normalizeActionBannersVariant("grid"), "grid");
+    assert.equal(normalizeActionBannersVariant("stacked"), "stacked");
+    assert.equal(normalizeActionBannersVariant("unknown"), "grid");
+    assert.equal(normalizeActionBannerAppearance("surface"), "surface");
+    assert.equal(normalizeActionBannerAppearance("brand"), "brand");
+    assert.equal(normalizeActionBannerAppearance("accent"), "accent");
+    assert.equal(normalizeActionBannerAppearance("yellow"), "surface");
+  });
+
+  it("normalizes SPEC-033 full-width banner presentation presets", () => {
+    assert.equal(normalizeBannerImageHeight("auto"), "auto");
+    assert.equal(normalizeBannerImageHeight("compact"), "compact");
+    assert.equal(normalizeBannerImageHeight("medium"), "medium");
+    assert.equal(normalizeBannerImageHeight("large"), "large");
+    assert.equal(normalizeBannerImageHeight("custom"), "custom");
+    assert.equal(normalizeBannerImageHeight("unknown"), "auto");
+    assert.equal(normalizeBannerImageHeight(undefined, "compact"), "compact");
+    assert.equal(normalizeBannerImageHeight(undefined, "default"), "medium");
+    assert.equal(normalizeBannerImageHeight(undefined, "immersive"), "large");
+    assert.equal(normalizeCustomBannerImageHeight(420), 420);
+    assert.equal(normalizeCustomBannerImageHeight(120), 160);
+    assert.equal(normalizeCustomBannerImageHeight(1000), 900);
+    assert.equal(normalizeCustomBannerImageHeight(undefined), null);
+    assert.equal(normalizeBannerImageFit("contain"), "contain");
+    assert.equal(normalizeBannerImageFit("stretch"), "cover");
+  });
+
+  it("normalizes SPEC-036 controlled block styling appearance attributes", () => {
+    // Hero tone & alignment
+    assert.equal(normalizeHeroTone("brand"), "brand");
+    assert.equal(normalizeHeroTone("surface"), "surface");
+    assert.equal(normalizeHeroTone("muted"), "muted");
+    assert.equal(normalizeHeroTone("default"), "default");
+    assert.equal(normalizeHeroTone("invalid"), "brand");
+    assert.equal(normalizeHeroTone(undefined), "brand");
+
+    assert.equal(normalizeHeroAlignment("center"), "center");
+    assert.equal(normalizeHeroAlignment("left"), "left");
+    assert.equal(normalizeHeroAlignment("invalid"), "left");
+    assert.equal(normalizeHeroAlignment(undefined, true), "center");
+
+    // CTA tone & spacing
+    assert.equal(normalizeColorScheme("brand"), "brand");
+    assert.equal(normalizeColorScheme("accent"), "accent");
+    assert.equal(normalizeColorScheme("muted"), "muted");
+    assert.equal(normalizeColorScheme("invalid", "accent"), "accent");
+    assert.equal(normalizeColorScheme(undefined, "brand"), "brand");
+
+    assert.equal(normalizeCTASpacing("compact"), "compact");
+    assert.equal(normalizeCTASpacing("spacious"), "spacious");
+    assert.equal(normalizeCTASpacing("invalid", "compact"), "compact");
+    assert.equal(normalizeCTASpacing(undefined), "default");
+    assert.equal(normalizeCTAEmphasis("subtle"), "subtle");
+    assert.equal(normalizeCTAEmphasis("strong"), "strong");
+    assert.equal(normalizeCTAEmphasis("invalid"), "default");
+
+    // RichText width & spacing
+    assert.equal(normalizeRichTextWidth("narrow"), "narrow");
+    assert.equal(normalizeRichTextWidth("wide"), "wide");
+    assert.equal(normalizeRichTextWidth("default"), "default");
+    assert.equal(normalizeRichTextWidth("unknown", "narrow"), "narrow");
+    assert.equal(normalizeRichTextWidth(undefined, "default"), "default");
+
+    assert.equal(normalizeRichTextSpacing("compact"), "compact");
+    assert.equal(normalizeRichTextSpacing("spacious"), "spacious");
+    assert.equal(normalizeRichTextSpacing(undefined), "default");
+
+    // Cards tone & spacing
+    assert.equal(normalizeCardsTone("surface"), "surface");
+    assert.equal(normalizeCardsTone("muted"), "muted");
+    assert.equal(normalizeCardsTone("default"), "default");
+    assert.equal(normalizeCardsTone("invalid", "muted"), "muted");
+    assert.equal(normalizeCardsTone(undefined), "default");
+
+    assert.equal(normalizeCardsSpacing("compact"), "compact");
+    assert.equal(normalizeCardsSpacing("spacious"), "spacious");
+    assert.equal(normalizeCardsSpacing("unknown"), "default");
+    assert.equal(normalizeGallerySpacing("compact"), "compact");
+    assert.equal(normalizeGallerySpacing("spacious"), "spacious");
+    assert.equal(normalizeGallerySpacing("unknown"), "default");
+
+    // ImageText tone & spacing
+    assert.equal(normalizeImageTextTone("surface"), "surface");
+    assert.equal(normalizeImageTextTone("muted"), "muted");
+    assert.equal(normalizeImageTextTone("default"), "default");
+    assert.equal(normalizeImageTextTone("unknown"), "default");
+
+    assert.equal(normalizeImageTextSpacing("compact"), "compact");
+    assert.equal(normalizeImageTextSpacing("spacious"), "spacious");
+    assert.equal(normalizeImageTextSpacing("unknown"), "default");
+
+    // IconGrid tone & spacing
+    assert.equal(normalizeIconGridTone("surface"), "surface");
+    assert.equal(normalizeIconGridTone("muted"), "muted");
+    assert.equal(normalizeIconGridTone("default"), "default");
+    assert.equal(normalizeIconGridTone("unknown"), "default");
+
+    assert.equal(normalizeIconGridSpacing("compact"), "compact");
+    assert.equal(normalizeIconGridSpacing("spacious"), "spacious");
+    assert.equal(normalizeIconGridSpacing("unknown"), "default");
+  });
+});
