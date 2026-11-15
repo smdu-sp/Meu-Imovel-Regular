@@ -1,8 +1,8 @@
 # Planejamento da migração WordPress → Next.js e Payload CMS
 
-Data: 12/11/2026. Status: proposta inicial para discussão.
+Data inicial: 12/11/2026. Atualização: 13/11/2026. Status: planejamento, sem implementação.
 
-Este documento organiza a descoberta, as decisões e a execução futura da migração do Meu Imóvel Regular. Nesta etapa, foram lidos o schema documentado do legado, os guias da base e o código atual. Não foram consultados registros do MySQL, aberto o dump original, executados imports ou alterados schemas e dados.
+Este documento organiza a descoberta, as decisões e a execução futura da migração do Meu Imóvel Regular. O planejamento inicial considerou o schema documentado, os guias da base e o código atual. Em 13/11, a [inspeção estática de old-wordpress](./analise-old-wordpress.md) acrescentou leitura do dump recebido, templates, plugin e inventário físico de mídia. Não foram consultados registros da instância MySQL, executados imports ou alterados schemas e dados.
 
 ## 1. Objetivo e limites
 
@@ -16,11 +16,11 @@ O planejamento não autoriza implementar collections, blocos, importadores, pág
 
 | Assunto | Evidência disponível | Consequência para o planejamento |
 | --- | --- | --- |
-| Legado | [Schema documentado](../banco-legado-schema.md), com 40 tabelas e estrutura WordPress/extensões | A quantidade de páginas, anexos e registros úteis ainda precisa ser medida. `AUTO_INCREMENT` não é contagem. |
-| Fonte | O dump descreve MySQL 8.0.19 na origem; o usuário informa uma instância local em execução | Confirmar conexão, identidade e correspondência entre instância e dump antes de inventariar. A data de extração do documento não comprova a data do backup. |
+| Legado | [Schema documentado](./banco-legado-schema.md) e dump recebido, com 40 tabelas; 936 registros em `wp_posts`, dez páginas publicadas e 188 anexos | Os volumes do dump foram medidos. Classificar outros tipos e definir o recorte; não confundir registros totais com páginas a migrar. |
+| Fonte | O dump recebido tem SHA-256 igual ao documento de schema; o usuário informa uma instância local em execução | A identidade do arquivo está confirmada. A correspondência com a instância MySQL e a atualidade do backup ainda não foram verificadas. |
 | Integridade | O dump não declara foreign keys | Conferir referências órfãs, pais ausentes e ciclos; não confiar apenas nos IDs. |
-| Conteúdo | `wp_posts`, `wp_postmeta`, termos e opções armazenam estruturas editoriais e de extensões | Descobrir `post_type`, `post_status`, chaves, formatos e dependências antes de fechar o mapeamento. |
-| Assets e comportamento | O usuário informa uma pasta da versão web disponível para download, mas com acesso ainda não liberado; seu conteúdo não foi inspecionado | Registrar a dependência de acesso. Não assumir que a pasta contenha todos os uploads, tema/plugins ou uma instalação WordPress executável. Banco sozinho não garante a reconstrução da página ou da funcionalidade. |
+| Conteúdo | As dez páginas publicadas têm HTML em `post_content` e JSON do Live Composer em `dslc_code`; Header e Footer também usam esse JSON | Usar o banco como fonte de conteúdo/estrutura e conferir equivalência das representações antes de definir a conversão. |
+| Assets e comportamento | `old-wordpress/` contém core, tema LC Blank, Live Composer, Wordfence, 1.456 arquivos em uploads e 21 assets adicionais; 187 arquivos principais de anexos foram encontrados | O material está acessível. A cópia não contém snapshots HTML das páginas; plugins ativos no dump estão parcialmente ausentes. Ainda falta conferir apresentação e comportamento. |
 | Destino | [Configuração atual](../../src/payload.config.ts): Next.js 16.3.3 e Payload 3.88.0 declarados em `package.json`, com adapter SQLite | O MySQL legado é uma fonte separada. Banco e storage de produção são decisões pendentes. |
 | Modelo editorial | Collections `pages`, `media`, `users`, `themes`, `audit-logs`; Globals `header`, `footer`, `site-settings` | Reusar a base e justificar eventuais lacunas; não criar uma collection para cada tabela WordPress. |
 | Rotas | [Slugs](../../src/domain/slug.ts) aceitam segmentos; rota pública `[...slug]`; `home` corresponde a `/` | É possível representar caminhos hierárquicos, mas `Pages` não possui relacionamento de pai. Não confundir caminho com árvore editorial. |
@@ -28,14 +28,14 @@ O planejamento não autoriza implementar collections, blocos, importadores, pág
 | Migrations do destino | [Guia da base](../CMS%20-%20DOCS/cms/schema-evolution-migrations.md) registra ausência de baseline integral; `src/migrations/` contém um backfill de roles | Estabelecer a baseline e o processo do ambiente antes de mudanças persistidas e da carga definitiva. O backfill isolado não cria o schema completo. |
 | Documentação | A base foi movida para `docs/CMS - DOCS/`; há referências antigas a `docs/cms/` e `docs/specs/` | Usar os caminhos existentes. A correção geral dos links fica em tarefa separada. |
 
-As tabelas `wp_wf*`, `wp_wpfm_backup` e `wp_yoast_seo_*` sugerem extensões por nomes e colunas. Não comprovam versões, uso atual ou localização de todos os dados relevantes. O tamanho do dump pode incluir logs; a complexidade editorial só será conhecida no inventário.
+As tabelas `wp_wf*`, `wp_wpfm_backup` e `wp_yoast_seo_*` sugerem extensões por nomes e colunas. Não comprovam versões ou uso atual por si. O código e os dados recebidos confirmam o uso de estruturas Live Composer, mas há divergência entre plugins no filesystem e na lista de ativos do dump. O relatório estático detalha esses limites; a análise por página ainda precisa dimensionar o esforço de adaptação.
 
 ## 3. Decisões em aberto
 
 | Decisão | Informação necessária | Momento de definição |
 | --- | --- | --- |
 | Adaptações específicas do MIR | Conteúdo será preservado e adaptado aos blocos existentes, conforme definição do usuário; identificar lacunas reais | No mapeamento de layouts, antes de propor novos componentes ou ajustes. |
-| Recursos disponíveis | Acesso à pasta da versão web pendente; confirmar depois sua cobertura de assets/HTML e a existência de uploads, tema, plugins, sitemap e regras do servidor | No diagnóstico inicial, sem impedir as análises independentes do banco. |
+| Cobertura da cópia recebida | Material acessível e inventariado; faltam plugins listados como ativos, referência renderizada e verificação de todas as dependências | Antes de assumir equivalência com a produção ou tentar executar o WordPress. |
 | Recorte editorial | Manter, revisar, consolidar ou arquivar cada família de conteúdo; responsáveis pela revisão | Antes de selecionar os lotes. |
 | Atualidade da fonte | Data efetiva do backup, alterações posteriores e possibilidade de obter uma extração final | No diagnóstico e novamente antes da virada. |
 | Destino operacional | Hospedagem, domínio, banco, armazenamento persistente de mídia, backup e restore | Antes do piloto em ambiente semelhante ao destino. |
@@ -47,7 +47,7 @@ Não estimar prazo total com base apenas no DDL. A estimativa deverá considerar
 
 ## 4. Sequência proposta
 
-As etapas de execução abaixo são futuras. A entrega atual é este plano.
+As etapas de implementação e carga abaixo são futuras. A inspeção estática de 13/11 realizou parte do diagnóstico da etapa 1: volumes, páginas, formato Live Composer e existência dos arquivos principais. O mapeamento detalhado e a conferência visual/comportamental continuam pendentes.
 
 | Etapa | Trabalho | Entrega e condição para avançar |
 | --- | --- | --- |
@@ -76,7 +76,7 @@ Levantar inicialmente agregações e nomes de chaves, evitando exportar valores 
 - quantidades de comentários e necessidade editorial, sem copiar dados de visitantes para o relatório;
 - funcionalidades fornecidas por tema/plugins, serviços externos ou JavaScript que não apareçam no DDL.
 
-Em seguida, quando o acesso à pasta da versão web for liberado, verificar sua estrutura e cobertura: HTML exportado, assets, uploads, JavaScript e eventual código WordPress são materiais diferentes. Comparar as referências do banco com os arquivos encontrados e, quando disponível, com o site navegável. Inventariar também arquivos utilizados diretamente por URLs e ausentes de `attachment`. Enquanto o acesso estiver pendente, entregar o inventário do banco com a cobertura física de mídia e a conferência visual marcadas como pendentes.
+A pasta recebida foi identificada como código WordPress com mídia, sem páginas HTML exportadas. A comparação inicial encontrou 187 dos 188 arquivos principais de anexos; o ausente pertence ao registro privado. Complementar a cobertura com variantes, arquivos usados diretamente em HTML/CSS e assets externos a uploads. Quando houver referência navegável, conferir a apresentação e o comportamento; essa verificação ainda está pendente.
 
 Entregas previstas: inventário agregado, famílias de páginas, dependências, cobertura dos arquivos e mapa inicial de URLs. Conteúdo bruto e dumps permanecem fora dos documentos versionados; amostras compartilhadas devem ser revisadas.
 
@@ -201,18 +201,18 @@ Definir antes da virada quando retornar ao WordPress e como preservar eventuais 
 
 ## 8. Próxima unidade de trabalho
 
-Propor uma tarefa restrita a **diagnóstico do legado em modo somente leitura**. Ela deve confirmar a conexão local por configuração separada, levantar agregações de tipos/status/metadados/taxonomias, identificar famílias e formatos e produzir o inventário sem criar importador nem alterar a aplicação.
+Propor uma tarefa restrita ao **mapeamento estático das páginas do legado para a base CMS**, usando o [levantamento realizado](./analise-old-wordpress.md). Entregar uma matriz página → seções → conteúdo/mídia → bloco candidato → pendências, incluindo Header e Footer, sem criar importador nem alterar a aplicação.
 
-Usar a direção já confirmada: preservar conteúdo e adaptá-lo aos blocos atuais, propondo componentes específicos quando necessário. O acesso à pasta da versão web está pendente; começar pelas análises independentes do banco, registrando as verificações que dependem dos arquivos. O mapeamento definitivo e a estimativa de esforço vêm depois desse diagnóstico.
+Usar a direção já confirmada: preservar conteúdo e adaptá-lo aos blocos atuais, propondo componentes específicos quando necessário. Começar pela home, uma modalidade e a FAQ para identificar padrões, completar as demais e avaliar os outros tipos de conteúdo. Registrar as verificações que dependem de execução ou referência visual. A estimativa de esforço vem depois desse mapeamento.
 
-## 9. Registro desta entrega
+## 9. Registro das entregas de planejamento
 
-Decisões: separar a documentação MIR da base CMS; usar o código atual para conferir capacidades; preservar conteúdo adaptando-o aos blocos atuais; admitir ajustes específicos mediante necessidade e spec; manter o mapeamento preliminar; começar pelo diagnóstico; preservar as alterações preexistentes do workspace.
+Decisões: separar a documentação MIR da base CMS; usar o código atual para conferir capacidades; preservar conteúdo adaptando-o aos blocos atuais; admitir ajustes específicos mediante necessidade e spec; manter o mapeamento preliminar; preservar as alterações preexistentes do workspace. A inspeção de 13/11 confirmou o banco como fonte útil em conjunto com arquivos e código, e propôs o mapeamento por página como próxima unidade.
 
 Impacto em dados: nenhum. Nenhum schema, seed, configuração de ambiente ou arquivo de aplicação foi modificado. Não há migration nesta entrega.
 
-Desvios e pendências: nenhuma execução da migração foi antecipada. O acesso à pasta da versão web aguarda liberação externa; banco local, arquivos e comportamento real do WordPress ainda não foram auditados. Essa pendência não impede o diagnóstico do banco. Os links antigos da documentação geral foram identificados, sem correção fora do escopo.
+Desvios e pendências: nenhuma execução da migração foi antecipada. O acesso aos arquivos foi resolvido e o dump foi analisado estaticamente, sem consulta ao MySQL. Apresentação, comportamento em execução, dependências ausentes e vigência editorial permanecem pendentes. Os links antigos da documentação geral foram identificados, sem correção fora do escopo.
 
 Inspeções executadas: `git status --short`, `rg --files docs`, leitura de `docs/banco-legado-schema.md` com `cat`/`sed`, e leitura dos schemas, rotas, guias de evolução de schema e documentação local de rotas/redirecionamentos do Next.js em `node_modules/next/dist/docs/`.
 
-Validações executadas: `git diff --check -- 'docs/MIR - DOCS'` sem erros; verificador documental via `python3` aprovado para os dois documentos MIR, com dez links relativos existentes, ausência de espaços finais, newline final e cercas de código balanceadas. A verificação Python cobre também os arquivos ainda não rastreados pelo Git. Lint, typecheck, testes de aplicação e build não se aplicam a esta entrega exclusivamente documental e não foram executados.
+Validações da entrega inicial de 12/11: `git diff --check -- 'docs/MIR - DOCS'` sem erros; verificador documental via `python3` aprovado para os dois documentos MIR, com dez links relativos existentes, ausência de espaços finais, newline final e cercas de código balanceadas. A verificação Python cobre também os arquivos ainda não rastreados pelo Git. A atualização de 13/11 acrescenta o relatório de inspeção e nova verificação documental dos três arquivos. Lint, typecheck, testes de aplicação e build não se aplicam às entregas exclusivamente documentais e não foram executados.

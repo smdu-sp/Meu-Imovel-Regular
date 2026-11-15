@@ -33,7 +33,7 @@ A plataforma não deve:
 - Next.js com App Router em `src/app`;
 - Payload CMS integrado na mesma aplicacao;
 - TypeScript;
-- SQLite para bootstrap local do Payload;
+- PostgreSQL para persistencia do Payload;
 - Tailwind CSS com tokens centralizados;
 - testes com `node --test` e `tsx`.
 
@@ -104,13 +104,63 @@ Preencha as variaveis:
 
 | Variavel | Configuracao |
 |---|---|
-| `DATABASE_URI` | Banco usado pelo Payload. Para SQLite local: `file:./payload.db`. |
+| `DATABASE_URI` | Conexao PostgreSQL usada pelo Payload, por exemplo `postgresql://postgres:postgres@localhost:5432/meu_imovel_regular`. |
+| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Banco e credenciais criados pelo Compose local. Defaults: `meu_imovel_regular`, `postgres` e `postgres`. |
+| `POSTGRES_PORT` | Porta local publicada pelo Compose. Default: `5432`. |
 | `PAYLOAD_SECRET` | Segredo aleatorio forte e exclusivo do ambiente; substitua o placeholder do exemplo. |
 | `NEXT_PUBLIC_SERVER_URL` | URL do portal. Localmente: `http://localhost:3000`. |
 | `LDAP_AUTH_MODE` | `external` para validar credenciais na API externa. |
 | `LDAP_API_URL` | URL base real do servico LDAP, sem os caminhos dos endpoints. |
 
+O PostgreSQL deve estar disponivel antes de iniciar a aplicacao ou executar seeds. Crie um banco dedicado e ajuste `DATABASE_URI` em `.env`. As credenciais do exemplo sao apenas para desenvolvimento local. Sem a variavel, o adapter usa a mesma URL local do exemplo.
+
+Se o ambiente ainda usa `file:./payload.db`, atualize a variavel para a conexao PostgreSQL. A troca do adapter nao transfere os dados do SQLite. Consulte [Transicao para PostgreSQL](./docs/postgresql.md) para inicializacao, migracao de dados existentes e limites de validacao.
+
 O dominio `ldap.example.test` e ficticio e precisa ser substituido para usar a API externa. No modo local descrito abaixo, essa API nao e consultada.
+
+### PostgreSQL local com Docker Compose
+
+Com Docker e Docker Compose instalados e o Docker em execucao, use
+[`docker-compose.yml`](./docker-compose.yml) na raiz do projeto:
+
+```bash
+docker compose up -d --wait postgres
+docker compose ps
+```
+
+O comando aguarda o healthcheck do PostgreSQL 17. O servico cria o banco
+`meu_imovel_regular`, com usuario `postgres` e senha `postgres` por padrao, e publica
+a porta `5432` apenas em `127.0.0.1`. As credenciais sao para desenvolvimento local.
+Configure a aplicacao executada no host com:
+
+```dotenv
+DATABASE_URI=postgresql://postgres:postgres@localhost:5432/meu_imovel_regular
+```
+
+O Compose le `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` e `POSTGRES_PORT`
+do `.env`, usando os defaults acima quando ausentes. Ele nao le
+`.env.development.local`. Ao alterar essas variaveis, ajuste tambem `DATABASE_URI`;
+a URL nao e recalculada automaticamente. Se a porta `5432` estiver ocupada, por
+exemplo, defina `POSTGRES_PORT=5433` e use `localhost:5433` na URL. Senhas com
+caracteres especiais precisam ser codificadas para URL em `DATABASE_URI`.
+
+Com o banco saudavel, execute `npm run dev` para o Payload criar ou sincronizar
+as tabelas em desenvolvimento. Depois, execute o seed de administrador descrito
+abaixo. O Compose inicializa o PostgreSQL; o schema editorial e gerenciado pelo
+Payload.
+
+Para acompanhar os logs e encerrar os containers:
+
+```bash
+docker compose logs -f postgres
+docker compose down
+```
+
+Os dados ficam no volume nomeado `postgres_data` do projeto e permanecem apos
+`docker compose down`. O comando `docker compose down -v` apaga esse volume e
+os dados locais. As variaveis de banco, usuario e senha so inicializam um volume
+vazio; altera-las no `.env` nao modifica as credenciais de um banco ja criado.
+Para bancos com dados, altere as credenciais no PostgreSQL e atualize a URL.
 
 ### Desenvolvimento sem API externa
 

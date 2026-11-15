@@ -1,4 +1,4 @@
-import type { MigrateUpArgs } from "@payloadcms/db-sqlite";
+import type { MigrateUpArgs } from "@payloadcms/db-postgres";
 
 import {
   createRoleBackfillPlan,

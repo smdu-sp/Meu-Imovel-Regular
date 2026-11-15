@@ -20,6 +20,9 @@
 # production
 /build
 
+# legacy WordPress
+/old-wordpress/
+
 # misc
 .DS_Store
 *.pem

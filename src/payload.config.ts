@@ -1,4 +1,4 @@
-import { sqliteAdapter } from "@payloadcms/db-sqlite";
+import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { pt } from "@payloadcms/translations/languages/pt";
 import path from "path";
@@ -19,7 +19,9 @@ getLdapDevUser();
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
-const databaseUrl = process.env.DATABASE_URI || "file:./payload.db";
+const databaseUrl =
+  process.env.DATABASE_URI ||
+  "postgresql://postgres:postgres@localhost:5432/meu_imovel_regular";
 const payloadSecret =
   process.env.PAYLOAD_SECRET || "dev-only-payload-secret-change-me";
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
@@ -82,9 +84,9 @@ export default buildConfig({
   },
   collections: [Users, Media, Pages, Themes, AuditLogs],
   globals: [Header, Footer, SiteSettings],
-  db: sqliteAdapter({
-    client: {
-      url: databaseUrl,
+  db: postgresAdapter({
+    pool: {
+      connectionString: databaseUrl,
     },
   }),
   secret: payloadSecret,
