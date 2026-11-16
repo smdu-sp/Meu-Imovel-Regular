@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="title">
+  <title id="title">Lista de documentos PDF</title>
+  <rect width="600" height="400" rx="24" fill="#f1f5f9"/>
+  <rect x="75" y="48" width="450" height="304" rx="14" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="108" y="104" fill="#1e293b" font-family="Arial, sans-serif" font-size="27" font-weight="700">Documentos</text>
+  <g fill="#dc2626"><rect x="108" y="138" width="54" height="48" rx="6"/><rect x="108" y="207" width="54" height="48" rx="6"/><rect x="108" y="276" width="54" height="48" rx="6"/></g>
+  <g fill="#fff" font-family="Arial, sans-serif" font-size="16" font-weight="700"><text x="116" y="168">PDF</text><text x="116" y="237">PDF</text><text x="116" y="306">PDF</text></g>
+  <g fill="#475569"><rect x="184" y="153" width="280" height="10" rx="5"/><rect x="184" y="222" width="244" height="10" rx="5"/><rect x="184" y="291" width="266" height="10" rx="5"/></g>
+</svg>

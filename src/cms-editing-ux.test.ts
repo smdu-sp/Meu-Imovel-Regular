@@ -133,6 +133,7 @@ describe("CMS editing UX", () => {
       [
         "Destaque principal",
         "Texto editorial",
+        "Lista de PDFs",
         "Midia e texto / imagem de destaque",
         "Cards e grades de beneficios",
         "Chamada para acao",

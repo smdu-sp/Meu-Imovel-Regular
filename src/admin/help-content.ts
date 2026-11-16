@@ -123,6 +123,13 @@ export const adminHelpBlockGuides: AdminHelpBlockGuide[] = [
     avoidWhen: "Evite para perguntas frequentes, chamadas finais ou cards repetidos.",
   },
   {
+    name: "Lista de PDFs",
+    purpose: "Oferecer documentos PDF para consulta e download por link direto.",
+    fields: ["titulo da lista", "PDFs", "nome opcional do link"],
+    useWhen: "Use para manuais, cartilhas e modelos publicados em PDF.",
+    avoidWhen: "Evite para imagens ou arquivos que nao sejam PDF.",
+  },
+  {
     name: "Midia e texto / imagem de destaque",
     purpose: "Combinar imagem e conteudo complementar em uma secao.",
     fields: ["titulo", "conteudo", "imagem", "posicao", "acao opcional"],

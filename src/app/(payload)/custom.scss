@@ -722,3 +722,156 @@
     display: block !important;
   }
 }
+
+/* A coleção Media é a única com abas nativas de lista e pastas nesta fase. */
+.collection-list--media,
+.collection-folder-list--media {
+  .default-list-view-tabs > .default-list-view-tabs__button {
+    align-items: center;
+    display: inline-flex;
+    gap: 8px;
+
+    &::before {
+      background-color: currentColor;
+      content: "";
+      display: inline-block;
+      flex: 0 0 16px;
+      height: 16px;
+      width: 16px;
+    }
+
+    &:first-child::before {
+      -webkit-mask: url("/admin-icons/media-list.svg") center / contain no-repeat;
+      mask: url("/admin-icons/media-list.svg") center / contain no-repeat;
+    }
+
+    &:nth-child(2)::before {
+      -webkit-mask: url("/admin-icons/folder-navigation.svg") center / contain no-repeat;
+      mask: url("/admin-icons/folder-navigation.svg") center / contain no-repeat;
+    }
+  }
+}
+
+/* Acoes de selecao nas duas abas de Midias. */
+.collection-folder-list--media,
+.collection-list--media {
+  .list-selection {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .list-selection__actions {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    .list-selection__button {
+      background: var(--theme-elevation-50);
+      border: 1px solid var(--theme-elevation-200);
+      border-radius: 6px;
+      color: var(--theme-text);
+      font-weight: 600;
+      margin-block: 0;
+      padding: 6px 10px;
+      text-decoration: none;
+
+      &:hover,
+      &:focus-visible {
+        background: var(--theme-elevation-100);
+        border-color: var(--theme-elevation-300);
+        color: var(--theme-text);
+      }
+    }
+
+    &:last-child {
+      .list-selection__button:not(.delete-documents__toggle) {
+        background: var(--admin-brand-primary);
+        border-color: var(--admin-brand-primary);
+        color: var(--theme-bg);
+
+        &:hover,
+        &:focus-visible {
+          background: color-mix(in srgb, var(--admin-brand-primary) 85%, var(--theme-text));
+          border-color: var(--admin-brand-primary);
+          color: var(--theme-bg);
+        }
+      }
+
+      .delete-documents__toggle {
+        background: color-mix(in srgb, var(--theme-error-500) 12%, var(--theme-bg));
+        border-color: var(--theme-error-500);
+        color: var(--theme-text);
+
+        &:hover,
+        &:focus-visible {
+          background: color-mix(in srgb, var(--theme-error-500) 20%, var(--theme-bg));
+          border-color: var(--theme-error-500);
+          color: var(--theme-text);
+        }
+      }
+    }
+  }
+}
+
+
+/* Miniatura da aba Todas as Midias. O grid de pastas usa a miniatura nativa. */
+.collection-list--media .media-preview-cell {
+  align-items: center;
+  background: var(--theme-elevation-50);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 5px;
+  display: inline-flex;
+  height: 52px;
+  justify-content: center;
+  overflow: hidden;
+  vertical-align: middle;
+  width: 52px;
+
+  .thumbnail {
+    height: 100%;
+    max-height: none;
+    min-height: 0;
+    width: 100%;
+  }
+
+  .thumbnail img,
+  .thumbnail svg {
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+  }
+}
+
+
+.collection-list--media .media-title-link {
+  color: var(--admin-brand-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--theme-text);
+  }
+}
+
+
+/* PDFs nao possuem miniatura; use o icone de arquivo institucional na grade. */
+.collection-folder-list--media .folder-file-card--file {
+  .folder-file-card__preview-area:has(> .icon--document) {
+    grid-template-columns: 1fr;
+
+    &::before {
+      background: url("/admin-icons/pdf-file.svg") center / contain no-repeat;
+      content: "";
+      display: block;
+      height: 50%;
+      margin: auto;
+      width: 50%;
+    }
+
+    > .icon--document {
+      display: none;
+    }
+  }
+}

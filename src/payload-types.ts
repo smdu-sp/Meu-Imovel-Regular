@@ -73,11 +73,16 @@ export interface Config {
     themes: Theme;
     'audit-logs': AuditLog;
     'payload-kv': PayloadKv;
+    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'payload-folders': {
+      documentsAndFolders: 'payload-folders' | 'media';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -85,6 +90,7 @@ export interface Config {
     themes: ThemesSelect<false> | ThemesSelect<true>;
     'audit-logs': AuditLogsSelect<false> | AuditLogsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -153,7 +159,7 @@ export interface User {
   collection: 'users';
 }
 /**
- * Cadastre imagens e documentos usados nos blocos, SEO e identidade visual. O texto alternativo e obrigatorio para acessibilidade.
+ * Organize imagens e PDFs em pastas. Imagens exigem texto alternativo; PDFs usam titulo editorial.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -161,13 +167,17 @@ export interface User {
 export interface Media {
   id: number;
   /**
+   * Nome usado no Admin e, para PDFs, no link de download. Registros antigos recebem o titulo ao serem editados.
+   */
+  title?: string | null;
+  /**
    * Classifique o papel editorial da midia. Imagens SVG sao aceitas apos validacao de seguranca; para icones e logos, use arquivos institucionais aprovados.
    */
   usage: 'content' | 'background' | 'logo' | 'icon' | 'infographic' | 'document';
   /**
-   * Descreva objetivamente a imagem para pessoas que usam leitores de tela.
+   * Descreva a imagem para leitores de tela. PDFs usam o titulo editorial como nome do link.
    */
-  alt: string;
+  alt?: string | null;
   /**
    * Opcional. Use quando a imagem precisar de credito, contexto ou complemento editorial.
    */
@@ -190,6 +200,7 @@ export interface Media {
     | number
     | boolean
     | null;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -201,6 +212,36 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: number;
+  name: string;
+  folder?: (number | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: number | FolderInterface;
+        }
+      | {
+          relationTo?: 'media';
+          value: number | Media;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  folderType?: 'media'[] | null;
+  /**
+   * Digite as etiquetas que ajudam a identificar esta pasta, como Home, Manuais ou Logos.
+   */
+  tags?: string[] | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Crie e organize paginas editoriais do portal. Use rascunho, preview e publicacao para controlar o ciclo editorial.
@@ -230,6 +271,7 @@ export interface Page {
         | HeroBlock
         | RichTextBlock
         | ImageBlock
+        | DocumentListBlock
         | GalleryBlock
         | CarouselBlock
         | VideoBlock
@@ -550,6 +592,24 @@ export interface ImageBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'imageBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DocumentListBlock".
+ */
+export interface DocumentListBlock {
+  heading?: string | null;
+  items: {
+    /**
+     * Se vazio, usa o titulo editorial da midia.
+     */
+    label?: string | null;
+    file: number | Media;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'documentList';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1708,6 +1768,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'audit-logs';
         value: number | AuditLog;
+      } | null)
+    | ({
+        relationTo: 'payload-folders';
+        value: number | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1769,6 +1833,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  title?: T;
   usage?: T;
   alt?: T;
   caption?: T;
@@ -1781,6 +1846,7 @@ export interface MediaSelect<T extends boolean = true> {
         y?: T;
       };
   editingMetadata?: T;
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1807,6 +1873,7 @@ export interface PagesSelect<T extends boolean = true> {
         hero?: T | HeroBlockSelect<T>;
         richText?: T | RichTextBlockSelect<T>;
         imageBlock?: T | ImageBlockSelect<T>;
+        documentList?: T | DocumentListBlockSelect<T>;
         gallery?: T | GalleryBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         videoBlock?: T | VideoBlockSelect<T>;
@@ -1946,6 +2013,22 @@ export interface ImageBlockSelect<T extends boolean = true> {
               action?: T;
               accent?: T;
             };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DocumentListBlock_select".
+ */
+export interface DocumentListBlockSelect<T extends boolean = true> {
+  heading?: T;
+  items?:
+    | T
+    | {
+        label?: T;
+        file?: T;
+        id?: T;
       };
   id?: T;
   blockName?: T;
@@ -2467,6 +2550,19 @@ export interface AuditLogsSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders_select".
+ */
+export interface PayloadFoldersSelect<T extends boolean = true> {
+  name?: T;
+  folder?: T;
+  documentsAndFolders?: T;
+  folderType?: T;
+  tags?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

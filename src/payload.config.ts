@@ -13,6 +13,7 @@ import { Footer } from "./globals/Footer.ts";
 import { Header } from "./globals/Header.ts";
 import { SiteSettings } from "./globals/SiteSettings.ts";
 import { getLdapDevUser } from "./lib/ldap/dev-user.ts";
+import { restrictMediaFolders } from "./lib/payload/media-folders.ts";
 
 getLdapDevUser();
 
@@ -54,6 +55,12 @@ export default buildConfig({
   i18n: {
     fallbackLanguage: "pt",
     supportedLanguages: { pt },
+    translations: {
+      pt: {
+        general: { all: "Todas as" },
+        folder: { byFolder: "Navegação Por Pastas" },
+      },
+    },
   },
   admin: {
     user: Users.slug,
@@ -83,6 +90,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Pages, Themes, AuditLogs],
+  folders: { collectionOverrides: [restrictMediaFolders] },
   globals: [Header, Footer, SiteSettings],
   db: postgresAdapter({
     pool: {

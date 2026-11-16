@@ -1,4 +1,5 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, TextFieldSingleValidation } from "payload";
+import { fillLegacyMediaTitle, prepareMediaMetadata } from "../lib/payload/media-metadata.ts";
 import {
   canCreateMedia,
   canDeleteMedia,
@@ -27,6 +28,8 @@ export const mediaUsageOptions = [
 
 export const Media: CollectionConfig = {
   slug: "media",
+  folders: true,
+  hooks: { beforeValidate: [prepareMediaMetadata], afterRead: [fillLegacyMediaTitle] },
   access: {
     create: canCreateMedia,
     read: canReadMedia,
@@ -38,10 +41,10 @@ export const Media: CollectionConfig = {
     plural: "Mídias",
   },
   admin: {
-    defaultColumns: ["alt", "usage", "caption", "updatedAt"],
+    defaultColumns: ["preview", "title", "usage", "mimeType", "updatedAt"],
     description:
-      "Cadastre imagens e documentos usados nos blocos, SEO e identidade visual. O texto alternativo e obrigatorio para acessibilidade.",
-    useAsTitle: "alt",
+      "Organize imagens e PDFs em pastas. Imagens exigem texto alternativo; PDFs usam titulo editorial.",
+    useAsTitle: "title",
     components: {
       edit: {
         beforeDocumentControls: [
@@ -64,6 +67,27 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
+      name: "preview",
+      type: "ui",
+      label: "Prévia",
+      admin: {
+        components: {
+          Cell: "/components/admin/MediaPreviewCell#MediaPreviewCell",
+        },
+      },
+    },
+    {
+      name: "title",
+      type: "text",
+      label: "Titulo editorial",
+      admin: {
+        components: {
+          Cell: "/components/admin/MediaTitleCell#MediaTitleCell",
+        },
+        description: "Nome usado no Admin e, para PDFs, no link de download. Registros antigos recebem o titulo ao serem editados.",
+      },
+    },
+    {
       name: "usage",
       type: "select",
       label: "Uso principal",
@@ -79,10 +103,28 @@ export const Media: CollectionConfig = {
       name: "alt",
       type: "text",
       label: "Texto alternativo",
-      required: true,
+      validate: (async (value, { data, id, req }) => {
+        let mimeType = req.file?.mimetype || (data as { mimeType?: string } | undefined)?.mimeType;
+        if (!mimeType && id != null && req?.payload) {
+          try {
+            mimeType = (await req.payload.findByID({
+              collection: "media",
+              id,
+              depth: 0,
+              overrideAccess: true,
+              req,
+            })).mimeType || undefined;
+          } catch {
+            // Missing media falls through to the image accessibility requirement.
+          }
+        }
+        if (mimeType === "application/pdf") return true;
+        return typeof value === "string" && value.trim()
+          ? true
+          : "Descreva a imagem para pessoas que usam leitores de tela.";
+      }) satisfies TextFieldSingleValidation,
       admin: {
-        description:
-          "Descreva objetivamente a imagem para pessoas que usam leitores de tela.",
+        description: "Descreva a imagem para leitores de tela. PDFs usam o titulo editorial como nome do link.",
       },
     },
     {

@@ -1,4 +1,8 @@
 import { AdminHelpBackButton as AdminHelpBackButton_91d47573155c4345c3604f489d60a701 } from '../../../components/admin/AdminHelpBackButton'
+import { MediaPreviewCell as MediaPreviewCell_fa740fc0f212c48148e3c9a2b45f7667 } from '../../../components/admin/MediaPreviewCell'
+import { MediaTitleCell as MediaTitleCell_3791911e900d14fb3fd0dfe7816f5c09 } from '../../../components/admin/MediaTitleCell'
+import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { ViewPageButton as ViewPageButton_280befce703042c3892fc43e283cbc0b } from '../../../components/admin/ViewPageButton'
 import { CharacterLimitedTextField as CharacterLimitedTextField_e13edbeccdd76f669b096be564191153 } from '../../../components/admin/CharacterLimitedTextField'
 import { ImageEditingCanvas as ImageEditingCanvas_111bccef76473ed486e4c4f4c2335248 } from '../../../components/admin/ImageEditingCanvas'
@@ -34,6 +38,7 @@ import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93
 import { RichTextFullScreen as RichTextFullScreen_65acaa4b066b5182ca36171bd91f0dfa } from '../../../components/admin/RichTextFullScreen'
 import { RichTextTableMenuPortuguese as RichTextTableMenuPortuguese_14713f82702752182fe1c22026851a72 } from '../../../components/admin/RichTextTableMenuPortuguese'
 import { ThemeColorReset as ThemeColorReset_477b42945c88043439e5d946a379222e } from '../../../components/admin/ThemeColorReset'
+import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { CustomNav as CustomNav_6de4d01e9d2fdd107175007ae639960b } from '../../../components/admin/CustomNav'
 import { Icon as Icon_dfe4008080d895d460898c3a6155e9ba } from '../../../components/admin/Icon'
 import { Logo as Logo_91a09b539d3c86b0aebf520e7564ce08 } from '../../../components/admin/Logo'
@@ -47,6 +52,10 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 /** @type import('payload').ImportMap */
 export const importMap = {
   "/components/admin/AdminHelpBackButton#AdminHelpBackButton": AdminHelpBackButton_91d47573155c4345c3604f489d60a701,
+  "/components/admin/MediaPreviewCell#MediaPreviewCell": MediaPreviewCell_fa740fc0f212c48148e3c9a2b45f7667,
+  "/components/admin/MediaTitleCell#MediaTitleCell": MediaTitleCell_3791911e900d14fb3fd0dfe7816f5c09,
+  "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "/components/admin/ViewPageButton#ViewPageButton": ViewPageButton_280befce703042c3892fc43e283cbc0b,
   "/components/admin/CharacterLimitedTextField#CharacterLimitedTextField": CharacterLimitedTextField_e13edbeccdd76f669b096be564191153,
   "/components/admin/ImageEditingCanvas#ImageEditingCanvas": ImageEditingCanvas_111bccef76473ed486e4c4f4c2335248,
@@ -82,6 +91,7 @@ export const importMap = {
   "/components/admin/RichTextFullScreen#RichTextFullScreen": RichTextFullScreen_65acaa4b066b5182ca36171bd91f0dfa,
   "/components/admin/RichTextTableMenuPortuguese#RichTextTableMenuPortuguese": RichTextTableMenuPortuguese_14713f82702752182fe1c22026851a72,
   "/components/admin/ThemeColorReset#ThemeColorReset": ThemeColorReset_477b42945c88043439e5d946a379222e,
+  "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "/components/admin/CustomNav#CustomNav": CustomNav_6de4d01e9d2fdd107175007ae639960b,
   "/components/admin/Icon#Icon": Icon_dfe4008080d895d460898c3a6155e9ba,
   "/components/admin/Logo#Logo": Logo_91a09b539d3c86b0aebf520e7564ce08,

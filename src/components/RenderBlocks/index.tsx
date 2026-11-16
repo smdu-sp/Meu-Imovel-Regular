@@ -6,6 +6,7 @@ import { AlertBoxBlock } from "../../blocks/AlertBox/Component";
 import { CardsBlock } from "../../blocks/Cards/Component";
 import { CarouselBlock } from "../../blocks/Carousel/Component";
 import { CTABlock } from "../../blocks/CTA/Component";
+import { DocumentListBlock } from "../../blocks/DocumentList/Component";
 import { FAQAccordionBlock } from "../../blocks/FAQ/Component";
 import { FullWidthImageBannerBlock } from "../../blocks/FullWidthImageBanner/Component";
 import { GalleryBlock } from "../../blocks/Gallery/Component";
@@ -31,6 +32,7 @@ const blockRenderers = {
   hero: (block) => <HeroBlock {...block} />,
   richText: (block) => <RichTextBlock {...block} />,
   imageBlock: (block) => <ImageBlock {...block} />,
+  documentList: (block) => <DocumentListBlock {...block} />,
   gallery: (block) => <GalleryBlock {...block} />,
   carousel: (block) => <CarouselBlock {...block} />,
   videoBlock: (block) => <VideoBlock {...block} />,

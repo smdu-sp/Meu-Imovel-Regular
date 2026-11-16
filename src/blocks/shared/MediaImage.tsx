@@ -47,6 +47,7 @@ export function MediaImage({
   style?: CSSProperties;
 }) {
   if (!media || typeof media !== "object" || !media.url) return null;
+  if (media.mimeType && !media.mimeType.startsWith("image/")) return null;
 
   const src = localizeMediaUrl(media.url);
   const eager = preload ?? priority;
@@ -55,7 +56,7 @@ export function MediaImage({
   if (fill) {
     return (
       <Image
-        alt={media.alt}
+        alt={media.alt || ""}
         className={className}
         fill
         preload={eager}
@@ -69,7 +70,7 @@ export function MediaImage({
 
   return (
     <Image
-      alt={media.alt}
+      alt={media.alt || ""}
       className={className}
       height={media.height || 900}
       preload={eager}

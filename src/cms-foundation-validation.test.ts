@@ -6,6 +6,7 @@ import { AlertBoxBlock } from "./blocks/AlertBox/config";
 import { CardsBlock } from "./blocks/Cards/config";
 import { CarouselBlock } from "./blocks/Carousel/config";
 import { CTABlock } from "./blocks/CTA/config";
+import { DocumentListBlock } from "./blocks/DocumentList/config";
 import { FAQBlock } from "./blocks/FAQ/config";
 import { FullWidthImageBannerBlock } from "./blocks/FullWidthImageBanner/config";
 import { GalleryBlock } from "./blocks/Gallery/config";
@@ -229,6 +230,7 @@ describe("SPEC-029 CMS foundation validation", () => {
       HeroBlock,
       RichTextBlock,
       ImageBlock,
+      DocumentListBlock,
       GalleryBlock,
       CarouselBlock,
       VideoBlock,

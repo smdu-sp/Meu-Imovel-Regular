@@ -4,6 +4,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { MediaBulkEditLabel } from "./MediaBulkEditLabel";
 import type { StandardIconName } from "../../domain/icons";
 import { Icon } from "../ui/Icon";
 
@@ -65,6 +66,7 @@ function NavSection({ children, label }: { children: ReactNode; label: string })
 export const CustomNav: React.FC = () => {
   return (
     <aside className="modern-nav">
+      <MediaBulkEditLabel />
       <div className="nav-home">
         <NavLink href="/admin" icon="home" label="Menu Principal" />
       </div>

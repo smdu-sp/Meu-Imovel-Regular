@@ -3,6 +3,7 @@ export const pageBlockSlugs = [
   "hero",
   "richText",
   "imageBlock",
+  "documentList",
   "gallery",
   "carousel",
   "videoBlock",
