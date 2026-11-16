@@ -10,6 +10,13 @@
 - Pastas são organização editorial. Não alteram o caminho físico do arquivo, o ID da mídia, a URL existente nem a política de leitura pública.
 - Papel Gestor, visibilidade restrita, permissões por site e multi-site ficam para uma etapa futura. Hoje há apenas Admin e Editor, e `canReadMedia` retorna `true`.
 
+## Interface do piloto MIR
+
+- As abas Todas as Mídias e Navegação Por Pastas usam os rótulos e ícones institucionais. Ações de seleção têm contorno e cores do tema nas duas abas.
+- Pastas aceitam Mídias em Coleções permitidas e têm Tags editoriais livres. As tags não controlam acesso nem filtram a navegação nativa.
+- Todas as Mídias mostra miniaturas de imagens e o SVG de PDF na coluna Prévia. A grade de pastas mostra miniaturas e o mesmo SVG para PDFs. A tabela nativa de pastas ainda usa o ícone genérico.
+- O título editorial na lista geral abre a ficha completa da mídia. Na pasta, o duplo clique abre a ficha. Editar em Massa continua abrindo o editor em lote, inclusive com um item selecionado.
+
 ## Artefatos
 
 1. [Especificação de implementação](./especificacao.md): contrato de dados, permissões, interface de pastas, vínculo do PDF nas páginas e arquivos previstos no repositório pai.

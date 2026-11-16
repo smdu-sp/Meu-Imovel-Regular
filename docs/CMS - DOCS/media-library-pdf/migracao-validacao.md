@@ -21,6 +21,10 @@ Sequência por ambiente: inventariar mídias/Pages e suas URLs → backup e rest
 
 ## Verificação funcional
 
+- [ ] Nas duas abas, verificar contorno e foco dos botões, rótulo Editar em Massa e preservação do Editar individual de pasta.
+- [ ] Na lista geral, imagens mostram miniatura, PDFs mostram o SVG institucional e o título editorial abre a ficha completa.
+- [ ] Na grade de pastas, imagens mostram miniatura e PDFs mostram o SVG institucional; duplo clique abre a ficha. Registrar que a tabela nativa ainda usa ícone genérico.
+
 - [ ] Editor adiciona tags livres a uma pasta, salva e confirma que persistem na reabertura.
 - [ ] Editor entra no Admin, cria/renomeia pastas e move mídia; não consegue excluir pasta. Admin também não consegue excluir pasta com mídia ou subpasta.
 - [ ] Mídias anteriores aparecem na raiz; continuam abrindo pelos mesmos IDs e URLs após serem movidas.

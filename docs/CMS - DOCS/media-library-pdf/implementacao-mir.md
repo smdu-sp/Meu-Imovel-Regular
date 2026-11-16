@@ -9,7 +9,7 @@
 | Biblioteca | `src/collections/Media.ts`, `src/lib/payload/media-metadata.ts`, `src/lib/payload/media-folders.ts`, `src/payload.config.ts` | Pastas nativas; Editor cria/edita; Admin exclui pasta vazia; PDFs exigem título e assinatura; `alt` permanece obrigatório para imagens. |
 | Compatibilidade | `Media` `afterRead`, `src/blocks/shared/MediaImage.tsx` | Mídia antiga sem `title` recebe nome de leitura derivado de `alt`/`filename`; PDF não é enviado a `next/image`. |
 | Páginas | `src/blocks/DocumentList/`, `src/blocks/catalog.ts`, `src/collections/Pages.ts`, `src/components/RenderBlocks/index.tsx` | Bloco `documentList` usa relação com `Media`, aceita apenas MIME PDF e emite links diretos com nome, formato e tamanho. PDFs antigos com `usage` legado continuam selecionáveis. |
-| Admin | `src/admin/help-content.ts`, `public/block-previews/document-list.svg`, import map gerado | Ajuda e prévia do novo bloco. |
+| Admin | src/components/admin/MediaPreviewCell.tsx, MediaTitleCell.tsx, MediaBulkEditLabel.tsx, CustomNav.tsx, src/app/(payload)/custom.scss, public/admin-icons/ | Prévias, ícone de PDF, link para ficha completa, rótulo Editar em Massa e ações com cores do tema. |
 | Tipos | `src/payload-types.ts` | Regenerados pelo Payload 3.88.0. |
 | Testes | `src/lib/payload/media-upgrade.test.ts`, `media-folders.integration.test.ts`, `src/blocks/DocumentList/Component.test.tsx` e expectativas do catálogo | Cobrem formato, título, acessibilidade, permissões e link público. |
 
@@ -31,11 +31,11 @@ Ao selecionar uma pasta com um clique, o Payload mostra as ações no topo da li
 
 ## Prévias de mídia
 
-A lista Todas as Mídias agora inclui uma coluna Prévia com miniatura para arquivos image/*; PDFs ficam sem miniatura. O componente usa o Thumbnail nativo do Payload, que trata falha de carregamento, e prefere thumbnailURL quando disponível. A navegação por pastas, em visualização de grade, já usa a miniatura nativa para imagens e um ícone para PDFs. A visualização em tabela das pastas continua com ícones, pois o Payload 3.88.0 não expõe um ponto de extensão para suas células. O campo Prévia é apenas de interface e não altera o schema persistido.
+A lista Todas as Mídias inclui uma coluna Prévia: imagens exibem miniatura, PDFs exibem o SVG institucional. O componente usa Thumbnail do Payload, que trata falha de carregamento, e prefere thumbnailURL quando disponível. Na navegação por pastas, a grade mostra miniaturas e o SVG de PDF; a tabela nativa continua com ícones genéricos. O campo Prévia é apenas de interface.
 
 ## Acesso à ficha completa da mídia
 
-O título editorial na lista Todas as Mídias agora é um link para a ficha completa do arquivo. O botão nativo Editar continua abrindo a edição em massa do Payload, inclusive para uma seleção única. Na navegação por pastas, a lista nativa não oferece ponto de extensão para substituir o título ou o botão; abrir a mídia por duplo clique continua disponível. Trocar o botão da pasta exige substituir a view nativa, o que impacta seleção, movimentação e drag and drop.
+O título editorial em Todas as Mídias abre a ficha completa do arquivo. Editar em Massa continua abrindo a edição em lote, mesmo com uma única mídia selecionada. Na navegação por pastas, duplo clique abre a ficha; a lista nativa não permite substituir o título ou a ação de edição sem trocar a view.
 
 ## Rótulo da edição em massa
 
@@ -55,7 +55,7 @@ Arquivos PDF exibem o SVG public/admin-icons/pdf-file.svg na coluna Prévia de T
 | Testes focados de PDF/imagem | 8/8 passaram após o ajuste de compatibilidade |
 | Teste de integração das pastas com SQLite temporário | 1/1 passou; confirmou Editor cria/renomeia, Admin exclui pasta vazia e não exclui pasta com subpasta |
 | `npx eslint` nos arquivos alterados | Passou |
-| `npm run build` com `LDAP_AUTH_MODE=external` | Passou após incluir as prévias de imagens na lista de Mídias. |
+| npm run build com LDAP_AUTH_MODE=external | Passou após a inclusão do ícone de PDF e do rótulo Editar em Massa. |
 | `npm run lint` global | Falhou por varrer milhares de arquivos do snapshot `old-wordpress`; o lint dos arquivos alterados passou |
 
 O teste de integração usa banco SQLite em memória. Ainda faltam validação manual do Admin e de download com arquivo real e prova da migração sobre cópia do PostgreSQL do MIR.

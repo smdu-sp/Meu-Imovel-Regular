@@ -12,6 +12,8 @@ Organizar `Media` em pastas editáveis no Admin e permitir que uma página publi
 - Permitir mover mídia entre pastas e deixar itens antigos sem pasta na raiz. A escolha da pasta não muda `Media.id`, `filename` ou `url`.
 - Filtro e navegação por pasta devem funcionar no seletor de mídia dos Blocks, além da lista principal. Verificar isso no Admin real; a API de pastas não substitui os testes de UX.
 
+- O campo nativo Coleções permitidas define quais coleções cabem na pasta; hoje só Mídias está habilitada. Tags editoriais são texto livre e não mudam essa regra ou as permissões.
+
 ## 2. Metadados de imagem e PDF
 
 | Campo | Imagem | PDF |
@@ -25,6 +27,13 @@ Organizar `Media` em pastas editáveis no Admin e permitir que uma página publi
 Adicionar `title` como opcional no schema, exigir título explícito para novos PDFs e preencher automaticamente o título de imagens novas. Em registros antigos, usar `alt`/`filename` como fallback de leitura e ao editar; o backfill persistente vem na migration. Só tornar a coluna obrigatória depois de revisar o backfill. Alterar a validação de `alt` para ser obrigatória apenas em imagens, inclusive quando o arquivo é substituído. No Admin, exibir `title`, `usage`, pasta, tipo e atualização; o `useAsTitle` passa a `title` depois do backfill. Não usar `alt` como chave de importação ou rótulo público de documento.
 
 `application/pdf` já integra a lista permitida; não inserir MIME de Word, PowerPoint ou outros documentos. Validar que um item marcado como `usage=document` tenha MIME PDF e que PDFs sejam classificados como documento. Verificar tipo real do arquivo antes de disponibilizá-lo e definir limite de tamanho adequado ao ambiente. A edição de um PDF existente não deve remover sua URL por simples mudança de título/pasta.
+
+## Interface editorial do piloto
+
+- Todas as Mídias mostra coluna Prévia: miniatura para imagem e SVG institucional para PDF. O título editorial é um link para a ficha completa.
+- Na navegação por pastas, a grade mostra miniaturas e o SVG de PDF; a tabela nativa ainda mostra ícones genéricos. Duplo clique na mídia abre sua ficha.
+- As duas abas destacam as ações selecionadas com contorno e cores do tema. O botão Editar em Massa continua abrindo a edição em lote. O rótulo é ajustado por um adaptador de DOM restrito às abas de Mídias; rever esse adaptador ao atualizar o Payload.
+- A lista nativa de pastas do Payload 3.88.0 não expõe extensão para a célula do título nem para trocar o destino do botão de edição em massa.
 
 ## 3. Inserção em páginas
 
