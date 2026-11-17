@@ -14,7 +14,8 @@
     "payload": "payload",
     "seed:editorial": "node --import ./src/seeds/patch-os-userinfo.mjs --import tsx ./src/seeds/run-payload-development.mjs run src/seeds/editorial-baseline.ts",
     "seed:first-admin": "payload run src/seeds/create-first-admin.ts",
-    "seed:dev-admin": "payload run src/seeds/create-dev-admin.ts"
+    "seed:dev-admin": "payload run src/seeds/create-dev-admin.ts",
+    "import:wordpress": "node --import ./src/seeds/patch-os-userinfo.mjs --import tsx src/imports/wordpress/run.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.88.0",

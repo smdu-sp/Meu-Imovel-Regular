@@ -1,0 +1,172 @@
+import { parseArgs } from "node:util";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+import { planHome, homeData } from "./pages/home.ts";
+import { applyHome } from "./shared/apply.ts";
+import {
+  openManifest,
+  targetFingerprint,
+} from "./shared/migration-manifest.ts";
+import { SNAPSHOT } from "./shared/source.ts";
+
+export function argumentsFor(args: string[]) {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    strict: true,
+    options: {
+      "dry-run": { type: "boolean" },
+      apply: { type: "boolean" },
+      "actor-id": { type: "string" },
+      "target-label": { type: "string" },
+      source: { type: "string" },
+      uploads: { type: "string" },
+      "state-dir": { type: "string" },
+      report: { type: "string" },
+    },
+  });
+  if (positionals.length !== 1 || positionals[0] !== "home")
+    throw new Error("Informe somente a página home.");
+  if (values.apply && values["dry-run"])
+    throw new Error("Modos incompatíveis.");
+  if (
+    values.apply &&
+    (!/^[1-9]\d*$/.test(values["actor-id"] || "") || !values["target-label"])
+  )
+    throw new Error("--apply exige --actor-id e --target-label.");
+  return values;
+}
+export async function run(args = process.argv.slice(2)) {
+  const options = argumentsFor(args);
+  const plan = await planHome(
+    options.source || "old-wordpress/db/meuimovelregular.sql",
+    options.uploads || "old-wordpress/meuimovelregular/wp-content/uploads",
+  );
+  const symbolic = Object.fromEntries(
+    plan.assets.map((a, i) => [a.id, -(i + 1)]),
+  );
+  const report: Record<string, unknown> = {
+    mode: options.apply ? "apply" : "dry-run",
+    snapshot: SNAPSHOT,
+    converterVersion: 1,
+    origin: {
+      file: options.source || "old-wordpress/db/meuimovelregular.sql",
+      postId: "87",
+      metaId: "4142",
+      sections: [0, 1, 2, 3, 4, 6, 7, 10],
+    },
+    sourcePage: "87",
+    sourceMeta: "4142",
+    destinationState: "não verificado",
+    assets: plan.assets.map((a) => ({
+      id: a.id,
+      title: a.title,
+      alt: a.alt,
+      relative: a.relative,
+      hash: a.hash,
+      mimeType: a.mimeType,
+      size: a.size,
+      usage: a.usage,
+      folder: a.folder,
+    })),
+    layout: homeData(plan, symbolic),
+    adjustments: plan.adjustments,
+    pending: plan.pending,
+  };
+  if (options.report) {
+    const target = path.resolve(options.report);
+    const stateDir = path.resolve(
+      options["state-dir"] || ".local/wordpress-import",
+    );
+    if (
+      [
+        path.resolve(options.source || "old-wordpress/db/meuimovelregular.sql"),
+        ...plan.assets.map((a) => a.filename),
+        path.join(stateDir, "manifest.json"),
+        path.join(stateDir, "execution.lock"),
+      ].includes(target)
+    )
+      throw new Error(
+        "Relatório não pode substituir fonte ou estado operacional.",
+      );
+  }
+  let failure: unknown;
+  try {
+    if (options.apply) {
+      // Only the write path loads environment files or imports the Payload runtime.
+      if (!process.env.NODE_ENV)
+        Object.assign(process.env, { NODE_ENV: "development" });
+      // @next/env is CommonJS. require avoids default/named export differences
+      // between native Node ESM and the tsx entry point used by this CLI.
+      const { loadEnvConfig } = createRequire(import.meta.url)(
+        "@next/env",
+      ) as typeof import("@next/env");
+      loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production", {
+        info: () => {},
+        error: () => {},
+      });
+      const uri = process.env.DATABASE_URI;
+      if (!uri) throw new Error("Defina DATABASE_URI explicitamente.");
+      const target = targetFingerprint(uri);
+      const state = await openManifest(
+        options["state-dir"] || ".local/wordpress-import",
+        target,
+        options["target-label"]!,
+        SNAPSHOT,
+      );
+      try {
+        const { connectStore } = await import("./shared/payload-store.ts");
+        const connection = await connectStore(uri, Number(options["actor-id"]));
+        try {
+          report.result = await applyHome(
+            plan,
+            connection.store,
+            state.state,
+            state.save,
+          );
+          report.destinationState = "verificado";
+        } finally {
+          await connection.close();
+        }
+      } finally {
+        await state.close();
+      }
+    }
+  } catch (error) {
+    failure = error;
+    report.error = String(
+      error instanceof Error ? error.message : "Falha na aplicação",
+    ).replace(/postgres(?:ql)?:\/\/[^\s]+/gi, "[destino omitido]");
+    report.destinationState = "falha; consultar checkpoints antes de retomar";
+  }
+  const output = JSON.stringify(report, null, 2) + "\n";
+  if (options.report) {
+    await mkdir(path.dirname(options.report), { recursive: true });
+    await writeFile(options.report, output, { mode: 0o600 });
+  } else if (options.apply) {
+    const dir = options["state-dir"] || ".local/wordpress-import";
+    await mkdir(dir, { recursive: true });
+    await writeFile(path.join(dir, `report-${Date.now()}.json`), output, {
+      mode: 0o600,
+    });
+  }
+  console.log(output);
+  if (failure) throw failure;
+  return report;
+}
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href
+) {
+  run().catch((e) => {
+    console.error(
+      String(e instanceof Error ? e.message : "Falha no importador.").replace(
+        /postgres(?:ql)?:\/\/[^\s]+/gi,
+        "[destino omitido]",
+      ),
+    );
+    process.exitCode = 1;
+  });
+}
