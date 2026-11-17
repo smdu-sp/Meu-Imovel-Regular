@@ -23,7 +23,7 @@ A configuração `page_on_front=87` e `show_on_front=page` confirma a Home como 
 | --- | --- | --- | --- | --- |
 | 1 | Capa panorâmica da cidade com a marca Meu Imóvel Regular incorporada à imagem. | [JSON 87](../../../old-wordpress/db/meuimovelregular.sql#L1755) `$[0]` | I01 | `fullWidthImageBanner`; preservar proporção e evitar corte da marca. O legado não é um Hero com título textual separado. |
 | 2 | Imagem de botão para o Portal de Licenciamento, com link externo e abertura em nova aba. | [JSON 87](../../../old-wordpress/db/meuimovelregular.sql#L1755) `$[0]` | I02 | `imageBlock` + `cta` textual acessível; avaliar banner com link caso a preservação gráfica seja necessária. Destino registrado: `https://portaldelicenciamento.prefeitura.sp.gov.br/pages/reg-ed.html`. |
-| 3 | “Consulte os manuais de apoio para acesso ao Portal”: oito links de documentos. | [JSON 87](../../../old-wordpress/db/meuimovelregular.sql#L1755) `$[1]` | D01–D08 | `richText` com links para documentos de Media. Não usar Cartilha como substituta dos oito manuais. |
+| 3 | “Consulte os manuais de apoio para acesso ao Portal”: oito links de documentos. | [JSON 87](../../../old-wordpress/db/meuimovelregular.sql#L1755) `$[1]` | D01–D08 | `iconGrid` compacto com oito ações Documento PDF relacionadas a Media. Não usar Cartilha como substituta dos oito manuais. |
 | 4 | Introdução à lei e às modalidades, com link para a legislação municipal. | [JSON 87](../../../old-wordpress/db/meuimovelregular.sql#L1755) `$[2]` | — | `richText`. Revisar terminologia, erro de digitação e afirmações históricas antes de publicar; não extrair regra de elegibilidade desse texto. |
 | 5 | Regularização Automática: título, descrição, “SAIBA MAIS” e foto à direita no array de módulos. | [JSON 87](../../../old-wordpress/db/meuimovelregular.sql#L1755) `$[3]` | I03 | `imageText`, texto à esquerda, link interno para `/regularizacao-automatica/`. |
 | 6 | Regularização Declaratória Simplificada: foto antes do texto, título, descrição e link. | [JSON 87](../../../old-wordpress/db/meuimovelregular.sql#L1755) `$[4]` | I04 | `imageText`, imagem à esquerda, link para `/regularizacao-declaratoria-simplificada/`. |
@@ -108,7 +108,7 @@ A opção `custom_css_post_id` recebida vale `-1`; não foi comprovado qual CSS 
 Header (Global)
 → fullWidthImageBanner (capa)
 → imageBlock + cta, ou banner com link (Portal de Licenciamento)
-→ richText (oito manuais)
+→ iconGrid compacto (oito manuais, ações Documento PDF)
 → richText (introdução)
 → imageText (Automática)
 → imageText (Declaratória Simplificada)

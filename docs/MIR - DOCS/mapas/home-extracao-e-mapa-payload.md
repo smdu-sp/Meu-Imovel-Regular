@@ -100,7 +100,7 @@ Não há texto editável nos dois módulos. A capa traz a marca dentro da imagem
 | ---: | --- | --- | --- | --- |
 | 1 | `$[0].content[0].content[0]` | `fullWidthImageBanner` | `desktopImage=I01`, `imageHeight=auto`, `overlay=none` | Marca dentro da imagem; conferir alternativa acessível e apresentação no celular |
 | 2 | `$[0].content[0].content[1]` | `imageBlock` + `cta` | `media=I02`; `action.type=external`, destino Portal de Licenciamento | Decidir entre manter botão gráfico e usar chamada textual; `imageBlock` não tem link próprio |
-| 3 | `$[1]` | `richText` | `content` com título e oito links D01–D08 | Confirmar vínculo durável entre links no Lexical e registros de `Media`; não gravar URLs antigas de uploads |
+| 3 | `$[1]` | `iconGrid`, variante `compact` | `title`; oito itens com ícone padrão `document`, nome em `description` e ação Documento PDF em `link` | Usar relações Media em `link.document`; sem URLs antigas de uploads |
 | 4 | `$[2]` | `richText` | `content` com quatro parágrafos e link da lei | Revisão editorial e jurídica antes de publicar |
 | 5 | `$[3]` | `imageText` | `title`, `content`, `image=I03`, `variant=image-right`, `cta` para página interna | A página de destino precisa existir para usar relationship |
 | 6 | `$[4]` | `imageText` | `title`, `content`, `image=I04`, `variant=image-left`, `cta` para página interna | Conferir posição visual em desktop e celular |
@@ -112,7 +112,7 @@ Não há texto editável nos dois módulos. A capa traz a marca dentro da imagem
 
 **Página de destino:** `Pages.title=Home`, `Pages.slug=home`, `Pages._status=draft` para o piloto. O campo `layout` deve usar os blocos acima, depois da importação dos assets. O conteúdo SEO e a data editorial ficam pendentes de mapeamento e revisão.
 
-**Ajustes de schema a avaliar:** os quatro blocos `imageText` e os `cards` cabem nos campos existentes. O botão gráfico pode ser representado por `imageBlock` e um `cta` textual sem mudar schema, se essa apresentação for aceita. Para os oito manuais, confirmar se links em `richText` podem manter relação estável com `Media`; se não puderem, um bloco de lista de documentos com itens `{rótulo, media}` é candidato mais seguro que gravar URLs fixas.
+**Decisão de adaptação:** os quatro `imageText` e os `cards` cabem nos campos existentes. Para os manuais, reutilizar `iconGrid` na variante `compact`, com ícone padrão de documento e ações relacionadas a Media PDF. O suporte a documentos nos links elimina a necessidade de RichText com URLs fixas ou de bloco novo para esta seção. O `documentList` existente permanece disponível e não é removido. A decisão atual de capa/botão e a composição completa estão na MIR-001.
 
 ## 4. Organização do importador
 
@@ -135,3 +135,5 @@ scripts/import-wordpress/
 ## 5. Limites deste levantamento
 
 Esta extração confirma a ordem e os textos armazenados no dump recebido. Não confirma que o dump seja a última versão em produção, a posição visual em cada largura de tela, a vigência de documentos e parâmetros legais ou o funcionamento dos links externos. Nenhum registro foi importado ou alterado no Payload.
+
+Atualização do piloto: os manuais usam agora a grade de ícones compacta existente, com oito ações “Baixar PDF”. A hipótese anterior de RichText/bloco dedicado foi substituída pelo suporte a documentos nos links de ação. Não há remoção do bloco `documentList` nem mudança de schema por esta adaptação.
