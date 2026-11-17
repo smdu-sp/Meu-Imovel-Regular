@@ -1,11 +1,13 @@
 ---
 spec: MIR-002
 title: Importador editorial de Entenda a Lei WordPress
-status: proposed
+status: implemented
 date: 2026-11-17
 ---
 
 # MIR-002 — Importador editorial de Entenda a Lei
+
+Implementação e desvios registrados no [guia operacional](../importador-entenda.md). Código testado em banco descartável; aplicação na instância e validação manual não foram executadas. O contrato original abaixo é preservado como referência, com as divergências efetivas documentadas no guia.
 
 ## 1. Resultado esperado
 

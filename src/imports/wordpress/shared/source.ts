@@ -119,7 +119,11 @@ export async function safeAsset(root: string, relative: string) {
   if (!mimeType) throw new Error(`Assinatura não suportada: ${relative}`);
   return { filename, relative, hash: hash(data), mimeType, size: data.length };
 }
-export async function loadSource(filename: string) {
+export async function loadSource(
+  filename: string,
+  pageId = "87",
+  expectedSections = 11,
+) {
   const data = await readFile(filename);
   if (hash(data) !== SNAPSHOT)
     throw new Error(
@@ -127,18 +131,18 @@ export async function loadSource(filename: string) {
     );
   const tables = readTables(data.toString("utf8"));
   const post = exactly(
-    tables.wp_posts.filter((p) => p.ID === "87"),
-    "wp_posts 87",
+    tables.wp_posts.filter((p) => p.ID === pageId),
+    `wp_posts ${pageId}`,
   );
   if (post.post_type !== "page" || post.post_status !== "publish")
-    throw new Error("Home de origem inesperada.");
+    throw new Error(`Página de origem inesperada: ${pageId}.`);
   const meta = (id: string, key: string) =>
     exactly(
       tables.wp_postmeta.filter((m) => m.post_id === id && m.meta_key === key),
       `wp_postmeta ${id}/${key}`,
     );
-  const lc = JSON.parse(meta("87", "dslc_code").meta_value);
-  if (!Array.isArray(lc) || lc.length !== 11)
-    throw new Error("Composição Home divergente.");
+  const lc = JSON.parse(meta(pageId, "dslc_code").meta_value);
+  if (!Array.isArray(lc) || lc.length !== expectedSections)
+    throw new Error(`Composição divergente: ${pageId}.`);
   return { post, meta, lc };
 }

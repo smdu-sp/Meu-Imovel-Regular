@@ -4,7 +4,9 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 import { planHome, homeData } from "./pages/home.ts";
-import { applyHome } from "./shared/apply.ts";
+import { applyHome, type Store } from "./shared/apply.ts";
+import { planEntenda, entendaData, applyEntenda } from "./pages/entenda.ts";
+import type { State } from "./shared/migration-manifest.ts";
 import {
   openManifest,
   targetFingerprint,
@@ -27,8 +29,8 @@ export function argumentsFor(args: string[]) {
       report: { type: "string" },
     },
   });
-  if (positionals.length !== 1 || positionals[0] !== "home")
-    throw new Error("Informe somente a página home.");
+  if (positionals.length !== 1 || !["home", "entenda"].includes(positionals[0]))
+    throw new Error("Informe somente a página home ou entenda.");
   if (values.apply && values["dry-run"])
     throw new Error("Modos incompatíveis.");
   if (
@@ -36,14 +38,40 @@ export function argumentsFor(args: string[]) {
     (!/^[1-9]\d*$/.test(values["actor-id"] || "") || !values["target-label"])
   )
     throw new Error("--apply exige --actor-id e --target-label.");
-  return values;
+  return { ...values, page: positionals[0] };
 }
 export async function run(args = process.argv.slice(2)) {
   const options = argumentsFor(args);
-  const plan = await planHome(
-    options.source || "old-wordpress/db/meuimovelregular.sql",
-    options.uploads || "old-wordpress/meuimovelregular/wp-content/uploads",
-  );
+  const source = options.source || "old-wordpress/db/meuimovelregular.sql";
+  const uploads =
+    options.uploads || "old-wordpress/meuimovelregular/wp-content/uploads";
+  const prepared =
+    options.page === "home"
+      ? await (async () => {
+          const plan = await planHome(source, uploads);
+          return {
+            plan,
+            id: "87",
+            metaId: "4142",
+            sections: [0, 1, 2, 3, 4, 6, 7, 10],
+            data: (media: Record<string, number>) => homeData(plan, media),
+            apply: (store: Store, state: State, save: () => Promise<void>) =>
+              applyHome(plan, store, state, save),
+          };
+        })()
+      : await (async () => {
+          const plan = await planEntenda(source, uploads);
+          return {
+            plan,
+            id: "172",
+            metaId: plan.metaId,
+            sections: [0, 1, 2, 3, 4, 5, 6],
+            data: (media: Record<string, number>) => entendaData(plan, media),
+            apply: (store: Store, state: State, save: () => Promise<void>) =>
+              applyEntenda(plan, store, state, save),
+          };
+        })();
+  const plan = prepared.plan;
   const symbolic = Object.fromEntries(
     plan.assets.map((a, i) => [a.id, -(i + 1)]),
   );
@@ -53,12 +81,12 @@ export async function run(args = process.argv.slice(2)) {
     converterVersion: 1,
     origin: {
       file: options.source || "old-wordpress/db/meuimovelregular.sql",
-      postId: "87",
-      metaId: "4142",
-      sections: [0, 1, 2, 3, 4, 6, 7, 10],
+      postId: prepared.id,
+      metaId: prepared.metaId,
+      sections: prepared.sections,
     },
-    sourcePage: "87",
-    sourceMeta: "4142",
+    sourcePage: prepared.id,
+    sourceMeta: prepared.metaId,
     destinationState: "não verificado",
     assets: plan.assets.map((a) => ({
       id: a.id,
@@ -71,7 +99,7 @@ export async function run(args = process.argv.slice(2)) {
       usage: a.usage,
       folder: a.folder,
     })),
-    layout: homeData(plan, symbolic),
+    layout: prepared.data(symbolic),
     adjustments: plan.adjustments,
     pending: plan.pending,
   };
@@ -120,8 +148,7 @@ export async function run(args = process.argv.slice(2)) {
         const { connectStore } = await import("./shared/payload-store.ts");
         const connection = await connectStore(uri, Number(options["actor-id"]));
         try {
-          report.result = await applyHome(
-            plan,
+          report.result = await prepared.apply(
             connection.store,
             state.state,
             state.save,

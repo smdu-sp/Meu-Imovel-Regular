@@ -17,6 +17,7 @@ Documentos específicos do portal e da migração do legado WordPress para a bas
 - [MIR-009 — Importador de Regularização Declaratória](./specs/mir-009-importador-regularizacao-declaratoria.md): limites de até 1.500 m², anuências obrigatórias, Outorga Onerosa, grade de manuais e alerta de comunicado único.
 - [MIR-010 — Importador de Regularização Comum](./specs/mir-010-importador-regularizacao-comum.md): casos acima de 1.500 m², Outorga Onerosa, saneamento de links corrompidos do `/wp-admin/` e alerta de comunicado único.
 - [Operação do importador da Home](./importador-home.md): comandos, ambiente, checkpoints, conflitos e resultados dos testes.
+- [MIR-002 — Importador de Entenda a Lei](./specs/mir-002-importador-entenda.md) e [guia operacional](./importador-entenda.md): oito blocos, cinco imagens, reuso de mídias e vídeo nativo. Código implementado; aplicação na instância e revisão manual pendentes.
 - [Contexto da base CMS](../CMS%20-%20DOCS/README.MD) e [specs da base](../CMS%20-%20DOCS/specs/README.md).
 
 Próxima etapa proposta: simular a Home e preparar o destino para aplicação/revisão do rascunho conforme o guia operacional. Os demais mapas e a importação de Globals continuam em etapas separadas.

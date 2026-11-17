@@ -22,6 +22,7 @@ export type State = {
   label: string;
   entries: Record<string, Entry>;
   pending?: string;
+  reviews?: Record<string, string[]>;
 };
 export function canonical(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonical);

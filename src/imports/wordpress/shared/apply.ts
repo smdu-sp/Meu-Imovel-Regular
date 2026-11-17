@@ -22,19 +22,55 @@ export interface Store {
   transaction<T>(fn: () => Promise<T>): Promise<T>;
 }
 const collectionFor = (key: string) =>
-  key === "page:87"
+  key.startsWith("page:")
     ? "pages"
     : key.startsWith("asset:")
       ? "media"
       : "payload-folders";
+export type ImportPlan = {
+  assets: HomePlan["assets"];
+  sections: { url: string }[];
+  cards: { url: string }[];
+  pending?: readonly string[];
+};
+export type PageImport = {
+  id: string;
+  slug: string;
+  folders: string[];
+  build: (
+    media: Record<string, number>,
+    pages: Record<string, number>,
+  ) => Record<string, unknown>;
+};
 export async function applyHome(
   plan: HomePlan,
   store: Store,
   state: State,
   save: () => Promise<void>,
 ) {
+  return applyPage(plan, store, state, save, {
+    id: "87",
+    slug: "home",
+    folders: ["MIR", "MIR/Home", "MIR/Home/Imagens", "MIR/Home/Manuais"],
+    build: (media, pages) => homeData(plan, media, pages),
+  });
+}
+export async function applyPage(
+  plan: ImportPlan,
+  store: Store,
+  state: State,
+  save: () => Promise<void>,
+  page: PageImport,
+) {
+  const pageKey = "page:" + page.id;
+  const relevant = new Set([
+    pageKey,
+    ...plan.assets.map((a) => "asset:" + a.id),
+    ...page.folders.map((f) => "folder:" + f),
+  ]);
   const check = async () => {
     for (const [key, entry] of Object.entries(state.entries)) {
+      if (!relevant.has(key)) continue;
       const collection = collectionFor(key);
       const doc = await store.get(collection, entry.id, true);
       assertIntact(doc, collection, entry);
@@ -51,10 +87,10 @@ export async function applyHome(
           throw new Error(`Asset alterado na origem: ${asset.id}`);
       }
     }
-    const home = await store.find("pages", { slug: { equals: "home" } });
-    if (home.some((d) => d.id !== state.entries["page:87"]?.id))
+    const home = await store.find("pages", { slug: { equals: page.slug } });
+    if (home.some((d) => d.id !== state.entries[pageKey]?.id))
       throw new Error(
-        "Home preexistente não gerenciada; nenhuma adoção automática.",
+        `${page.slug === "home" ? "Home" : page.slug} preexistente não gerenciada; nenhuma adoção automática.`,
       );
   };
   const pages: Record<string, number> = {};
@@ -68,12 +104,14 @@ export async function applyHome(
     if (found.length > 1) throw new Error("Destino interno ambíguo.");
     if (found[0]) pages[slug] = found[0].id;
   }
-  const folderPaths = [
-    "MIR",
-    "MIR/Home",
-    "MIR/Home/Imagens",
-    "MIR/Home/Manuais",
+  state.reviews ??= {};
+  state.reviews[page.id] = [
+    ...(plan.pending || []),
+    ...[...plan.sections, ...plan.cards]
+      .filter((s) => !pages[new URL(s.url).pathname.replace(/^\/+|\/+$/g, "")])
+      .map((s) => `Destino temporário no legado: ${s.url}`),
   ];
+  const folderPaths = page.folders;
   // Full preflight, including folder ambiguity, before first mutation.
   await store.transaction(async () => {
     await check();
@@ -194,8 +232,8 @@ export async function applyHome(
   const media = Object.fromEntries(
     plan.assets.map((a) => [a.id, state.entries["asset:" + a.id].id]),
   );
-  const data = homeData(plan, media, pages);
-  const key = "page:87";
+  const data = page.build(media, pages);
+  const key = pageKey;
   const inputHash = hash(JSON.stringify(canonical(data)));
   const entry = state.entries[key];
   if (entry) {
