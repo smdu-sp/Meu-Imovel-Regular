@@ -1,5 +1,11 @@
-import type { Media, Page } from "../../payload-types";
-import { BlockThemeScope, Container, Heading, Section } from "../../components/ui";
+import type { NavigationLink } from "../../lib/navigation/resolve-link";
+import type { Media } from "../../payload-types";
+import {
+  BlockThemeScope,
+  Container,
+  Heading,
+  Section,
+} from "../../components/ui";
 import {
   normalizeColorScheme,
   type EditorialColorOverrides,
@@ -12,13 +18,7 @@ export type CarouselNavigation = "arrows" | "arrows-dots";
 export type CarouselAutoplay = "off" | "on";
 export type CarouselContentAlignment = "left" | "center";
 
-export type CarouselLink = {
-  label?: string | null;
-  newTab?: boolean | null;
-  page?: (number | null) | Page;
-  type?: "external" | "internal" | null;
-  url?: string | null;
-};
+export type CarouselLink = NavigationLink;
 
 export type CarouselItem = {
   description?: string | null;
@@ -81,7 +81,9 @@ export function CarouselBlock({
   title,
 }: CarouselBlockProps) {
   const usableItems =
-    items?.filter((item) => item.image && typeof item.image === "object" && item.image.url) ?? [];
+    items?.filter(
+      (item) => item.image && typeof item.image === "object" && item.image.url,
+    ) ?? [];
 
   if (!usableItems.length) return null;
 
@@ -90,7 +92,9 @@ export function CarouselBlock({
   const section = (
     <Section
       spacing="default"
-      scheme={customTheme ? "default" : normalizeColorScheme(appearance?.scheme)}
+      scheme={
+        customTheme ? "default" : normalizeColorScheme(appearance?.scheme)
+      }
     >
       <Container size="lg">
         {title ? (
@@ -102,7 +106,9 @@ export function CarouselBlock({
         ) : null}
         <CarouselClient
           autoplay={normalizeCarouselAutoplay(behavior?.autoplay)}
-          contentAlignment={normalizeCarouselContentAlignment(display?.contentAlignment)}
+          contentAlignment={normalizeCarouselContentAlignment(
+            display?.contentAlignment,
+          )}
           items={usableItems}
           navigation={normalizeCarouselNavigation(display?.navigation)}
           slidesPerView={normalizeCarouselSlidesPerView(display?.slidesPerView)}
@@ -111,7 +117,9 @@ export function CarouselBlock({
     </Section>
   );
 
-  return customTheme
-    ? <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
-    : section;
+  return customTheme ? (
+    <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
+  ) : (
+    section
+  );
 }

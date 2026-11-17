@@ -15,12 +15,14 @@ import { closedSelect } from "../../fields/editorial-validation";
 import { createImageCanvasField } from "../../fields/image-presentation";
 import { createBlockAdmin } from "../shared/admin";
 
+import { createDocumentLinkField } from "../../fields/document-link";
+
 // Without overlaid content, only the optional overlay consumes a local color.
 const fullWidthBannerColorTokens = ["background"] as const;
 
 type BannerLinkSiblingData = {
   enabled?: boolean | null;
-  type?: "external" | "internal" | null;
+  type?: "external" | "internal" | "document" | null;
 };
 
 const overlayOptions = [
@@ -45,12 +47,17 @@ const imageHeightOptions = [
   { label: "Personalizada", value: "custom" },
 ];
 
-const validateCustomImageHeight: NumberFieldSingleValidation = (value, { siblingData }) => {
+const validateCustomImageHeight: NumberFieldSingleValidation = (
+  value,
+  { siblingData },
+) => {
   const data = siblingData as { imageHeight?: unknown };
 
   if (data.imageHeight !== "custom") return true;
-  if (typeof value !== "number") return "Informe a altura personalizada em pixels.";
-  if (value < 160 || value > 900) return "Informe uma altura entre 160 e 900 pixels.";
+  if (typeof value !== "number")
+    return "Informe a altura personalizada em pixels.";
+  if (value < 160 || value > 900)
+    return "Informe uma altura entre 160 e 900 pixels.";
 
   return true;
 };
@@ -75,7 +82,9 @@ export const FullWidthImageBannerBlock: Block = {
       label: "Imagem desktop",
       required: true,
       validate: ((value) =>
-        value ? true : "Selecione uma imagem para o banner desktop.") satisfies UploadFieldSingleValidation,
+        value
+          ? true
+          : "Selecione uma imagem para o banner desktop.") satisfies UploadFieldSingleValidation,
       admin: {
         description:
           "Imagem principal do banner. Largura minima: 1200px. Ideal: 1920px para full-width. Formatos recomendados: .webp ou .jpg otimizado.",
@@ -108,7 +117,7 @@ export const FullWidthImageBannerBlock: Block = {
       label: "Link do banner",
       admin: {
         description:
-          "Opcional. Associe a imagem inteira a uma pagina do portal ou a uma URL externa.",
+          "Opcional. Associe a imagem inteira a uma página do portal, URL externa ou documento PDF.",
       },
       fields: [
         {
@@ -122,15 +131,20 @@ export const FullWidthImageBannerBlock: Block = {
           label: "Destino do link",
           admin: {
             condition: (_, siblingData) =>
-              (siblingData as BannerLinkSiblingData | undefined)?.enabled === true,
+              (siblingData as BannerLinkSiblingData | undefined)?.enabled ===
+              true,
           },
           options: [
             { label: "Pagina interna", value: "internal" },
             { label: "URL externa", value: "external" },
+            { label: "Documento PDF", value: "document" },
           ],
           validate: ((value, { siblingData }) => {
             const link = siblingData as BannerLinkSiblingData;
-            return link.enabled !== true || value === "internal" || value === "external"
+            return link.enabled !== true ||
+              value === "internal" ||
+              value === "external" ||
+              value === "document"
               ? true
               : "Escolha o destino do link.";
           }) satisfies SelectFieldSingleValidation,
@@ -164,7 +178,8 @@ export const FullWidthImageBannerBlock: Block = {
               const link = siblingData as BannerLinkSiblingData | undefined;
               return link?.enabled === true && link.type === "external";
             },
-            description: "Informe o endereco completo, incluindo http:// ou https://.",
+            description:
+              "Informe o endereco completo, incluindo http:// ou https://.",
           },
           validate: ((value, { siblingData }) => {
             const link = siblingData as BannerLinkSiblingData;
@@ -181,13 +196,17 @@ export const FullWidthImageBannerBlock: Block = {
             }
           }) satisfies TextFieldValidation,
         },
+        createDocumentLinkField(
+          (data) => data.enabled === true && data.type === "document",
+        ),
         {
           name: "newTab",
           type: "checkbox",
           label: "Abrir em nova aba",
           admin: {
             condition: (_, siblingData) =>
-              (siblingData as BannerLinkSiblingData | undefined)?.enabled === true,
+              (siblingData as BannerLinkSiblingData | undefined)?.enabled ===
+              true,
             description: "Recomendado para links externos.",
           },
         },

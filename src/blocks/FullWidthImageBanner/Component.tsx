@@ -1,6 +1,10 @@
 import Link from "next/link";
 import type { Media, Page } from "../../payload-types";
-import { BlockThemeScope, ColorScope, MediaColorScope } from "../../components/ui";
+import {
+  BlockThemeScope,
+  ColorScope,
+  MediaColorScope,
+} from "../../components/ui";
 import { classNames } from "../../components/ui/classNames";
 import { resolveLinkHref } from "../../lib/navigation/resolve-link";
 import type { EditorialColorOverrides } from "../../lib/theme/block-color-theme";
@@ -16,8 +20,9 @@ type BannerLink = {
   enabled?: boolean | null;
   newTab?: boolean | null;
   page?: (number | null) | Page;
-  type?: "external" | "internal" | null;
+  type?: "external" | "internal" | "document" | null;
   url?: string | null;
+  document?: number | Media | null;
 };
 
 export type FullWidthImageBannerBlockProps = {
@@ -81,7 +86,10 @@ export function normalizeBannerImageFit(
   return fit === "contain" ? "contain" : "cover";
 }
 
-const heightClasses: Record<Exclude<BannerHeight, "auto" | "custom">, string> = {
+const heightClasses: Record<
+  Exclude<BannerHeight, "auto" | "custom">,
+  string
+> = {
   compact: "h-64",
   medium: "h-96",
   large: "h-[34rem]",
@@ -116,11 +124,13 @@ export function FullWidthImageBannerBlock({
   variant,
 }: BannerProps) {
   const normalizedHeight = normalizeBannerImageHeight(imageHeight, variant);
-  const normalizedCustomHeight = normalizeCustomBannerImageHeight(customImageHeight);
+  const normalizedCustomHeight =
+    normalizeCustomBannerImageHeight(customImageHeight);
   const normalizedFit = normalizeBannerImageFit(imageFit);
   const normalizedOverlay = normalizeHeroOverlay(overlay);
   const normalizedFocalPoint = normalizeFocalPoint(focalPoint);
-  if (!desktopImage || typeof desktopImage !== "object" || !desktopImage.url) return null;
+  if (!desktopImage || typeof desktopImage !== "object" || !desktopImage.url)
+    return null;
 
   const hasMobileImage = Boolean(
     mobileImage && typeof mobileImage === "object" && mobileImage.url,
@@ -129,26 +139,34 @@ export function FullWidthImageBannerBlock({
   const hasAutoHeight = normalizedHeight === "auto";
   const hasCustomHeight = normalizedHeight === "custom";
   const resolvedHeight = hasCustomHeight ? normalizedCustomHeight : null;
-  const shouldUseFixedHeight = !hasAutoHeight && (!hasCustomHeight || Boolean(resolvedHeight));
+  const shouldUseFixedHeight =
+    !hasAutoHeight && (!hasCustomHeight || Boolean(resolvedHeight));
   const customTheme = appearance?.scheme === "custom";
   const linkValue = link?.enabled === true ? link : null;
   const href = linkValue ? resolveLinkHref(linkValue) : null;
-  const safeHref = href && (linkValue?.type === "external" || linkValue?.url)
-    ? (() => {
-        try {
-          const url = new URL(href);
-          return url.protocol === "http:" || url.protocol === "https:" ? href : null;
-        } catch {
-          return null;
-        }
-      })()
-    : href;
+  const safeHref =
+    href &&
+    linkValue?.type !== "document" &&
+    (linkValue?.type === "external" || linkValue?.url)
+      ? (() => {
+          try {
+            const url = new URL(href);
+            return url.protocol === "http:" || url.protocol === "https:"
+              ? href
+              : null;
+          } catch {
+            return null;
+          }
+        })()
+      : href;
 
   const image = (
     <div
       className={classNames(
         "relative overflow-hidden bg-muted",
-        shouldUseFixedHeight && !hasCustomHeight && heightClasses[normalizedHeight],
+        shouldUseFixedHeight &&
+          !hasCustomHeight &&
+          heightClasses[normalizedHeight],
       )}
       style={resolvedHeight ? { height: `${resolvedHeight}px` } : undefined}
     >
@@ -181,38 +199,63 @@ export function FullWidthImageBannerBlock({
           sizes="100vw"
           style={getFocalPointStyle(
             typeof mobileImage === "object" ? mobileImage : null,
-            { aspectRatio: "original", canvas: mobileCanvas, fit: normalizedFit },
+            {
+              aspectRatio: "original",
+              canvas: mobileCanvas,
+              fit: normalizedFit,
+            },
           )}
         />
       ) : null}
       {normalizedOverlay !== "none" ? (
-        <div aria-hidden="true" className={classNames("absolute inset-0", overlayClasses[normalizedOverlay])} />
+        <div
+          aria-hidden="true"
+          className={classNames(
+            "absolute inset-0",
+            overlayClasses[normalizedOverlay],
+          )}
+        />
       ) : null}
     </div>
   );
 
+  const Anchor = linkValue?.type === "document" ? "a" : Link;
+  const document =
+    typeof linkValue?.document === "object" ? linkValue.document : null;
   const banner = safeHref ? (
-    <Link
-      aria-label={`Abrir banner: ${desktopImage.alt}`}
+    <Anchor
+      aria-label={
+        linkValue?.type === "document"
+          ? `Baixar PDF: ${document?.title || document?.filename || desktopImage.alt}`
+          : `Abrir banner: ${desktopImage.alt}`
+      }
+      download={linkValue?.type === "document" || undefined}
       className="block rounded-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       href={safeHref}
       rel={linkValue?.newTab ? "noopener noreferrer" : undefined}
       target={linkValue?.newTab ? "_blank" : undefined}
     >
       {image}
-    </Link>
-  ) : image;
+    </Anchor>
+  ) : (
+    image
+  );
 
   if (customTheme) {
     return (
       <BlockThemeScope palette={appearance?.colors}>
-        <ColorScope scheme="default" paint={false}>{banner}</ColorScope>
+        <ColorScope scheme="default" paint={false}>
+          {banner}
+        </ColorScope>
       </BlockThemeScope>
     );
   }
 
   return (
-    <MediaColorScope mode={normalizedOverlay === "light" ? "light" : "dark"} paint={false}>
+    <MediaColorScope
+      mode={normalizedOverlay === "light" ? "light" : "dark"}
+      paint={false}
+    >
       {banner}
     </MediaColorScope>
   );

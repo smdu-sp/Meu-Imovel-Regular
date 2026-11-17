@@ -37,6 +37,7 @@ import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f
 import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { RichTextFullScreen as RichTextFullScreen_65acaa4b066b5182ca36171bd91f0dfa } from '../../../components/admin/RichTextFullScreen'
 import { RichTextTableMenuPortuguese as RichTextTableMenuPortuguese_14713f82702752182fe1c22026851a72 } from '../../../components/admin/RichTextTableMenuPortuguese'
+import { EditorialEditorFonts as EditorialEditorFonts_3527b82d99e119871d0a8d4d7e4d06a0 } from '../../../components/admin/EditorialEditorFonts'
 import { ThemeColorReset as ThemeColorReset_477b42945c88043439e5d946a379222e } from '../../../components/admin/ThemeColorReset'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { CustomNav as CustomNav_6de4d01e9d2fdd107175007ae639960b } from '../../../components/admin/CustomNav'
@@ -90,6 +91,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/components/admin/RichTextFullScreen#RichTextFullScreen": RichTextFullScreen_65acaa4b066b5182ca36171bd91f0dfa,
   "/components/admin/RichTextTableMenuPortuguese#RichTextTableMenuPortuguese": RichTextTableMenuPortuguese_14713f82702752182fe1c22026851a72,
+  "/components/admin/EditorialEditorFonts#EditorialEditorFonts": EditorialEditorFonts_3527b82d99e119871d0a8d4d7e4d06a0,
   "/components/admin/ThemeColorReset#ThemeColorReset": ThemeColorReset_477b42945c88043439e5d946a379222e,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "/components/admin/CustomNav#CustomNav": CustomNav_6de4d01e9d2fdd107175007ae639960b,

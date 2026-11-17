@@ -4,8 +4,10 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { classNames } from "./classNames";
 
 const buttonVariants = {
-  solid: "bg-[var(--block-action)] text-[var(--block-action-foreground)] border border-transparent hover:underline",
-  outline: "border border-current bg-transparent text-[var(--block-foreground)] hover:underline",
+  solid:
+    "bg-[var(--block-action)] text-[var(--block-action-foreground)] border border-transparent hover:underline",
+  outline:
+    "border border-current bg-transparent text-[var(--block-foreground)] hover:underline",
   ghost: "bg-transparent text-[var(--block-foreground)] hover:underline",
 } as const;
 
@@ -31,6 +33,7 @@ type ButtonAsButtonProps = SharedButtonProps &
 
 type ButtonAsLinkProps = SharedButtonProps & {
   href: string;
+  download?: boolean;
   rel?: string;
   target?: "_blank";
 };
@@ -50,6 +53,18 @@ export function Button({
   );
 
   if ("href" in props && props.href) {
+    if (props.download)
+      return (
+        <a
+          className={className}
+          href={props.href}
+          download
+          rel={props.rel}
+          target={props.target}
+        >
+          {children}
+        </a>
+      );
     return (
       <Link
         className={className}

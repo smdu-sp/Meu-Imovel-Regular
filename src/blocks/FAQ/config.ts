@@ -1,3 +1,7 @@
+import {
+  createEditorialEditor,
+  editorialEditorAdmin,
+} from "../../fields/editorial-editor";
 import type { Block } from "payload";
 import { characterLimitAdmin } from "../../fields/character-limit";
 import {
@@ -35,8 +39,7 @@ export const FAQBlock: Block = {
       maxLength: 100,
       admin: {
         ...characterLimitAdmin(100),
-        description:
-          "Opcional. Titulo exibido antes da lista de perguntas.",
+        description: "Opcional. Titulo exibido antes da lista de perguntas.",
       },
     },
     {
@@ -46,8 +49,7 @@ export const FAQBlock: Block = {
       maxLength: 180,
       admin: {
         ...characterLimitAdmin(180, "textarea"),
-        description:
-          "Texto opcional para contextualizar as perguntas.",
+        description: "Texto opcional para contextualizar as perguntas.",
       },
     },
     {
@@ -102,10 +104,12 @@ export const FAQBlock: Block = {
         {
           name: "answer",
           type: "richText",
+          editor: createEditorialEditor(),
           label: "Resposta",
           required: true,
           validate: requiredRichText("Informe a resposta desta pergunta."),
           admin: {
+            ...editorialEditorAdmin(),
             description:
               "Resposta editorial. Use links somente para canais oficiais ou paginas do portal.",
           },

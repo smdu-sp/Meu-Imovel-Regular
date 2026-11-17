@@ -1,6 +1,14 @@
-import { RichText } from "@payloadcms/richtext-lexical/react";
+import { EditorialRichText } from "../shared/EditorialRichText";
 import type { AlertBoxBlock as AlertBoxBlockProps } from "../../payload-types";
-import { BlockThemeScope, ColorScope, Container, Heading, Section, Status, normalizeStatusVariant } from "../../components/ui";
+import {
+  BlockThemeScope,
+  ColorScope,
+  Container,
+  Heading,
+  Section,
+  Status,
+  normalizeStatusVariant,
+} from "../../components/ui";
 import type { EditorialColorOverrides } from "../../lib/theme/block-color-theme";
 import { BlockLink } from "../shared/BlockLink";
 
@@ -39,14 +47,19 @@ export function AlertBoxBlock({
   const alert = (
     <ColorScope scheme={customTheme ? "default" : effectiveTone}>
       <Status
-        title={title ? (
-          <Heading level={2} size="md">
-            <span className="break-words">{title}</span>
-          </Heading>
-        ) : null}
+        title={
+          title ? (
+            <Heading level={2} size="md">
+              <span className="break-words">{title}</span>
+            </Heading>
+          ) : null
+        }
         variant={variant}
       >
-        <RichText className="cms-rich-text leading-relaxed" data={content} />
+        <EditorialRichText
+          className="cms-rich-text leading-relaxed"
+          data={content}
+        />
         {link?.label ? (
           <div className="mt-5">
             <BlockLink link={link} />
@@ -59,9 +72,13 @@ export function AlertBoxBlock({
   return (
     <Section spacing="sm" scheme="default">
       <Container size="md">
-        {customTheme
-          ? <BlockThemeScope palette={appearance?.colors}>{alert}</BlockThemeScope>
-          : alert}
+        {customTheme ? (
+          <BlockThemeScope palette={appearance?.colors}>
+            {alert}
+          </BlockThemeScope>
+        ) : (
+          alert
+        )}
       </Container>
     </Section>
   );

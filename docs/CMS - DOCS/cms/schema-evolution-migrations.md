@@ -23,6 +23,8 @@ As mudancas de schema registradas neste projeto foram classificadas assim:
 
 | Area | Mudanca | Classificacao | Migration |
 |---|---|---|---|
+| richText.content, imageText.content, faqAccordion.items[].answer, alertBox.content | Editor e renderer editorial compartilhados; novos campos podem usar os estados opcionais de tipografia e tabelas já suportados | Expansão compatível do JSON Lexical, sem mudança de campos ou relações | Sem migration SQL/backfill. [Contrato e validação](../shared-editorial-editor/README.md). |
+| Links de ação de Blocks, incluindo Banner | Novo destino `document` e upload opcional `document` para Media PDF | Novo enum e novo relacionamento opcional | Atualização incremental de enums, colunas e relações em Pages e suas versões; sem backfill ou conversão de URLs. [Plano anterior ao patch](../document-action-links/implementacao-mir.md) e [port por adapter](../document-action-links/portabilidade-e-migracao.md). Não aplicada ao banco da instância nesta tarefa. |
 | `Pages.layout` | Novos Blocks `iconGrid`, `faqAccordion`, `alertBox`, `actionBanners` | Novo Block | Nao exige migration; dados antigos continuam renderizando. |
 | `Pages.layout` | Novo Block `imageBlock` | Novo Block | Nao exige migration; dados antigos continuam renderizando. |
 | `Pages.layout` | Novo Block `gallery` | Novo Block | Nao exige migration; dados antigos continuam renderizando. |

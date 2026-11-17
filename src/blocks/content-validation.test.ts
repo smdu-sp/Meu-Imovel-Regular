@@ -543,7 +543,7 @@ describe("SPEC-026 content validation", () => {
     assert.ok("fields" in bannerLink);
     assert.deepEqual(
       bannerLink.fields.map((field) => "name" in field ? field.name : null),
-      ["enabled", "type", "page", "url", "newTab"],
+      ["enabled", "type", "page", "url", "document", "newTab"],
     );
     const bannerLinkPage = fieldByName(bannerLink.fields, "page");
     const bannerLinkUrl = fieldByName(bannerLink.fields, "url");

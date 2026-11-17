@@ -1,3 +1,7 @@
+import {
+  createEditorialEditor,
+  editorialEditorAdmin,
+} from "../../fields/editorial-editor";
 import type { Block } from "payload";
 import { characterLimitAdmin } from "../../fields/character-limit";
 import {
@@ -37,17 +41,18 @@ export const ImageTextBlock: Block = {
       maxLength: 100,
       admin: {
         ...characterLimitAdmin(100),
-        description:
-          "Opcional. Titulo da secao que acompanha a imagem.",
+        description: "Opcional. Titulo da secao que acompanha a imagem.",
       },
     },
     {
       name: "content",
       type: "richText",
+      editor: createEditorialEditor(),
       label: "Conteudo",
       required: true,
       validate: requiredRichText("Escreva o conteudo que acompanha a midia."),
       admin: {
+        ...editorialEditorAdmin(),
         description:
           "Texto complementar exibido ao lado da imagem em telas maiores.",
       },
@@ -102,8 +107,7 @@ export const ImageTextBlock: Block = {
       type: "group",
       label: "Acao complementar",
       admin: {
-        description:
-          "Link opcional exibido apos o texto.",
+        description: "Link opcional exibido apos o texto.",
       },
       fields: createLinkFields(),
     },

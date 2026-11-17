@@ -22,6 +22,7 @@
 1. [Especificação de implementação](./especificacao.md): contrato de dados, permissões, interface de pastas, vínculo do PDF nas páginas e arquivos previstos no repositório pai.
 2. [Plano de migração e validação](./migracao-validacao.md): evolução do banco, compatibilidade, testes de aceite e ordem de entrega.
 3. [Implementação no MIR](./implementacao-mir.md): arquivos alterados, decisões efetivas, comandos executados e pendências de implantação.
+4. [Links de ação para PDFs](../document-action-links/README.md): pacote separado para replicar no pai a ampliação de 17/11, com contrato, arquivos, migração e validação.
 
 ## Contexto confirmado
 

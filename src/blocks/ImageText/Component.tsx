@@ -1,7 +1,12 @@
-import { RichText } from "@payloadcms/richtext-lexical/react";
+import { EditorialRichText } from "../shared/EditorialRichText";
 import type { ImageTextBlock as ImageTextBlockProps } from "../../payload-types";
 import type { ImagePresentationSize } from "../../fields/image-presentation";
-import { BlockThemeScope, Container, Heading, Section } from "../../components/ui";
+import {
+  BlockThemeScope,
+  Container,
+  Heading,
+  Section,
+} from "../../components/ui";
 import type { EditorialColorOverrides } from "../../lib/theme/block-color-theme";
 import type { ImagePresentation } from "../shared/image-presentation";
 import { PresentedMediaImage } from "../shared/PresentedMediaImage";
@@ -28,7 +33,13 @@ const imageSizeClasses: Record<ImagePresentationSize, string> = {
 };
 
 export function normalizeImageTextVariant(
-  variant: ImageTextBlockProps["variant"] | "left" | "right" | string | null | undefined,
+  variant:
+    | ImageTextBlockProps["variant"]
+    | "left"
+    | "right"
+    | string
+    | null
+    | undefined,
 ): ImageTextVariant {
   if (variant === "image-right" || variant === "right") return "image-right";
   return "image-left";
@@ -64,7 +75,10 @@ export function ImageTextBlock({
   const effectiveSpacing = normalizeImageTextSpacing(appearance?.spacing);
   const customTheme = appearance?.scheme === "custom";
   const section = (
-    <Section spacing={effectiveSpacing} scheme={customTheme ? "default" : effectiveTone}>
+    <Section
+      spacing={effectiveSpacing}
+      scheme={customTheme ? "default" : effectiveTone}
+    >
       <Container size="lg">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <PresentedMediaImage
@@ -80,7 +94,7 @@ export function ImageTextBlock({
                 <span className="text-balance break-words">{title}</span>
               </Heading>
             ) : null}
-            <RichText
+            <EditorialRichText
               className={`cms-rich-text leading-relaxed${title ? " mt-5" : ""}`}
               data={content}
             />
@@ -95,7 +109,9 @@ export function ImageTextBlock({
     </Section>
   );
 
-  return customTheme
-    ? <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
-    : section;
+  return customTheme ? (
+    <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
+  ) : (
+    section
+  );
 }

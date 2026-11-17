@@ -4,10 +4,13 @@ import type {
   TextFieldValidation,
 } from "payload";
 
+import { createDocumentLinkField } from "./document-link";
+
 export type LinkSiblingData = {
   label?: string | null;
   page?: unknown;
-  type?: "internal" | "external" | null;
+  document?: unknown;
+  type?: "internal" | "external" | "document" | null;
   url?: string | null;
 };
 
@@ -19,7 +22,9 @@ export const createLinkFields = (required = false): Field[] => [
     required,
     validate: ((value, { siblingData }) => {
       const link = siblingData as LinkSiblingData;
-      const hasDestination = Boolean(link.page || link.url);
+      const hasDestination = Boolean(
+        link.page || link.url || link.document || link.type === "document",
+      );
 
       return required || hasDestination
         ? typeof value === "string" && value.trim()
@@ -40,11 +45,12 @@ export const createLinkFields = (required = false): Field[] => [
     defaultValue: "internal",
     admin: {
       description:
-        "Escolha pagina interna para navegar no portal ou URL externa para encaminhar a servico oficial.",
+        "Escolha página interna, URL externa ou documento PDF da biblioteca.",
     },
     options: [
       { label: "Pagina interna", value: "internal" },
       { label: "URL externa", value: "external" },
+      { label: "Documento PDF", value: "document" },
     ],
   },
   {
@@ -59,7 +65,9 @@ export const createLinkFields = (required = false): Field[] => [
     },
     validate: ((value, { siblingData }) => {
       const link = siblingData as LinkSiblingData;
-      return link.type !== "internal" || (!required && !link.label && !link.url) || value
+      return link.type !== "internal" ||
+        (!required && !link.label && !link.url) ||
+        value
         ? true
         : "Informe o destino interno deste link.";
     }) satisfies RelationshipFieldSingleValidation,
@@ -89,6 +97,7 @@ export const createLinkFields = (required = false): Field[] => [
       }
     }) satisfies TextFieldValidation,
   },
+  createDocumentLinkField(),
   {
     name: "newTab",
     type: "checkbox",

@@ -1,13 +1,5 @@
 import type { Block } from "payload";
-import {
-  //Para futuras versões do Payload teremos que atualizar o 'EXPERIMENTAL_TableFeature'
-  EXPERIMENTAL_TableFeature,
-  FixedToolbarFeature,
-  HeadingFeature,
-  LinkFeature,
-  UploadFeature,
-  lexicalEditor,
-} from "@payloadcms/richtext-lexical";
+
 import {
   createAppearanceGroup,
   createBlockContrastStatusField,
@@ -16,9 +8,15 @@ import {
   createSpacingField,
   createWidthField,
 } from "../../fields/block-appearance";
-import { closedSelect, requiredRichText } from "../../fields/editorial-validation";
+import {
+  closedSelect,
+  requiredRichText,
+} from "../../fields/editorial-validation";
 import { createBlockAdmin } from "../shared/admin";
-import { RichTextTypographyFeature } from "./typography-feature.server";
+import {
+  createEditorialEditor,
+  editorialEditorAdmin,
+} from "../../fields/editorial-editor";
 
 // Rich Text paints a surface and derives headings and links from its foreground.
 const richTextColorTokens = ["background", "foreground"] as const;
@@ -40,43 +38,10 @@ export const RichTextBlock: Block = {
       type: "richText",
       label: "Conteudo",
       required: true,
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures.filter(
-            (f) => f.key !== "link" && f.key !== "heading" && f.key !== "upload",
-          ),
-          HeadingFeature({
-            enabledHeadingSizes: ["h1", "h2", "h3", "h4", "h5", "h6"],
-          }),
-          RichTextTypographyFeature(),
-          LinkFeature({
-            enabledCollections: ["pages"],
-          }),
-          UploadFeature({
-            collections: {
-              media: {
-                fields: [
-                  {
-                    name: "caption",
-                    type: "text",
-                    label: "Legenda",
-                  },
-                ],
-              },
-            },
-          }),
-          FixedToolbarFeature(),
-          EXPERIMENTAL_TableFeature(),
-        ],
-      }),
+      editor: createEditorialEditor(),
       validate: requiredRichText("Escreva o conteudo deste bloco."),
       admin: {
-        components: {
-          beforeInput: [
-            "/components/admin/RichTextFullScreen#RichTextFullScreen",
-            "/components/admin/RichTextTableMenuPortuguese#RichTextTableMenuPortuguese",
-          ],
-        },
+        ...editorialEditorAdmin(true),
         description:
           "Area para texto, listas, tabelas, links e subtitulos com barra de ferramentas WYSIWYG. Fontes e cores usam opcoes controladas e acompanham o tema do bloco.",
       },

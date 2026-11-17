@@ -1,6 +1,13 @@
 import Link from "next/link";
-import { Button, type ButtonSize, type ButtonVariant } from "../../components/ui";
-import { resolveLink, type NavigationLink } from "../../lib/navigation/resolve-link";
+import {
+  Button,
+  type ButtonSize,
+  type ButtonVariant,
+} from "../../components/ui";
+import {
+  resolveLink,
+  type NavigationLink,
+} from "../../lib/navigation/resolve-link";
 
 export type LinkValue = NavigationLink;
 
@@ -21,6 +28,7 @@ export function BlockLink({
   if (appearance !== "text") {
     return (
       <Button
+        download={resolvedLink.download}
         href={resolvedLink.href}
         rel={resolvedLink.rel}
         size={size}
@@ -32,15 +40,16 @@ export function BlockLink({
     );
   }
 
+  const Anchor = resolvedLink.download ? "a" : Link;
   return (
-    <Link
+    <Anchor
       className="rounded-sm font-semibold text-[var(--block-foreground)] underline decoration-2 underline-offset-4 transition-[text-decoration-thickness,background-color] hover:decoration-4 hover:bg-[var(--block-foreground)]/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-focus motion-reduce:transition-none"
+      download={resolvedLink.download}
       href={resolvedLink.href}
       rel={resolvedLink.rel}
       target={resolvedLink.target}
     >
       {resolvedLink.label}
-    </Link>
+    </Anchor>
   );
 }
-

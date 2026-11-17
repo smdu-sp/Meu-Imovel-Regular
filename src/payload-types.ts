@@ -423,9 +423,9 @@ export interface HeroBlock {
      */
     label?: string | null;
     /**
-     * Escolha pagina interna para navegar no portal ou URL externa para encaminhar a servico oficial.
+     * Escolha página interna, URL externa ou documento PDF da biblioteca.
      */
-    type?: ('internal' | 'external') | null;
+    type?: ('internal' | 'external' | 'document') | null;
     /**
      * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
      */
@@ -434,6 +434,10 @@ export interface HeroBlock {
      * Informe o endereco completo, incluindo http:// ou https://.
      */
     url?: string | null;
+    /**
+     * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+     */
+    document?: (number | null) | Media;
     /**
      * Recomendado para links externos, mantendo o portal aberto na aba atual.
      */
@@ -769,9 +773,9 @@ export interface CarouselBlock {
        */
       label?: string | null;
       /**
-       * Escolha pagina interna para navegar no portal ou URL externa para encaminhar a servico oficial.
+       * Escolha página interna, URL externa ou documento PDF da biblioteca.
        */
-      type?: ('internal' | 'external') | null;
+      type?: ('internal' | 'external' | 'document') | null;
       /**
        * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
        */
@@ -780,6 +784,10 @@ export interface CarouselBlock {
        * Informe o endereco completo, incluindo http:// ou https://.
        */
       url?: string | null;
+      /**
+       * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+       */
+      document?: (number | null) | Media;
       /**
        * Recomendado para links externos, mantendo o portal aberto na aba atual.
        */
@@ -939,9 +947,9 @@ export interface ImageTextBlock {
      */
     label?: string | null;
     /**
-     * Escolha pagina interna para navegar no portal ou URL externa para encaminhar a servico oficial.
+     * Escolha página interna, URL externa ou documento PDF da biblioteca.
      */
-    type?: ('internal' | 'external') | null;
+    type?: ('internal' | 'external' | 'document') | null;
     /**
      * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
      */
@@ -950,6 +958,10 @@ export interface ImageTextBlock {
      * Informe o endereco completo, incluindo http:// ou https://.
      */
     url?: string | null;
+    /**
+     * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+     */
+    document?: (number | null) | Media;
     /**
      * Recomendado para links externos, mantendo o portal aberto na aba atual.
      */
@@ -1120,9 +1132,9 @@ export interface CardsBlock {
        */
       label?: string | null;
       /**
-       * Escolha pagina interna para navegar no portal ou URL externa para encaminhar a servico oficial.
+       * Escolha página interna, URL externa ou documento PDF da biblioteca.
        */
-      type?: ('internal' | 'external') | null;
+      type?: ('internal' | 'external' | 'document') | null;
       /**
        * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
        */
@@ -1131,6 +1143,10 @@ export interface CardsBlock {
        * Informe o endereco completo, incluindo http:// ou https://.
        */
       url?: string | null;
+      /**
+       * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+       */
+      document?: (number | null) | Media;
       /**
        * Recomendado para links externos, mantendo o portal aberto na aba atual.
        */
@@ -1164,9 +1180,9 @@ export interface CTABlock {
      */
     label: string;
     /**
-     * Escolha pagina interna para navegar no portal ou URL externa para encaminhar a servico oficial.
+     * Escolha página interna, URL externa ou documento PDF da biblioteca.
      */
-    type: 'internal' | 'external';
+    type: 'internal' | 'external' | 'document';
     /**
      * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
      */
@@ -1175,6 +1191,10 @@ export interface CTABlock {
      * Informe o endereco completo, incluindo http:// ou https://.
      */
     url?: string | null;
+    /**
+     * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+     */
+    document?: (number | null) | Media;
     /**
      * Recomendado para links externos, mantendo o portal aberto na aba atual.
      */
@@ -1306,9 +1326,9 @@ export interface IconGridBlock {
        */
       label?: string | null;
       /**
-       * Escolha pagina interna para navegar no portal ou URL externa para encaminhar a servico oficial.
+       * Escolha página interna, URL externa ou documento PDF da biblioteca.
        */
-      type?: ('internal' | 'external') | null;
+      type?: ('internal' | 'external' | 'document') | null;
       /**
        * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
        */
@@ -1317,6 +1337,10 @@ export interface IconGridBlock {
        * Informe o endereco completo, incluindo http:// ou https://.
        */
       url?: string | null;
+      /**
+       * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+       */
+      document?: (number | null) | Media;
       /**
        * Recomendado para links externos, mantendo o portal aberto na aba atual.
        */
@@ -1436,9 +1460,9 @@ export interface AlertBoxBlock {
      */
     label?: string | null;
     /**
-     * Escolha pagina interna para navegar no portal ou URL externa para encaminhar a servico oficial.
+     * Escolha página interna, URL externa ou documento PDF da biblioteca.
      */
-    type?: ('internal' | 'external') | null;
+    type?: ('internal' | 'external' | 'document') | null;
     /**
      * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
      */
@@ -1447,6 +1471,10 @@ export interface AlertBoxBlock {
      * Informe o endereco completo, incluindo http:// ou https://.
      */
     url?: string | null;
+    /**
+     * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+     */
+    document?: (number | null) | Media;
     /**
      * Recomendado para links externos, mantendo o portal aberto na aba atual.
      */
@@ -1510,9 +1538,9 @@ export interface ActionBannersBlock {
        */
       label: string;
       /**
-       * Escolha pagina interna para navegar no portal ou URL externa para encaminhar a servico oficial.
+       * Escolha página interna, URL externa ou documento PDF da biblioteca.
        */
-      type: 'internal' | 'external';
+      type: 'internal' | 'external' | 'document';
       /**
        * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
        */
@@ -1521,6 +1549,10 @@ export interface ActionBannersBlock {
        * Informe o endereco completo, incluindo http:// ou https://.
        */
       url?: string | null;
+      /**
+       * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+       */
+      document?: (number | null) | Media;
       /**
        * Recomendado para links externos, mantendo o portal aberto na aba atual.
        */
@@ -1589,11 +1621,11 @@ export interface FullWidthImageBannerBlock {
     | boolean
     | null;
   /**
-   * Opcional. Associe a imagem inteira a uma pagina do portal ou a uma URL externa.
+   * Opcional. Associe a imagem inteira a uma página do portal, URL externa ou documento PDF.
    */
   link?: {
     enabled?: boolean | null;
-    type?: ('internal' | 'external') | null;
+    type?: ('internal' | 'external' | 'document') | null;
     /**
      * Pagina de destino dentro do portal. Mudancas de slug nao quebram este relacionamento.
      */
@@ -1602,6 +1634,10 @@ export interface FullWidthImageBannerBlock {
      * Informe o endereco completo, incluindo http:// ou https://.
      */
     url?: string | null;
+    /**
+     * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+     */
+    document?: (number | null) | Media;
     /**
      * Recomendado para links externos.
      */
@@ -1938,6 +1974,7 @@ export interface HeroBlockSelect<T extends boolean = true> {
         type?: T;
         page?: T;
         url?: T;
+        document?: T;
         newTab?: T;
       };
   variant?: T;
@@ -2108,6 +2145,7 @@ export interface CarouselBlockSelect<T extends boolean = true> {
               type?: T;
               page?: T;
               url?: T;
+              document?: T;
               newTab?: T;
             };
         id?: T;
@@ -2192,6 +2230,7 @@ export interface ImageTextBlockSelect<T extends boolean = true> {
         type?: T;
         page?: T;
         url?: T;
+        document?: T;
         newTab?: T;
       };
   appearance?:
@@ -2263,6 +2302,7 @@ export interface CardsBlockSelect<T extends boolean = true> {
               type?: T;
               page?: T;
               url?: T;
+              document?: T;
               newTab?: T;
             };
         id?: T;
@@ -2284,6 +2324,7 @@ export interface CTABlockSelect<T extends boolean = true> {
         type?: T;
         page?: T;
         url?: T;
+        document?: T;
         newTab?: T;
       };
   variant?: T;
@@ -2343,6 +2384,7 @@ export interface IconGridBlockSelect<T extends boolean = true> {
               type?: T;
               page?: T;
               url?: T;
+              document?: T;
               newTab?: T;
             };
         id?: T;
@@ -2397,6 +2439,7 @@ export interface AlertBoxBlockSelect<T extends boolean = true> {
         type?: T;
         page?: T;
         url?: T;
+        document?: T;
         newTab?: T;
       };
   appearance?:
@@ -2436,6 +2479,7 @@ export interface ActionBannersBlockSelect<T extends boolean = true> {
               type?: T;
               page?: T;
               url?: T;
+              document?: T;
               newTab?: T;
             };
         id?: T;
@@ -2473,6 +2517,7 @@ export interface FullWidthImageBannerBlockSelect<T extends boolean = true> {
         type?: T;
         page?: T;
         url?: T;
+        document?: T;
         newTab?: T;
       };
   overlay?: T;

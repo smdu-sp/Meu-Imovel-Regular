@@ -1,3 +1,7 @@
+import {
+  createEditorialEditor,
+  editorialEditorAdmin,
+} from "../../fields/editorial-editor";
 import type { Block } from "payload";
 import { characterLimitAdmin } from "../../fields/character-limit";
 import {
@@ -6,7 +10,10 @@ import {
   createControlledColorAppearanceFields,
   createSchemeField,
 } from "../../fields/block-appearance";
-import { closedSelect, requiredRichText } from "../../fields/editorial-validation";
+import {
+  closedSelect,
+  requiredRichText,
+} from "../../fields/editorial-validation";
 import { createLinkFields } from "../../fields/link";
 import { createBlockAdmin } from "../shared/admin";
 
@@ -39,10 +46,12 @@ export const AlertBoxBlock: Block = {
     {
       name: "content",
       type: "richText",
+      editor: createEditorialEditor(),
       label: "Conteudo do aviso",
       required: true,
       validate: requiredRichText("Escreva o conteudo da caixa de aviso."),
       admin: {
+        ...editorialEditorAdmin(),
         description:
           "Texto do aviso. Mantenha linguagem orientativa e evite conclusoes definitivas.",
       },

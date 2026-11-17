@@ -1,19 +1,10 @@
-import {
-  RichText,
-  type JSXConvertersFunction,
-} from "@payloadcms/richtext-lexical/react";
+import { EditorialRichText } from "../shared/EditorialRichText";
 import type { RichTextBlock as RichTextBlockProps } from "../../payload-types";
 import { BlockThemeScope, Container, Section } from "../../components/ui";
 import {
   normalizeColorScheme,
   type EditorialColorOverrides,
 } from "../../lib/theme/block-color-theme";
-import {
-  getRichTextFontFamily,
-  getUsedRichTextFontStylesheets,
-} from "./font-family";
-import { getRichTextFontSize } from "./font-size";
-import { getRichTextTextColor } from "./text-color";
 
 type RichTextVariant = "default" | "narrow";
 
@@ -29,28 +20,14 @@ type RichTextBlockWithLegacyProps = RichTextBlockProps & {
   width?: "content" | "wide" | string | null;
 };
 
-const richTextConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
-  ...defaultConverters,
-  text: (args) => {
-    const defaultText =
-      typeof defaultConverters.text === "function"
-        ? defaultConverters.text(args)
-        : args.node.text;
-    const state = (args.node as {
-      $?: { fontFamily?: unknown; fontSize?: unknown; textColor?: unknown };
-    }).$;
-    const fontFamily = getRichTextFontFamily(state?.fontFamily);
-    const fontSize = getRichTextFontSize(state?.fontSize);
-    const color = getRichTextTextColor(state?.textColor);
-
-    return fontFamily || fontSize || color
-      ? <span style={{ color, fontFamily, fontSize }}>{defaultText}</span>
-      : defaultText;
-  },
-});
-
 export function normalizeRichTextVariant(
-  variant: RichTextBlockProps["variant"] | "content" | "wide" | string | null | undefined,
+  variant:
+    | RichTextBlockProps["variant"]
+    | "content"
+    | "wide"
+    | string
+    | null
+    | undefined,
 ): RichTextVariant {
   if (variant === "narrow" || variant === "content") return "narrow";
   return "default";
@@ -60,7 +37,8 @@ export function normalizeRichTextWidth(
   width?: string | null,
   fallbackVariant: "default" | "narrow" = "default",
 ): "default" | "narrow" | "wide" {
-  if (width === "narrow" || width === "wide" || width === "default") return width;
+  if (width === "narrow" || width === "wide" || width === "default")
+    return width;
   return fallbackVariant;
 }
 
@@ -78,7 +56,6 @@ export function RichTextBlock({
   variant,
   width,
 }: RichTextBlockWithLegacyProps) {
-  const fontStylesheets = getUsedRichTextFontStylesheets(content);
   const normalizedVariant = normalizeRichTextVariant(variant ?? width);
   const effectiveWidth = normalizeRichTextWidth(
     appearance?.width,
@@ -98,28 +75,24 @@ export function RichTextBlock({
   const section = (
     <Section
       spacing={effectiveSpacing}
-      scheme={customTheme ? "default" : normalizeColorScheme(appearance?.scheme)}
+      scheme={
+        customTheme ? "default" : normalizeColorScheme(appearance?.scheme)
+      }
     >
       <Container size={containerSize}>
-        <RichText
+        <EditorialRichText
           className={`cms-rich-text leading-relaxed ${effectiveWidth !== "narrow" ? "cms-rich-text--wide" : ""}`}
-          converters={richTextConverters}
           data={content}
         />
       </Container>
     </Section>
   );
 
-  const themedSection = customTheme
-    ? <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
-    : section;
-
-  return (
-    <>
-      {fontStylesheets.map((href) => (
-        <link href={href} key={href} precedence="rich-text-fonts" rel="stylesheet" />
-      ))}
-      {themedSection}
-    </>
+  const themedSection = customTheme ? (
+    <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
+  ) : (
+    section
   );
+
+  return themedSection;
 }
