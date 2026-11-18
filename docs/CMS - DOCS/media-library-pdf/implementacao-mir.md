@@ -80,3 +80,12 @@ A célula agora delega a `DefaultCell` do Payload, propagando `onClick`, `link`,
 Para replicar no repositório pai, transportar `src/components/admin/MediaTitleCell.tsx`; a collection mantém o mesmo registro do componente. A regressão está em `src/components/admin/MediaTitleCell.test.ts` e renderiza a célula real do Payload com seu provider de configuração, verificando botão no seletor, preservação de callback e navegação da listagem e fallbacks. O teste ignora imports CSS apenas no processo Node de testes.
 
 Validação: testes da célula e contratos de mídia (sete passaram), `npm run typecheck`, lint dos dois arquivos TypeScript alterados e `git diff --check`. Sem validação manual de navegador nesta correção. Conferir no Admin a seleção de imagem/PDF, inclusive dentro de pasta, e a abertura da ficha pela listagem.
+
+
+### Complemento: callback disponível no contexto, não nas props
+
+A primeira correção era insuficiente: `DefaultCell` só seleciona se receber `onClick`, e uma célula personalizada é renderizada por `RenderCustomComponent`, sem passar por `RenderDefaultCell`. É nesse wrapper nativo que o Payload 3.88 injeta normalmente o callback do seletor. Portanto, os testes anteriores forneciam uma prop que não chegava ao componente no fluxo real.
+
+`MediaTitleCell` agora consulta `useListDrawerContext()`. Se `isInDrawer` e `onSelect` estiverem disponíveis, a ação devolve `collectionSlug`, o documento completo da linha e seu ID ao seletor, prevalecendo sobre eventual callback de edição das props. A célula nativa recebe esse callback e `link=false`. Fora do seletor, as props originais de navegação/ação são preservadas.
+
+A regressão foi refeita usando `ListDrawerContextProvider` real e sem `onClick` nas props. Verifica seleção de imagem e PDF, retorno do documento correto, botão sem âncora, prioridade da seleção sobre edição e fallback/listagem fora do drawer. Validação: oito testes focados passaram, além de `npm run typecheck`, lint dos dois arquivos alterados e `git diff --check`. Sem mudança de schema, importMap ou dados e sem validação visual em navegador nesta correção. Transportar o componente e o teste atualizados ao repositório pai.

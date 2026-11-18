@@ -2,6 +2,22 @@
 
 Execute os comandos abaixo na raiz do projeto.
 
+## Executar todas as importações
+
+Validar as dez páginas sem conectar ao banco:
+
+```bash
+npm run import:wordpress:all -- --dry-run
+```
+
+Importar as dez páginas como rascunhos e resolver os links entre elas:
+
+```bash
+npm run import:wordpress:all -- --apply --actor-id 1 --target-label mir-local
+```
+
+O lote valida todas as fontes antes de gravar, reutiliza o manifesto e faz duas passadas: carga e resolução final das referências. Para ao encontrar conflito, sem sobrescrever conteúdo editado/publicado. Não executa migrations de schema. [Guia do lote e atualização de links](../../docs/MIR%20-%20DOCS/relatorio-specs/importacao-completa.md).
+
 ## Home
 
 Simular a importação:
@@ -116,6 +132,15 @@ Gravar a página e importar/reutilizar suas mídias:
 npm run import:wordpress -- regularizacao-declaratoria-simplificada --apply --actor-id 1 --target-label mir-local
 ```
 
+## Regularização Declaratória e Comum
+
+```bash
+npm run import:wordpress -- regularizacao-declaratoria --dry-run
+npm run import:wordpress -- regularizacao-declaratoria --apply --actor-id 1 --target-label mir-local
+npm run import:wordpress -- regularizacao-comum --dry-run
+npm run import:wordpress -- regularizacao-comum --apply --actor-id 1 --target-label mir-local
+```
+
 ## Parâmetros e resultado
 
 - `--dry-run`: valida os arquivos e mostra a composição, sem conectar ao banco. Os IDs negativos das mídias são referências temporárias da simulação.
@@ -149,3 +174,4 @@ O estado das importações fica em `.local/wordpress-import/`. Mantenha esse dir
 - [Operação do importador da Cartilha](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-cartilha.md).
 - [Operação do importador de Regularização Automática](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-regularizacao-automatica.md).
 - [Operação do importador de Declaratória Simplificada](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-regularizacao-declaratoria-simplificada.md).
+- [Operação de Declaratória e Comum](../../docs/MIR%20-%20DOCS/relatorio-specs/importadores-declaratoria-comum.md).

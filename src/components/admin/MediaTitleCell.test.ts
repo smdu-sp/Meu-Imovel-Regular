@@ -16,7 +16,8 @@ register(
 `),
   import.meta.url,
 );
-const { ConfigProvider, DefaultCell } = await import("@payloadcms/ui");
+const { ConfigProvider, DefaultCell, ListDrawerContextProvider } =
+  await import("@payloadcms/ui");
 const { MediaTitleCell } = await import("./MediaTitleCell.tsx");
 
 const config = {
@@ -31,37 +32,93 @@ const props = {
   field: { name: "title", type: "text" },
   link: true,
 } satisfies DefaultCellComponentProps;
-function render(cellProps: DefaultCellComponentProps) {
+function render(
+  cellProps: DefaultCellComponentProps,
+  selection?: (value: unknown) => void,
+  native = true,
+) {
+  let cell: ReactElement<DefaultCellComponentProps> | undefined;
+  function Probe() {
+    cell = MediaTitleCell(cellProps) as ReactElement<DefaultCellComponentProps>;
+    return native ? cell : null;
+  }
+  const drawerProps = {
+    drawerSlug: selection ? "select-media" : undefined,
+    onSelect: selection,
+    refresh: async () => {},
+    children: createElement(Probe),
+  };
   const providerProps = {
     config,
-    children: createElement(MediaTitleCell, cellProps),
+    children: createElement(ListDrawerContextProvider, drawerProps),
   };
-  return renderToStaticMarkup(createElement(ConfigProvider, providerProps));
+  const html = renderToStaticMarkup(
+    createElement(ConfigProvider, providerProps),
+  );
+  assert(cell);
+  return { html, cell };
 }
-test("Media title renders the native selection button instead of navigating to edit", () => {
-  const onClick = () => {};
-  const cell = MediaTitleCell({
-    ...props,
-    onClick,
-  }) as ReactElement<DefaultCellComponentProps>;
-  assert.equal(cell.type, DefaultCell);
-  assert.equal(cell.props.onClick, onClick);
-  const html = render({ ...props, onClick });
-  assert.match(html, /<button[^>]*type="button"/);
-  assert.match(html, /Imagem de teste/);
-  assert.doesNotMatch(html, /<a\b|href=/);
+test("Media title selects from drawer context even when custom cell props have no onClick", () => {
+  for (const mimeType of ["image/jpeg", "application/pdf"]) {
+    let selected: unknown;
+    const rowData = { ...props.rowData, mimeType };
+    const { html, cell } = render({ ...props, rowData }, (value) => {
+      selected = value;
+    });
+    assert.equal(cell.type, DefaultCell);
+    assert.equal(cell.props.link, false);
+    assert.match(html, /<button[^>]*type="button"/);
+    assert.doesNotMatch(html, /<a\b|href=/);
+    assert(cell.props.onClick);
+    cell.props.onClick({
+      collectionSlug: "media",
+      rowData,
+      cellData: props.cellData,
+    });
+    assert.deepEqual(selected, {
+      collectionSlug: "media",
+      doc: rowData,
+      docID: 9,
+    });
+  }
 });
-test("Media title preserves collection navigation props and fallback names", () => {
-  const cell = MediaTitleCell({
-    ...props,
-    linkURL: "/admin/collections/media/9",
-  }) as ReactElement<DefaultCellComponentProps>;
+test("Drawer selection wins over an edit callback in custom cell props", () => {
+  let selected = false;
+  const { cell } = render(
+    {
+      ...props,
+      onClick: () => {
+        throw new Error("Unexpected navigation");
+      },
+    },
+    () => {
+      selected = true;
+    },
+  );
+  cell.props.onClick!({
+    collectionSlug: "media",
+    rowData: props.rowData,
+    cellData: props.cellData,
+  });
+  assert(selected);
+});
+test("Outside drawers title preserves navigation, explicit callbacks and fallback names", () => {
+  const { cell } = render(
+    { ...props, linkURL: "/admin/collections/media/9" },
+    undefined,
+    false,
+  );
   assert.equal(cell.props.link, true);
   assert.equal(cell.props.linkURL, "/admin/collections/media/9");
   assert.equal(cell.props.rowData, props.rowData);
-  assert.match(render({ ...props, cellData: " ", link: false }), /imagem.jpg/);
+  const onClick = () => {};
+  assert.equal(render({ ...props, onClick }).cell.props.onClick, onClick);
   assert.match(
-    render({ ...props, cellData: "", rowData: { id: 9 }, link: false }),
+    render({ ...props, cellData: " ", link: false }).html,
+    /imagem.jpg/,
+  );
+  assert.match(
+    render({ ...props, cellData: "", rowData: { id: 9 }, link: false }).html,
     />9</,
   );
 });

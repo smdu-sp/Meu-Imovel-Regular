@@ -14,8 +14,10 @@ Documentos específicos do portal e da migração do legado WordPress para a bas
 - [MIR-006 — Importador da Cartilha](./specs/mir-006-importador-cartilha.md) e [guia operacional](./relatorio-specs/importador-cartilha.md): três blocos, capa e CTA com relação ao PDF na biblioteca de mídia. Código implementado; revisão no Admin pendente.
 - [MIR-007 — Importador de Regularização Automática](./specs/mir-007-importador-regularizacao-automatica.md) e [guia operacional](./relatorio-specs/importador-regularizacao-automatica.md): nove blocos, cinco imagens, quatro manuais reutilizados e alerta institucional. Código implementado; revisão no Admin pendente.
 - [MIR-008 — Importador de Regularização Declaratória Simplificada](./specs/mir-008-importador-regularizacao-declaratoria-simplificada.md) e [guia operacional](./relatorio-specs/importador-regularizacao-declaratoria-simplificada.md): nove blocos, quatro imagens exclusivas, reuso de cinco assets e alerta crítico de ausência de comunicado. Código implementado; revisão no Admin pendente.
-- [MIR-009 — Importador de Regularização Declaratória](./specs/mir-009-importador-regularizacao-declaratoria.md): limites de até 1.500 m², anuências obrigatórias, Outorga Onerosa, grade de manuais e alerta de comunicado único.
-- [MIR-010 — Importador de Regularização Comum](./specs/mir-010-importador-regularizacao-comum.md): casos acima de 1.500 m², Outorga Onerosa, saneamento de links corrompidos do `/wp-admin/` e alerta de comunicado único.
+- [MIR-009 — Importador de Regularização Declaratória](./specs/mir-009-importador-regularizacao-declaratoria.md) e [guia operacional](./relatorio-specs/importadores-declaratoria-comum.md): 12 blocos, Outorga/Anuências e comunicado único. Implementado; revisão institucional pendente.
+- [MIR-010 — Importador de Regularização Comum](./specs/mir-010-importador-regularizacao-comum.md) e [guia operacional](./relatorio-specs/importadores-declaratoria-comum.md): 12 blocos, correção de legislação e reuso das mídias de Outorga. Implementado; revisão institucional pendente.
+- [MIR-011 — Importador do Cabeçalho](./specs/mir-011-importador-header.md): template de cabeçalho, logo MIR, menu principal com cinco links ordenados e pasta compartilhada de identidade.
+- [MIR-012 — Importador do Rodapé](./specs/mir-012-importador-footer.md): template de rodapé, logo PMSP, dados de contato institucional, endereço e links de redes sociais com ícones oficiais.
 - [Operação do importador da Home](./relatorio-specs/importador-home.md): comandos, ambiente, checkpoints, conflitos e resultados dos testes.
 - [MIR-002 — Importador de Entenda a Lei](./specs/mir-002-importador-entenda.md) e [guia operacional](./relatorio-specs/importador-entenda.md): oito blocos, cinco imagens, reuso de mídias e vídeo nativo. Código implementado; aplicação na instância e revisão manual pendentes.
 - [Contexto da base CMS](../CMS%20-%20DOCS/README.MD) e [specs da base](../CMS%20-%20DOCS/specs/README.md).
@@ -23,3 +25,6 @@ Documentos específicos do portal e da migração do legado WordPress para a bas
 Próxima etapa proposta: simular a Home e preparar o destino para aplicação/revisão do rascunho conforme o guia operacional. Os demais mapas e a importação de Globals continuam em etapas separadas.
 
 Os mapas de composição ficam em `mapas/`, com um documento por página.
+
+- [Importação completa das dez páginas](./relatorio-specs/importacao-completa.md): comando único, relatório e atualização de links locais.
+- [Auditoria dos links do domínio legado](./mapas/auditoria-links-internos.md): rotas correspondentes e tratamento de documentos.

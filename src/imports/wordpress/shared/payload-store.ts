@@ -34,6 +34,7 @@ export async function isolatedAdapter(uri: string, push = false) {
   };
 }
 
+let connectionSequence = 0;
 export async function connectStore(uri: string, actorId: number) {
   process.env.DISABLE_PAYLOAD_HMR = "true";
   if (process.env.PAYLOAD_DROP_DATABASE === "true")
@@ -49,7 +50,10 @@ export async function connectStore(uri: string, actorId: number) {
   config.db = database.adapter;
   let payload: Payload;
   try {
-    payload = await getPayload({ config, key: "wordpress-import" });
+    payload = await getPayload({
+      config,
+      key: `wordpress-import-${++connectionSequence}`,
+    });
   } catch (error) {
     await database.close();
     throw error;

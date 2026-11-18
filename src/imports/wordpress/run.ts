@@ -24,6 +24,21 @@ import {
   simplificadaData,
   applySimplificada,
 } from "./pages/regularizacao-declaratoria-simplificada.ts";
+import {
+  planDeclaratoria,
+  declaratoriaData,
+  applyDeclaratoria,
+} from "./pages/regularizacao-declaratoria.ts";
+import {
+  planComum,
+  comumData,
+  applyComum,
+} from "./pages/regularizacao-comum.ts";
+import {
+  localizeSiteLinks,
+  sitePages,
+  type LinkAudit,
+} from "./shared/site-links.ts";
 import type { State } from "./shared/migration-manifest.ts";
 import {
   openManifest,
@@ -49,19 +64,15 @@ export function argumentsFor(args: string[]) {
   });
   if (
     positionals.length !== 1 ||
-    ![
-      "home",
-      "entenda",
-      "beneficios",
-      "situacao",
-      "faq",
-      "cartilha",
-      "regularizacao-automatica",
-      "regularizacao-declaratoria-simplificada",
-    ].includes(positionals[0])
+    !Object.keys(sitePages).some(
+      (key) =>
+        key === positionals[0] ||
+        (key === "beneficios-de-regularizar-o-imovel" &&
+          positionals[0] === "beneficios"),
+    )
   )
     throw new Error(
-      "Informe somente a página home, entenda, beneficios, situacao, faq, cartilha, regularizacao-automatica ou regularizacao-declaratoria-simplificada.",
+      "Informe uma página suportada: home, entenda, beneficios, situacao, faq, cartilha ou uma modalidade de regularizacao.",
     );
   if (values.apply && values["dry-run"])
     throw new Error("Modos incompatíveis.");
@@ -72,143 +83,210 @@ export function argumentsFor(args: string[]) {
     throw new Error("--apply exige --actor-id e --target-label.");
   return { ...values, page: positionals[0] };
 }
-export async function run(args = process.argv.slice(2)) {
+export async function preparePage(
+  page: string,
+  source: string,
+  uploads: string,
+) {
+  const factories = {
+    home: async () => {
+      const plan = await planHome(source, uploads);
+      return {
+        plan,
+        id: "87",
+        metaId: "4142",
+        sections: [0, 1, 2, 3, 4, 6, 7, 10],
+        data: (
+          media: Record<string, number>,
+          pages: Record<string, number> = {},
+        ) => homeData(plan, media, pages),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applyHome(plan, store, state, save),
+      };
+    },
+    entenda: async () => {
+      const plan = await planEntenda(source, uploads);
+      return {
+        plan,
+        id: "172",
+        metaId: plan.metaId,
+        sections: [0, 1, 2, 3, 4, 5, 6],
+        data: (
+          media: Record<string, number>,
+          pages: Record<string, number> = {},
+        ) => entendaData(plan, media, pages),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applyEntenda(plan, store, state, save),
+      };
+    },
+    beneficios: async () => {
+      const plan = await planBeneficios(source, uploads);
+      return {
+        plan,
+        id: "210",
+        metaId: plan.metaId,
+        sections: [0, 1, 2, 3, 4, 5],
+        data: (media: Record<string, number>) => beneficiosData(plan, media),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applyBeneficios(plan, store, state, save),
+      };
+    },
+    situacao: async () => {
+      const plan = await planSituacao(source, uploads);
+      return {
+        plan,
+        id: "176",
+        metaId: plan.metaId,
+        sections: [0, 1],
+        data: (media: Record<string, number>) => situacaoData(plan, media),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applySituacao(plan, store, state, save),
+      };
+    },
+    faq: async () => {
+      const plan = await planFaq(source, uploads);
+      return {
+        plan,
+        id: "174",
+        metaId: plan.metaId,
+        sections: [0, 1, 2, 3],
+        data: (media: Record<string, number>) => faqData(plan, media),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applyFaq(plan, store, state, save),
+      };
+    },
+    cartilha: async () => {
+      const plan = await planCartilha(source, uploads);
+      return {
+        plan,
+        id: "1145",
+        metaId: plan.metaId,
+        sections: [0, 1],
+        data: (media: Record<string, number>) => cartilhaData(plan, media),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applyCartilha(plan, store, state, save),
+      };
+    },
+    "regularizacao-automatica": async () => {
+      const plan = await planAutomatica(source, uploads);
+      return {
+        plan,
+        id: "193",
+        metaId: plan.metaId,
+        sections: [0, 1],
+        data: (media: Record<string, number>) => automaticaData(plan, media),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applyAutomatica(plan, store, state, save),
+      };
+    },
+    "regularizacao-declaratoria-simplificada": async () => {
+      const plan = await planSimplificada(source, uploads);
+      return {
+        plan,
+        id: "760",
+        metaId: plan.metaId,
+        sections: [0, 1],
+        data: (media: Record<string, number>) => simplificadaData(plan, media),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applySimplificada(plan, store, state, save),
+      };
+    },
+    "regularizacao-declaratoria": async () => {
+      const plan = await planDeclaratoria(source, uploads);
+      return {
+        plan,
+        id: "204",
+        metaId: plan.metaId,
+        sections: [0, 1],
+        data: (media: Record<string, number>) => declaratoriaData(plan, media),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applyDeclaratoria(plan, store, state, save),
+      };
+    },
+    "regularizacao-comum": async () => {
+      const plan = await planComum(source, uploads);
+      return {
+        plan,
+        id: "206",
+        metaId: plan.metaId,
+        sections: [0, 1],
+        data: (media: Record<string, number>) => comumData(plan, media),
+        apply: (store: Store, state: State, save: () => Promise<void>) =>
+          applyComum(plan, store, state, save),
+      };
+    },
+  };
+  const factory = factories[page as keyof typeof factories];
+  if (!factory) throw new Error("Página não suportada.");
+  return factory();
+}
+export type ImportSession = {
+  store: Store;
+  state: State;
+  save: () => Promise<void>;
+  close: () => Promise<void>;
+};
+export async function openImportSession(
+  options: ReturnType<typeof argumentsFor>,
+): Promise<ImportSession> {
+  if (!process.env.NODE_ENV)
+    Object.assign(process.env, { NODE_ENV: "development" });
+  const { loadEnvConfig } = createRequire(import.meta.url)(
+    "@next/env",
+  ) as typeof import("@next/env");
+  loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production", {
+    info: () => {},
+    error: () => {},
+  });
+  const uri = process.env.DATABASE_URI;
+  if (!uri) throw new Error("Defina DATABASE_URI explicitamente.");
+  const manifest = await openManifest(
+    options["state-dir"] || ".local/wordpress-import",
+    targetFingerprint(uri),
+    options["target-label"]!,
+    SNAPSHOT,
+  );
+  try {
+    const { connectStore } = await import("./shared/payload-store.ts");
+    const connection = await connectStore(uri, Number(options["actor-id"]));
+    return {
+      store: connection.store,
+      state: manifest.state,
+      save: manifest.save,
+      close: async () => {
+        try {
+          await connection.close();
+        } finally {
+          await manifest.close();
+        }
+      },
+    };
+  } catch (error) {
+    await manifest.close();
+    throw error;
+  }
+}
+export async function run(
+  args = process.argv.slice(2),
+  settings: { print?: boolean; session?: ImportSession } = {},
+) {
   const options = argumentsFor(args);
   const source = options.source || "old-wordpress/db/meuimovelregular.sql";
   const uploads =
     options.uploads || "old-wordpress/meuimovelregular/wp-content/uploads";
-  const prepared =
-    options.page === "home"
-      ? await (async () => {
-          const plan = await planHome(source, uploads);
-          return {
-            plan,
-            id: "87",
-            metaId: "4142",
-            sections: [0, 1, 2, 3, 4, 6, 7, 10],
-            data: (media: Record<string, number>) => homeData(plan, media),
-            apply: (store: Store, state: State, save: () => Promise<void>) =>
-              applyHome(plan, store, state, save),
-          };
-        })()
-      : options.page === "regularizacao-declaratoria-simplificada"
-        ? await (async () => {
-            const plan = await planSimplificada(source, uploads);
-            return {
-              plan,
-              id: "760",
-              metaId: plan.metaId,
-              sections: [0, 1],
-              data: (media: Record<string, number>) =>
-                simplificadaData(plan, media),
-              apply: (store: Store, state: State, save: () => Promise<void>) =>
-                applySimplificada(plan, store, state, save),
-            };
-          })()
-        : options.page === "regularizacao-automatica"
-          ? await (async () => {
-              const plan = await planAutomatica(source, uploads);
-              return {
-                plan,
-                id: "193",
-                metaId: plan.metaId,
-                sections: [0, 1],
-                data: (media: Record<string, number>) =>
-                  automaticaData(plan, media),
-                apply: (
-                  store: Store,
-                  state: State,
-                  save: () => Promise<void>,
-                ) => applyAutomatica(plan, store, state, save),
-              };
-            })()
-          : options.page === "cartilha"
-            ? await (async () => {
-                const plan = await planCartilha(source, uploads);
-                return {
-                  plan,
-                  id: "1145",
-                  metaId: plan.metaId,
-                  sections: [0, 1],
-                  data: (media: Record<string, number>) =>
-                    cartilhaData(plan, media),
-                  apply: (
-                    store: Store,
-                    state: State,
-                    save: () => Promise<void>,
-                  ) => applyCartilha(plan, store, state, save),
-                };
-              })()
-            : options.page === "faq"
-              ? await (async () => {
-                  const plan = await planFaq(source, uploads);
-                  return {
-                    plan,
-                    id: "174",
-                    metaId: plan.metaId,
-                    sections: [0, 1, 2, 3],
-                    data: (media: Record<string, number>) =>
-                      faqData(plan, media),
-                    apply: (
-                      store: Store,
-                      state: State,
-                      save: () => Promise<void>,
-                    ) => applyFaq(plan, store, state, save),
-                  };
-                })()
-              : options.page === "situacao"
-                ? await (async () => {
-                    const plan = await planSituacao(source, uploads);
-                    return {
-                      plan,
-                      id: "176",
-                      metaId: plan.metaId,
-                      sections: [0, 1],
-                      data: (media: Record<string, number>) =>
-                        situacaoData(plan, media),
-                      apply: (
-                        store: Store,
-                        state: State,
-                        save: () => Promise<void>,
-                      ) => applySituacao(plan, store, state, save),
-                    };
-                  })()
-                : options.page === "beneficios"
-                  ? await (async () => {
-                      const plan = await planBeneficios(source, uploads);
-                      return {
-                        plan,
-                        id: "210",
-                        metaId: plan.metaId,
-                        sections: [0, 1, 2, 3, 4, 5],
-                        data: (media: Record<string, number>) =>
-                          beneficiosData(plan, media),
-                        apply: (
-                          store: Store,
-                          state: State,
-                          save: () => Promise<void>,
-                        ) => applyBeneficios(plan, store, state, save),
-                      };
-                    })()
-                  : await (async () => {
-                      const plan = await planEntenda(source, uploads);
-                      return {
-                        plan,
-                        id: "172",
-                        metaId: plan.metaId,
-                        sections: [0, 1, 2, 3, 4, 5, 6],
-                        data: (media: Record<string, number>) =>
-                          entendaData(plan, media),
-                        apply: (
-                          store: Store,
-                          state: State,
-                          save: () => Promise<void>,
-                        ) => applyEntenda(plan, store, state, save),
-                      };
-                    })();
+  const prepared = await preparePage(options.page, source, uploads);
   const plan = prepared.plan;
   const symbolic = Object.fromEntries(
     plan.assets.map((a, i) => [a.id, -(i + 1)]),
+  );
+  const linkAudit: LinkAudit[] = [];
+  const symbolicPages = Object.fromEntries(
+    Object.keys(sitePages).map((slug, index) => [slug, -(index + 1)]),
+  );
+  const layout = localizeSiteLinks(
+    prepared.data(symbolic, symbolicPages),
+    symbolicPages,
+    linkAudit,
   );
   const report: Record<string, unknown> = {
     mode: options.apply ? "apply" : "dry-run",
@@ -234,7 +312,8 @@ export async function run(args = process.argv.slice(2)) {
       usage: a.usage,
       folder: a.folder,
     })),
-    layout: prepared.data(symbolic),
+    layout,
+    linkAudit,
     adjustments: plan.adjustments,
     pending: plan.pending,
   };
@@ -258,42 +337,19 @@ export async function run(args = process.argv.slice(2)) {
   let failure: unknown;
   try {
     if (options.apply) {
-      // Only the write path loads environment files or imports the Payload runtime.
-      if (!process.env.NODE_ENV)
-        Object.assign(process.env, { NODE_ENV: "development" });
-      // @next/env is CommonJS. require avoids default/named export differences
-      // between native Node ESM and the tsx entry point used by this CLI.
-      const { loadEnvConfig } = createRequire(import.meta.url)(
-        "@next/env",
-      ) as typeof import("@next/env");
-      loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production", {
-        info: () => {},
-        error: () => {},
-      });
-      const uri = process.env.DATABASE_URI;
-      if (!uri) throw new Error("Defina DATABASE_URI explicitamente.");
-      const target = targetFingerprint(uri);
-      const state = await openManifest(
-        options["state-dir"] || ".local/wordpress-import",
-        target,
-        options["target-label"]!,
-        SNAPSHOT,
-      );
+      const session = settings.session || (await openImportSession(options));
       try {
-        const { connectStore } = await import("./shared/payload-store.ts");
-        const connection = await connectStore(uri, Number(options["actor-id"]));
-        try {
-          report.result = await prepared.apply(
-            connection.store,
-            state.state,
-            state.save,
-          );
-          report.destinationState = "verificado";
-        } finally {
-          await connection.close();
-        }
+        report.result = await prepared.apply(
+          session.store,
+          session.state,
+          session.save,
+        );
+        report.linkAudit = (
+          report.result as { linkAudit: LinkAudit[] }
+        ).linkAudit;
+        report.destinationState = "verificado";
       } finally {
-        await state.close();
+        if (!settings.session) await session.close();
       }
     }
   } catch (error) {
@@ -314,7 +370,7 @@ export async function run(args = process.argv.slice(2)) {
       mode: 0o600,
     });
   }
-  console.log(output);
+  if (settings.print !== false) console.log(output);
   if (failure) throw failure;
   return report;
 }

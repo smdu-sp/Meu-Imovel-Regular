@@ -512,6 +512,61 @@ test(
           applySimplificada(simplificadaPlan, store, state, save),
           /Conflito/,
         );
+        const { planDeclaratoria, applyDeclaratoria } =
+          await import("./wordpress/pages/regularizacao-declaratoria.ts");
+        const { planComum, applyComum } =
+          await import("./wordpress/pages/regularizacao-comum.ts");
+        const declaratoriaPlan = await planDeclaratoria(
+          "old-wordpress/db/meuimovelregular.sql",
+          "old-wordpress/meuimovelregular/wp-content/uploads",
+        );
+        const declaratoria = await applyDeclaratoria(
+          declaratoriaPlan,
+          store,
+          state,
+          save,
+        );
+        const comumPlan = await planComum(
+          "old-wordpress/db/meuimovelregular.sql",
+          "old-wordpress/meuimovelregular/wp-content/uploads",
+        );
+        const comum = await applyComum(comumPlan, store, state, save);
+        for (const id of [
+          "1116",
+          "1120",
+          "223",
+          "1196",
+          "1191",
+          "1188",
+          "1187",
+        ])
+          assert.equal(comum.media[id], declaratoria.media[id]);
+        for (const [plan, apply, resultPage] of [
+          [declaratoriaPlan, applyDeclaratoria, declaratoria],
+          [comumPlan, applyComum, comum],
+        ] as const) {
+          const doc = await store.get("pages", resultPage.pageId, true);
+          assert.equal(doc._status, "draft");
+          assert.equal((doc.layout as unknown[]).length, 12);
+          assert.doesNotMatch(JSON.stringify(doc.layout), /wp-admin/);
+          const checkpoints = saves;
+          await apply(plan, store, state, save);
+          assert.equal(saves, checkpoints);
+          const unmanaged = structuredClone(state);
+          delete unmanaged.entries[
+            doc.slug === "regularizacao-declaratoria" ? "page:204" : "page:206"
+          ];
+          await assert.rejects(
+            apply(plan, store, unmanaged, save),
+            /preexistente/,
+          );
+          await store.transaction(() =>
+            store.update(resultPage.pageId, { title: "Revisada no Admin" }),
+          );
+          await assert.rejects(apply(plan, store, state, save), /Conflito/);
+        }
+        assert.equal((await store.find("media", {})).length, 54);
+        assert.equal((await store.find("payload-folders", {})).length, 29);
       } catch (error) {
         console.error(error);
         throw error;

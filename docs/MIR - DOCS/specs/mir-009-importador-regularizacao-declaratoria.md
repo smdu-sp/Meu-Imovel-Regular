@@ -1,7 +1,7 @@
 ---
 spec: MIR-009
 title: Importador editorial de Regularização Declaratória WordPress
-status: proposed
+status: implemented
 date: 2026-11-17
 ---
 
@@ -121,11 +121,28 @@ Destino: `title="Regularização Declaratória"`, `slug="regularizacao-declarato
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline verifica integridade dos 8 arquivos de imagem e 4 PDFs.
-- [ ] Diagramação alternada de blocos `imageText` para as etapas e regras.
-- [ ] Alerta de comunicado único configurado via `alertBox`.
-- [ ] Rascunho salvo no Payload sem erros ou publicação precoce.
+- [x] Simulação offline verifica integridade dos 8 arquivos de imagem e 4 PDFs.
+- [x] Diagramação alternada de blocos `imageText` para as etapas e regras.
+- [x] Alerta de comunicado único configurado via `alertBox`.
+- [x] Rascunho salvo no Payload sem erros ou publicação precoce.
 
 ## 13. Registro desta especificação
 
 - Decisões: estruturação dos tópicos de Outorga Onerosa em blocos `imageText`; compartilhamento dos assets de cálculo com a Regularização Comum; correção dos caminhos de PDFs.
+
+
+## 14. Implementação e validação
+
+Implementado em 18/11/2026; consulte o [guia operacional](../relatorio-specs/importadores-declaratoria-comum.md) e o [lote completo](../relatorio-specs/importacao-completa.md).
+
+- Doze blocos existentes, grade compacta com quatro relações Documento, alerta no campo atual `type=warning` e rascunho com ator de auditoria.
+- Fontes conferidas: Declaratória post 204/meta 4112, oito imagens/quatro PDFs; Comum post 206/meta 4115, sete imagens/quatro PDFs. As fórmulas ficam em imagens, sem simulador.
+- O texto real permite uma prorrogação de 30 dias e recurso de 60 dias; não foi reproduzida a afirmação de prazo improrrogável do resumo da spec. Revisão institucional permanece pendente.
+- A Comum corrige link administrativo da Lei e destino do Decreto; não foram copiadas estruturas HTML do editor. Os manuais quebrados usam as versões locais da Home.
+- Reuso de Outorga 1116/1120, fluxo 223 e PDFs 1196/1191/1188/1187. Após as dez páginas: 54 mídias e 29 pastas. Declaratória introduz sete imagens, e Comum quatro; o resumo inicial de contagem de imagens exclusivas da 009 foi corrigido por conferência dos anexos.
+- Nenhuma mudança de schema, migration, componente ou Globals. Persistência por Local API com checkpoints e proteção contra conteúdo editado/publicado.
+- Validado: simulação real das duas páginas e do lote offline; `npm run typecheck`; `npx eslint src/imports`; suíte geral (123 passaram, dois testes de banco opcionais ignorados); integração PostgreSQL das dez páginas com reuso, idempotência e conflitos.
+- Os links de domínio legado são tratados centralmente, conforme a auditoria e o relatório do lote. O banco da instância não recebeu carga.
+- Pendentes revisão institucional, imagens/alternativas/créditos, preview no Admin e disponibilidade dos serviços externos.
+
+O lote completo também foi validado em banco vazio, com dez rascunhos, 54 mídias, 29 pastas e nenhuma URL de domínio legado nos layouts persistidos. Uma segunda execução manteve as mesmas revisões e não duplicou mídia.

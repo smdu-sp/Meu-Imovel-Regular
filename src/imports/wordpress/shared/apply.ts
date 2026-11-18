@@ -1,3 +1,4 @@
+import { localizeSiteLinks, sitePages, type LinkAudit } from "./site-links.ts";
 import path from "node:path";
 import { readFile } from "node:fs/promises";
 import { homeData, type HomePlan } from "../pages/home.ts";
@@ -95,14 +96,12 @@ export async function applyPage(
       );
   };
   const pages: Record<string, number> = {};
-  for (const url of [...plan.sections, ...plan.cards].map((x) => x.url)) {
-    const slug = new URL(url).pathname.replace(/^\/+|\/+$/g, "");
+  for (const slug of Object.keys(sitePages)) {
     const found = await store.find("pages", {
       slug: { equals: slug },
-      _status: { equals: "published" },
       lifecycleStatus: { equals: "active" },
     });
-    if (found.length > 1) throw new Error("Destino interno ambíguo.");
+    if (found.length > 1) throw new Error("Destino interno ambíguo: " + slug);
     if (found[0]) pages[slug] = found[0].id;
   }
   state.reviews ??= {};
@@ -233,12 +232,17 @@ export async function applyPage(
   const media = Object.fromEntries(
     plan.assets.map((a) => [a.id, state.entries["asset:" + a.id].id]),
   );
-  const data = await page.build(media, pages);
+  const linkAudit: LinkAudit[] = [];
+  const data = localizeSiteLinks(
+    await page.build(media, pages),
+    pages,
+    linkAudit,
+  );
   const key = pageKey;
   const inputHash = hash(
     page.sourceFingerprint
       ? page.sourceFingerprint(data)
-      : JSON.stringify(canonical(data)),
+      : JSON.stringify(data),
   );
   const entry = state.entries[key];
   if (entry) {
@@ -297,5 +301,6 @@ export async function applyPage(
     media,
     pages,
     content: canonical(data),
+    linkAudit,
   };
 }
