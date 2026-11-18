@@ -1,7 +1,7 @@
 ---
 spec: MIR-006
 title: Importador editorial da Cartilha WordPress
-status: proposed
+status: implemented
 date: 2026-11-17
 ---
 
@@ -108,11 +108,25 @@ Configuração no destino: `title="Cartilha"`, `slug="cartilha"`, `_status="draf
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline valida os hashes da imagem e do PDF de 4,67 MB sem tocar no banco de dados.
-- [ ] Upload do PDF realizado com `usage="document"` na pasta de documentos.
-- [ ] CTA de download configurado com link de documento apontando para a Media cadastrada.
-- [ ] Rascunho da página gerado com conformidade sem tocar em páginas publicadas.
+- [x] Simulação offline valida os hashes da imagem e do PDF de 4,67 MB sem tocar no banco de dados.
+- [x] Upload do PDF realizado com `usage="document"` na pasta de documentos.
+- [x] CTA de download configurado com link de documento apontando para a Media cadastrada.
+- [x] Rascunho da página gerado com conformidade sem tocar em páginas publicadas.
 
 ## 13. Registro desta especificação
 
 - Decisões: separação física e lógica da imagem de capa e do documento PDF em pastas distintas; uso de `cta` com relação de documento nativa para o download do PDF.
+
+
+## 14. Implementação e validação
+
+Implementado em 18/11/2026; consulte o [guia operacional](../relatorio-specs/importador-cartilha.md).
+
+- Origem conferida: post 1145/meta 4133; duas seções, capa e PDF validados por origem, hash, tamanho e assinatura.
+- Três blocos existentes: banner, introdução com H1 e CTA Documento relacionado ao anexo 1129 na Media. O parágrafo do link legado foi convertido em CTA, preservando os demais textos da apresentação.
+- Sem desvio estrutural, alteração de schema, migration, componente ou Globals. Atomicidade por operação com checkpoints, sem promessa de transação única entre banco, arquivos e manifesto.
+- Validações: simulação real; `npm run typecheck`; `npx eslint src/imports`; `DISABLE_PAYLOAD_HMR=true npm test` (114 passaram, um opcional ignorado); integração PostgreSQL 17 descartável; `git diff --check`.
+- Integração confirmou rascunho com três blocos, PDF com `usage=document`, pastas distintas para capa e documento, CTA com relação correta, reexecução sem gravações, colisão de slug sem manifesto e conflito após edição manual. Após as seis páginas, 34 mídias e 16 pastas.
+- O banco da instância não recebeu carga. O container temporário foi removido após a validação. Pendentes revisão institucional do texto/PDF, conferência visual no Admin/preview e download manual.
+
+Organização documental: o guia operacional foi criado em `relatorio-specs/`, acompanhando a reorganização dos guias feita durante a implementação.

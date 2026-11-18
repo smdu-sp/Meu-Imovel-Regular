@@ -327,6 +327,62 @@ test(
           store.update(faq.pageId, { title: "FAQ revisada no Admin" }),
         );
         await assert.rejects(applyFaq(faqPlan, store, state, save), /Conflito/);
+        const { planCartilha, applyCartilha } =
+          await import("./wordpress/pages/cartilha.ts");
+        const cartilhaPlan = await planCartilha(
+          "old-wordpress/db/meuimovelregular.sql",
+          "old-wordpress/meuimovelregular/wp-content/uploads",
+        );
+        const cartilha = await applyCartilha(cartilhaPlan, store, state, save);
+        const savedCartilha = await store.get("pages", cartilha.pageId, true);
+        assert.equal(savedCartilha._status, "draft");
+        assert.equal(savedCartilha.slug, "cartilha");
+        const cartilhaLayout = savedCartilha.layout as {
+          blockType: string;
+          action?: { type: string; document: number; newTab: boolean };
+        }[];
+        assert.deepEqual(
+          cartilhaLayout.map((b) => b.blockType),
+          ["fullWidthImageBanner", "richText", "cta"],
+        );
+        assert.equal(cartilhaLayout[2].action?.type, "document");
+        assert.equal(
+          cartilhaLayout[2].action?.document,
+          cartilha.media["1129"],
+        );
+        assert.equal(cartilhaLayout[2].action?.newTab, false);
+        const cartilhaPdf = await store.get("media", cartilha.media["1129"]);
+        assert.equal(cartilhaPdf.mimeType, "application/pdf");
+        assert.equal(cartilhaPdf.usage, "document");
+        assert.equal(cartilhaPdf.filesize, 4676839);
+        assert.equal(
+          cartilhaPdf.folder,
+          state.entries["folder:MIR/Cartilha/Documentos"].id,
+        );
+        assert.equal(
+          (await store.get("media", cartilha.media["1150"])).folder,
+          state.entries["folder:MIR/Cartilha/Imagens"].id,
+        );
+        assert.equal((await store.find("media", {})).length, 34);
+        assert.equal((await store.find("payload-folders", {})).length, 16);
+        const beforeCartilhaRepeat = saves;
+        await applyCartilha(cartilhaPlan, store, state, save);
+        assert.equal(saves, beforeCartilhaRepeat);
+        const withoutCartilha = structuredClone(state);
+        delete withoutCartilha.entries["page:1145"];
+        await assert.rejects(
+          applyCartilha(cartilhaPlan, store, withoutCartilha, save),
+          /preexistente/,
+        );
+        await store.transaction(() =>
+          store.update(cartilha.pageId, {
+            title: "Cartilha revisada no Admin",
+          }),
+        );
+        await assert.rejects(
+          applyCartilha(cartilhaPlan, store, state, save),
+          /Conflito/,
+        );
       } catch (error) {
         console.error(error);
         throw error;

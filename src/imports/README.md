@@ -72,7 +72,21 @@ Gravar a página e importar suas mídias no banco configurado:
 npm run import:wordpress -- faq --apply --actor-id 1 --target-label mir-local
 ```
 
-A FAQ reutiliza os três manuais da Home nas respostas 19 e 23. Ao reaplicar uma FAQ intacta, atualiza os links para as URLs da mídia local. [Detalhes e limites da atualização](../../docs/MIR%20-%20DOCS/importador-faq.md).
+A FAQ reutiliza os três manuais da Home nas respostas 19 e 23. Ao reaplicar uma FAQ intacta, atualiza os links para as URLs da mídia local. [Detalhes e limites da atualização](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-faq.md).
+
+## Cartilha
+
+Simular a importação:
+
+```bash
+npm run import:wordpress -- cartilha --dry-run
+```
+
+Gravar a página, a capa e o PDF no banco configurado:
+
+```bash
+npm run import:wordpress -- cartilha --apply --actor-id 1 --target-label mir-local
+```
 
 ## Parâmetros e resultado
 
@@ -98,9 +112,10 @@ O estado das importações fica em `.local/wordpress-import/`. Mantenha esse dir
 
 ## Guias detalhados
 
-- [Operação do importador da Home](../../docs/MIR%20-%20DOCS/importador-home.md).
-- [Operação do importador Entenda](../../docs/MIR%20-%20DOCS/importador-entenda.md).
+- [Operação do importador da Home](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-home.md).
+- [Operação do importador Entenda](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-entenda.md).
 
-- [Operação do importador de Benefícios](../../docs/MIR%20-%20DOCS/importador-beneficios.md).
-- [Operação do importador de Situação do Imóvel](../../docs/MIR%20-%20DOCS/importador-situacao.md).
-- [Operação do importador de FAQ](../../docs/MIR%20-%20DOCS/importador-faq.md).
+- [Operação do importador de Benefícios](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-beneficios.md).
+- [Operação do importador de Situação do Imóvel](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-situacao.md).
+- [Operação do importador de FAQ](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-faq.md).
+- [Operação do importador da Cartilha](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-cartilha.md).
