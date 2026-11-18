@@ -1,7 +1,7 @@
 ---
 spec: MIR-007
 title: Importador editorial de Regularização Automática WordPress
-status: proposed
+status: implemented
 date: 2026-11-17
 ---
 
@@ -118,11 +118,25 @@ A seção vazia `$[2]` é descartada.
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline verifica imagens e resolução dos 4 manuais D01–D04.
-- [ ] Correção dos caminhos quebrados legados de PDF confirmada no relatório.
-- [ ] Bloco `alertBox` configurado adequadamente para as informações importantes.
-- [ ] Rascunho salvo no Payload sem erros de validação ou publicação involuntária.
+- [x] Simulação offline verifica imagens e resolução dos 4 manuais D01–D04.
+- [x] Correção dos caminhos quebrados legados de PDF confirmada no relatório.
+- [x] Bloco `alertBox` configurado adequadamente para as informações importantes.
+- [x] Rascunho salvo no Payload sem erros de validação ou publicação involuntária.
 
 ## 13. Registro desta especificação
 
 - Decisões: correção ativa dos links de manuais quebrados do legado, reaproveitando os PDFs oficiais consolidados na MIR-001; conversão dos tópicos em blocos `imageText` e `alertBox`.
+
+
+## 14. Implementação e validação
+
+Implementado em 18/11/2026; consulte o [guia operacional](../relatorio-specs/importador-regularizacao-automatica.md).
+
+- Origem conferida: post 193/meta 4106, três seções, nove assets e nove blocos.
+- Diferenças da fonte: lista externa somente PDF, sem XLS; seção de certificado menciona Portal de Licenciamento e prazo histórico, sem CEDI. Foi acrescentada orientação para Situação sem consulta a dados oficiais. O alerta real trata de taxas e encaminhamento para Declaratória/Comum; esse conteúdo foi preservado com `type=info`, campo existente no schema.
+- Manuais Inicial e Peças Gráficas com destinos legados indisponíveis foram substituídos pelos anexos 1196 e 1191 da Home. Reuso por anexo/hash no manifesto preserva metadados e pastas; PDFs novos, se necessários, ficam em `MIR/Modalidades/Automatica/Manuais`.
+- O infográfico 223 não estava nas cargas Home–Cartilha. Após essas seis páginas, Automática adiciona cinco imagens e reutiliza quatro PDFs, em vez da previsão resumida de quatro imagens novas e cinco assets reutilizados. As próximas modalidades podem reutilizar o infográfico.
+- Sem mudança de schema, migration, componente ou Globals. Atomicidade por operação com checkpoints, conforme o importador compartilhado.
+- Validado: simulação real, `npm run typecheck`, `npx eslint src/imports`, `DISABLE_PAYLOAD_HMR=true npm test` (117 passaram, um opcional ignorado), integração PostgreSQL 17 descartável e `git diff --check`.
+- Integração confirmou rascunho com nove blocos, grade com quatro relações Documento, reuso dos IDs sem alterar metadados da Home, alerta informativo, 39 mídias e 20 pastas após sete páginas, reexecução sem gravação, colisão de slug sem manifesto e conflito após edição manual.
+- Banco da instância não usado; container temporário removido após validação. Pendentes revisão institucional, imagens/infográfico, preview no Admin e funcionamento dos links/downloads.

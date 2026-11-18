@@ -43,6 +43,12 @@ test("Cartilha snapshot validates the JPEG/PDF, preserves introduction and relat
     ["fullWidthImageBanner", "richText", "cta"],
   );
   assert.equal(page.layout[0].desktopImage, 71);
+  assert.deepEqual(page.layout[0].link, {
+    enabled: true,
+    type: "document",
+    document: 72,
+    newTab: false,
+  });
   assert.deepEqual(page.layout[2].action, {
     label: "Baixar Cartilha Completa (PDF)",
     type: "document",

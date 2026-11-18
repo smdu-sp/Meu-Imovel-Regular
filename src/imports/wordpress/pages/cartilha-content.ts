@@ -23,6 +23,7 @@ export const cartilhaAssets = [
   },
 ] as const;
 export const cartilhaAdjustments = [
+  "Capa clicável configurada com link Documento para o mesmo PDF do CTA.",
   "Parágrafo Clique aqui convertido em CTA de Documento relacionado à Media, sem URL legada no texto.",
   "Apresentação editorial e título H1 preservados a partir do backup; nenhum visualizador PDF incorporado.",
 ];

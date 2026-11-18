@@ -383,6 +383,67 @@ test(
           applyCartilha(cartilhaPlan, store, state, save),
           /Conflito/,
         );
+        const { planAutomatica, applyAutomatica } =
+          await import("./wordpress/pages/regularizacao-automatica.ts");
+        const automaticaPlan = await planAutomatica(
+          "old-wordpress/db/meuimovelregular.sql",
+          "old-wordpress/meuimovelregular/wp-content/uploads",
+        );
+        const manualBefore = await store.get("media", result.media["1196"]);
+        const automatica = await applyAutomatica(
+          automaticaPlan,
+          store,
+          state,
+          save,
+        );
+        const savedAutomatica = await store.get(
+          "pages",
+          automatica.pageId,
+          true,
+        );
+        assert.equal(savedAutomatica._status, "draft");
+        assert.equal(savedAutomatica.slug, "regularizacao-automatica");
+        const automaticaLayout = savedAutomatica.layout as {
+          blockType: string;
+          type?: string;
+          items?: { link: { type: string; document: number } }[];
+        }[];
+        assert.equal(automaticaLayout.length, 9);
+        assert.equal(automaticaLayout[7].blockType, "iconGrid");
+        assert.deepEqual(
+          automaticaLayout[7].items?.map((i) => i.link.document),
+          ["1196", "1191", "1188", "1187"].map((id) => result.media[id]),
+        );
+        assert(
+          automaticaLayout[7].items?.every((i) => i.link.type === "document"),
+        );
+        assert.equal(automaticaLayout[8].type, "info");
+        for (const id of ["1196", "1191", "1188", "1187"])
+          assert.equal(automatica.media[id], result.media[id]);
+        assert.deepEqual(
+          await store.get("media", result.media["1196"]),
+          manualBefore,
+        );
+        assert.equal((await store.find("media", {})).length, 39);
+        assert.equal((await store.find("payload-folders", {})).length, 20);
+        const beforeAutomaticaRepeat = saves;
+        await applyAutomatica(automaticaPlan, store, state, save);
+        assert.equal(saves, beforeAutomaticaRepeat);
+        const withoutAutomatica = structuredClone(state);
+        delete withoutAutomatica.entries["page:193"];
+        await assert.rejects(
+          applyAutomatica(automaticaPlan, store, withoutAutomatica, save),
+          /preexistente/,
+        );
+        await store.transaction(() =>
+          store.update(automatica.pageId, {
+            title: "Automática revisada no Admin",
+          }),
+        );
+        await assert.rejects(
+          applyAutomatica(automaticaPlan, store, state, save),
+          /Conflito/,
+        );
       } catch (error) {
         console.error(error);
         throw error;

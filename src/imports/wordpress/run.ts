@@ -14,6 +14,11 @@ import {
 import { planSituacao, situacaoData, applySituacao } from "./pages/situacao.ts";
 import { planFaq, faqData, applyFaq } from "./pages/faq.ts";
 import { planCartilha, cartilhaData, applyCartilha } from "./pages/cartilha.ts";
+import {
+  planAutomatica,
+  automaticaData,
+  applyAutomatica,
+} from "./pages/regularizacao-automatica.ts";
 import type { State } from "./shared/migration-manifest.ts";
 import {
   openManifest,
@@ -39,12 +44,18 @@ export function argumentsFor(args: string[]) {
   });
   if (
     positionals.length !== 1 ||
-    !["home", "entenda", "beneficios", "situacao", "faq", "cartilha"].includes(
-      positionals[0],
-    )
+    ![
+      "home",
+      "entenda",
+      "beneficios",
+      "situacao",
+      "faq",
+      "cartilha",
+      "regularizacao-automatica",
+    ].includes(positionals[0])
   )
     throw new Error(
-      "Informe somente a página home, entenda, beneficios, situacao, faq ou cartilha.",
+      "Informe somente a página home, entenda, beneficios, situacao, faq, cartilha ou regularizacao-automatica.",
     );
   if (values.apply && values["dry-run"])
     throw new Error("Modos incompatíveis.");
@@ -74,86 +85,103 @@ export async function run(args = process.argv.slice(2)) {
               applyHome(plan, store, state, save),
           };
         })()
-      : options.page === "cartilha"
+      : options.page === "regularizacao-automatica"
         ? await (async () => {
-            const plan = await planCartilha(source, uploads);
+            const plan = await planAutomatica(source, uploads);
             return {
               plan,
-              id: "1145",
+              id: "193",
               metaId: plan.metaId,
               sections: [0, 1],
               data: (media: Record<string, number>) =>
-                cartilhaData(plan, media),
+                automaticaData(plan, media),
               apply: (store: Store, state: State, save: () => Promise<void>) =>
-                applyCartilha(plan, store, state, save),
+                applyAutomatica(plan, store, state, save),
             };
           })()
-        : options.page === "faq"
+        : options.page === "cartilha"
           ? await (async () => {
-              const plan = await planFaq(source, uploads);
+              const plan = await planCartilha(source, uploads);
               return {
                 plan,
-                id: "174",
+                id: "1145",
                 metaId: plan.metaId,
-                sections: [0, 1, 2, 3],
-                data: (media: Record<string, number>) => faqData(plan, media),
+                sections: [0, 1],
+                data: (media: Record<string, number>) =>
+                  cartilhaData(plan, media),
                 apply: (
                   store: Store,
                   state: State,
                   save: () => Promise<void>,
-                ) => applyFaq(plan, store, state, save),
+                ) => applyCartilha(plan, store, state, save),
               };
             })()
-          : options.page === "situacao"
+          : options.page === "faq"
             ? await (async () => {
-                const plan = await planSituacao(source, uploads);
+                const plan = await planFaq(source, uploads);
                 return {
                   plan,
-                  id: "176",
+                  id: "174",
                   metaId: plan.metaId,
-                  sections: [0, 1],
-                  data: (media: Record<string, number>) =>
-                    situacaoData(plan, media),
+                  sections: [0, 1, 2, 3],
+                  data: (media: Record<string, number>) => faqData(plan, media),
                   apply: (
                     store: Store,
                     state: State,
                     save: () => Promise<void>,
-                  ) => applySituacao(plan, store, state, save),
+                  ) => applyFaq(plan, store, state, save),
                 };
               })()
-            : options.page === "beneficios"
+            : options.page === "situacao"
               ? await (async () => {
-                  const plan = await planBeneficios(source, uploads);
+                  const plan = await planSituacao(source, uploads);
                   return {
                     plan,
-                    id: "210",
+                    id: "176",
                     metaId: plan.metaId,
-                    sections: [0, 1, 2, 3, 4, 5],
+                    sections: [0, 1],
                     data: (media: Record<string, number>) =>
-                      beneficiosData(plan, media),
+                      situacaoData(plan, media),
                     apply: (
                       store: Store,
                       state: State,
                       save: () => Promise<void>,
-                    ) => applyBeneficios(plan, store, state, save),
+                    ) => applySituacao(plan, store, state, save),
                   };
                 })()
-              : await (async () => {
-                  const plan = await planEntenda(source, uploads);
-                  return {
-                    plan,
-                    id: "172",
-                    metaId: plan.metaId,
-                    sections: [0, 1, 2, 3, 4, 5, 6],
-                    data: (media: Record<string, number>) =>
-                      entendaData(plan, media),
-                    apply: (
-                      store: Store,
-                      state: State,
-                      save: () => Promise<void>,
-                    ) => applyEntenda(plan, store, state, save),
-                  };
-                })();
+              : options.page === "beneficios"
+                ? await (async () => {
+                    const plan = await planBeneficios(source, uploads);
+                    return {
+                      plan,
+                      id: "210",
+                      metaId: plan.metaId,
+                      sections: [0, 1, 2, 3, 4, 5],
+                      data: (media: Record<string, number>) =>
+                        beneficiosData(plan, media),
+                      apply: (
+                        store: Store,
+                        state: State,
+                        save: () => Promise<void>,
+                      ) => applyBeneficios(plan, store, state, save),
+                    };
+                  })()
+                : await (async () => {
+                    const plan = await planEntenda(source, uploads);
+                    return {
+                      plan,
+                      id: "172",
+                      metaId: plan.metaId,
+                      sections: [0, 1, 2, 3, 4, 5, 6],
+                      data: (media: Record<string, number>) =>
+                        entendaData(plan, media),
+                      apply: (
+                        store: Store,
+                        state: State,
+                        save: () => Promise<void>,
+                      ) => applyEntenda(plan, store, state, save),
+                    };
+                  })();
   const plan = prepared.plan;
   const symbolic = Object.fromEntries(
     plan.assets.map((a, i) => [a.id, -(i + 1)]),

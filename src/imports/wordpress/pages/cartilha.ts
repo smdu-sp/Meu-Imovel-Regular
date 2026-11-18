@@ -96,6 +96,12 @@ export function cartilhaData(
       {
         blockType: "fullWidthImageBanner",
         desktopImage: media["1150"],
+        link: {
+          enabled: true,
+          type: "document",
+          document: media["1129"],
+          newTab: false,
+        },
         imageHeight: "auto",
         overlay: "none",
         imageFit: "contain",

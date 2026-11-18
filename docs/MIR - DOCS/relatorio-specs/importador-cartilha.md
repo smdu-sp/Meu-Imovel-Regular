@@ -53,3 +53,12 @@ Comandos de validação executados:
 - `git diff --check` e links locais deste guia e do README: conferidos.
 
 Testes com subprocessos e banco foram executados fora do sandbox. O container temporário foi removido ao encerrar a validação.
+
+
+### Capa clicável para o PDF
+
+O banner também usa `link.enabled=true`, `type=document`, `document=Media.id` do anexo 1129 e `newTab=false`, apontando ao mesmo PDF do CTA. O componente existente renderiza a capa como link de download com nome acessível. Sem alteração de schema.
+
+A configuração foi adicionada ao importador. Para uma página já editada no CMS, abra o bloco Banner de imagem, habilite “Associar banner a um link”, escolha “Documento PDF” e selecione a Cartilha. Isso evita reaplicar a importação sobre alterações editoriais. Reexecuções do importador continuam sujeitas às proteções de conflito.
+
+Validação da capa clicável: `npm run typecheck`, lint dos três arquivos TypeScript alterados, `git diff --check` e os três testes de `src/imports/cartilha.test.ts` passaram. Sem aplicação no banco da instância ou nova validação visual nesta alteração.
