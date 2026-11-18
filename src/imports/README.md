@@ -102,6 +102,20 @@ Gravar a página e importar/reutilizar suas mídias:
 npm run import:wordpress -- regularizacao-automatica --apply --actor-id 1 --target-label mir-local
 ```
 
+## Regularização Declaratória Simplificada
+
+Simular a importação:
+
+```bash
+npm run import:wordpress -- regularizacao-declaratoria-simplificada --dry-run
+```
+
+Gravar a página e importar/reutilizar suas mídias:
+
+```bash
+npm run import:wordpress -- regularizacao-declaratoria-simplificada --apply --actor-id 1 --target-label mir-local
+```
+
 ## Parâmetros e resultado
 
 - `--dry-run`: valida os arquivos e mostra a composição, sem conectar ao banco. Os IDs negativos das mídias são referências temporárias da simulação.
@@ -134,3 +148,4 @@ O estado das importações fica em `.local/wordpress-import/`. Mantenha esse dir
 - [Operação do importador de FAQ](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-faq.md).
 - [Operação do importador da Cartilha](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-cartilha.md).
 - [Operação do importador de Regularização Automática](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-regularizacao-automatica.md).
+- [Operação do importador de Declaratória Simplificada](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-regularizacao-declaratoria-simplificada.md).

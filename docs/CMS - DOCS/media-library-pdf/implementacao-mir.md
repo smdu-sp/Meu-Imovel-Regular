@@ -69,3 +69,14 @@ O teste de integração usa banco SQLite em memória. Ainda faltam validação m
 5. Atualizar a documentação corrente do CMS pai (`docs/cms/media-library.md` e `schema-evolution-migrations.md`) ao aplicar o port.
 
 Não executar seeds de pastas do MIR no repositório pai. As pastas de `MIR/Home/Imagens` e `MIR/Home/Manuais` são decisão editorial da instância MIR.
+
+
+## Correção da seleção pelo título no seletor de mídia — 18/11/2026
+
+A célula personalizada `MediaTitleCell` criava uma âncora fixa para a edição e chamava `stopPropagation`, ignorando o callback de seleção do Payload. No seletor aberto pelos campos de upload, clicar no título navegava para a ficha em vez de escolher a mídia.
+
+A célula agora delega a `DefaultCell` do Payload, propagando `onClick`, `link`, `linkURL`, contexto e dados da linha. Quando há callback, desabilita a navegação por link e usa o botão nativo de seleção. Na listagem, respeita as propriedades de navegação fornecidas pelo Payload. O fallback de título para nome do arquivo/ID foi mantido. Não há alteração de schema, importMap, dados persistidos ou migrations.
+
+Para replicar no repositório pai, transportar `src/components/admin/MediaTitleCell.tsx`; a collection mantém o mesmo registro do componente. A regressão está em `src/components/admin/MediaTitleCell.test.ts` e renderiza a célula real do Payload com seu provider de configuração, verificando botão no seletor, preservação de callback e navegação da listagem e fallbacks. O teste ignora imports CSS apenas no processo Node de testes.
+
+Validação: testes da célula e contratos de mídia (sete passaram), `npm run typecheck`, lint dos dois arquivos TypeScript alterados e `git diff --check`. Sem validação manual de navegador nesta correção. Conferir no Admin a seleção de imagem/PDF, inclusive dentro de pasta, e a abertura da ficha pela listagem.

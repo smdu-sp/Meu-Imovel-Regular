@@ -444,6 +444,74 @@ test(
           applyAutomatica(automaticaPlan, store, state, save),
           /Conflito/,
         );
+        const { planSimplificada, applySimplificada } =
+          await import("./wordpress/pages/regularizacao-declaratoria-simplificada.ts");
+        const simplificadaPlan = await planSimplificada(
+          "old-wordpress/db/meuimovelregular.sql",
+          "old-wordpress/meuimovelregular/wp-content/uploads",
+        );
+        const flowBefore = await store.get("media", automatica.media["223"]);
+        const simplificada = await applySimplificada(
+          simplificadaPlan,
+          store,
+          state,
+          save,
+        );
+        const savedSimplificada = await store.get(
+          "pages",
+          simplificada.pageId,
+          true,
+        );
+        assert.equal(savedSimplificada._status, "draft");
+        assert.equal(
+          savedSimplificada.slug,
+          "regularizacao-declaratoria-simplificada",
+        );
+        const simplificadaLayout = savedSimplificada.layout as {
+          blockType: string;
+          type?: string;
+          items?: { link: { document: number } }[];
+        }[];
+        assert.equal(simplificadaLayout.length, 9);
+        assert.equal(simplificadaLayout[8].type, "danger");
+        assert.match(
+          JSON.stringify(simplificadaLayout[8]),
+          /não se admite a emissão de comunicado/,
+        );
+        assert.doesNotMatch(
+          JSON.stringify(savedSimplificada),
+          /indeferimento sumário|anisti|wp-content/,
+        );
+        assert.deepEqual(
+          simplificadaLayout[7].items?.map((i) => i.link.document),
+          ["1196", "1191", "1188", "1187"].map((id) => result.media[id]),
+        );
+        for (const id of ["223", "1196", "1191", "1188", "1187"])
+          assert.equal(simplificada.media[id], automatica.media[id]);
+        assert.deepEqual(
+          await store.get("media", automatica.media["223"]),
+          flowBefore,
+        );
+        assert.equal((await store.find("media", {})).length, 43);
+        assert.equal((await store.find("payload-folders", {})).length, 23);
+        const beforeSimplificadaRepeat = saves;
+        await applySimplificada(simplificadaPlan, store, state, save);
+        assert.equal(saves, beforeSimplificadaRepeat);
+        const withoutSimplificada = structuredClone(state);
+        delete withoutSimplificada.entries["page:760"];
+        await assert.rejects(
+          applySimplificada(simplificadaPlan, store, withoutSimplificada, save),
+          /preexistente/,
+        );
+        await store.transaction(() =>
+          store.update(simplificada.pageId, {
+            title: "Simplificada revisada no Admin",
+          }),
+        );
+        await assert.rejects(
+          applySimplificada(simplificadaPlan, store, state, save),
+          /Conflito/,
+        );
       } catch (error) {
         console.error(error);
         throw error;

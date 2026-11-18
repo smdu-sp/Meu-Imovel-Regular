@@ -1,7 +1,7 @@
 ---
 spec: MIR-008
 title: Importador editorial de Regularização Declaratória Simplificada WordPress
-status: proposed
+status: implemented
 date: 2026-11-17
 ---
 
@@ -114,11 +114,24 @@ Destino: `title="Regularização Declaratória Simplificada"`, `slug="regulariza
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline verifica integridade física de arquivos e hashes.
-- [ ] Correção de links de manuais comprovada na grade compacta.
-- [ ] Configuração do alerta crítico destacando a ausência de comunicado no rito simplificado.
-- [ ] Rascunho salvo no Payload sem erros de schema ou publicação prematura.
+- [x] Simulação offline verifica integridade física de arquivos e hashes.
+- [x] Correção de links de manuais comprovada na grade compacta.
+- [x] Configuração do alerta crítico destacando a ausência de comunicado no rito simplificado.
+- [x] Rascunho salvo no Payload sem erros de schema ou publicação prematura.
 
 ## 13. Registro desta especificação
 
 - Decisões: destaque ao alerta de não emissão de comunicado via `alertBox`; saneamento dos links de manuais quebrados.
+
+
+## 14. Implementação e validação
+
+Implementado em 18/11/2026; consulte o [guia operacional](../relatorio-specs/importador-regularizacao-declaratoria-simplificada.md).
+
+- Origem conferida: post 760/meta 4109, duas seções, nove arquivos e nove blocos.
+- Quatro imagens exclusivas e reuso dos anexos 223/1196/1191/1188/1187 pelo manifesto, preservando pastas e metadados existentes. PDFs novos, se necessários, ficam em `MIR/Modalidades/DeclaratoriaSimplificada/Manuais`.
+- Diferenças: alerta usa `type=danger`, campo atual; preserva ausência de comunicado, profissional habilitado e oito casos de encaminhamento à modalidade comum. A expressão “indeferimento sumário” não aparece na fonte e não foi acrescentada. Os oito casos foram convertidos para lista semântica.
+- Sem mudança de schema, migration, componente ou Globals; persistência e atomicidade por operação com checkpoints compartilhados.
+- Validado: simulação real, `npm run typecheck`, `npx eslint src/imports`, `DISABLE_PAYLOAD_HMR=true npm test` (120 passaram, um opcional ignorado), integração PostgreSQL 17 descartável e `git diff --check`.
+- Integração confirmou rascunho, nove blocos, quatro relações Documento, alerta crítico, reuso de cinco IDs sem mover/alterar a mídia compartilhada, reexecução sem gravação, colisão de slug sem manifesto e conflito após edição manual. Após as oito páginas, 43 mídias e 23 pastas.
+- O banco da instância não foi usado; container temporário removido após validação. Pendentes revisão institucional, conteúdo/alternativas das imagens, preview no Admin, downloads e funcionamento dos links.
