@@ -193,14 +193,14 @@ Comandos da implementação: `npm run typecheck`, `npm test`, lint dos arquivos 
 
 Aceite manual: abrir a Home pelo preview, conferir desktop/mobile, capa e botão sem corte de conteúdo, teclado/alternativas de imagem, nove imagens corretas, oito links PDF funcionais e ausência de publicação involuntária. Registrar que os links temporários ao legado ainda dependem de revisão e que Header/Footer exibidos são os Globals já configurados, não importados por este script.
 
-- [ ] Runner e Home específicos, sem importação genérica de todo o WordPress.
-- [ ] Simulação offline e aplicação explícita com destino/ator identificados.
-- [ ] 17 arquivos resolvidos, mídias em pastas e PDFs pela grade de ícones compacta.
-- [ ] Home em rascunho; Home existente/publicada protegida.
-- [ ] Reexecução, recuperação e edição concorrente cobertas por testes.
-- [ ] Schema e dados preexistentes preservados; nenhuma publicação ou alteração de Globals.
-- [ ] Relatório com proveniência, IDs, reutilizações, ajustes editoriais e pendências.
-- [ ] Validações automatizadas e manuais registradas, com limitações explícitas.
+- [x] Runner e Home específicos, sem importação genérica de todo o WordPress.
+- [x] Simulação offline e aplicação explícita com destino/ator identificados.
+- [x] 17 arquivos resolvidos, mídias em pastas e PDFs pela grade de ícones compacta.
+- [x] Home em rascunho; Home existente/publicada protegida.
+- [x] Reexecução, recuperação e edição concorrente cobertas por testes.
+- [x] Schema e dados preexistentes preservados; nenhuma publicação ou alteração de Globals.
+- [x] Relatório com proveniência, IDs, reutilizações, ajustes editoriais e pendências.
+- [x] Validações automatizadas e manuais registradas, com limitações explícitas.
 
 ## 13. Registro desta entrega de especificação
 

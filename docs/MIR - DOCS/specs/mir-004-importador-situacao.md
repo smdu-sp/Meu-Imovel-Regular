@@ -1,7 +1,7 @@
 ---
 spec: MIR-004
 title: Importador editorial de Situação do Imóvel WordPress
-status: proposed
+status: implemented
 date: 2026-11-17
 ---
 
@@ -112,12 +112,25 @@ Configuração no destino: `title="Como saber a situação do meu imóvel?"`, `s
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline verifica os dois arquivos físicos e validação Lexical.
-- [ ] Link do CEDI externo direciona para a página oficial em nova aba.
+- [x] Simulação offline verifica os dois arquivos físicos e validação Lexical.
+- [x] Link do CEDI externo direciona para a página oficial em nova aba.
 - [ ] Diagramação do passo a passo clara e acessível, com imagem ilustrativa.
-- [ ] Respeito aos limites do portal: nenhum código ou formulário de consulta falsa criado.
-- [ ] Rascunho criado com segurança e registrado no manifesto.
+- [x] Respeito aos limites do portal: nenhum código ou formulário de consulta falsa criado.
+- [x] Rascunho criado com segurança e registrado no manifesto.
 
 ## 13. Registro desta especificação
 
 - Decisões: uso de `imageBlock` e `cta` para destacar o fluxo de consulta do CEDI; separação clara entre a orientação institucional e o serviço oficial externo.
+
+
+## 14. Implementação e validação
+
+Implementado em 18/11/2026. Consulte o [guia operacional](../importador-situacao.md).
+
+- Origem conferida: post 176, meta 4149, duas seções. Destino com cinco blocos existentes e duas mídias em `MIR/Situacao/Imagens`.
+- Desvios: preservados os três passos efetivamente encontrados; CAPTCHA, Auto de Regularização e Habite-se não constam dos módulos textuais e não foram acrescentados. Qualificada a explicação do histórico para respeitar os limites do portal. Link HTTP preservado sem pressupor disponibilidade ou suporte a HTTPS.
+- Reuso segue anexo legado e hash no manifesto, sem deduplicação global. Atomicidade por operação, com checkpoints e tratamento de rollback compartilhados com a Home, sem promessa de transação única entre banco, arquivos e manifesto.
+- Nenhuma mudança de schema, migration, integração CEDI, componente ou Globals.
+- Validações: simulação real; `npm run typecheck`; `npx eslint src/imports`; `DISABLE_PAYLOAD_HMR=true npm test` (107 passaram, um teste opcional ignorado); integração PostgreSQL 17 descartável (passou); `git diff --check`.
+- Integração confirmou rascunho com cinco blocos, CTA externo com nova aba, duas novas mídias (26 após as quatro páginas), dez pastas, reexecução sem gravação, recusa de slug sem manifesto e conflito após edição manual.
+- Pendentes: revisão visual no Admin/preview desktop e mobile, disponibilidade do serviço e revisão institucional. O banco da instância não foi usado e o container temporário foi removido após a validação.

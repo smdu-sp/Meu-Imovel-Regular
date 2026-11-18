@@ -103,7 +103,7 @@ test("asset paths reject traversal and symlinks; MIME is signature based", async
 test("CLI is offline by default and rejects unknown/contradictory arguments", () => {
   assert.equal(argumentsFor(["home"]).apply, undefined);
   for (const args of [
-    ["faq"],
+    ["pagina-inexistente"],
     ["home", "--force"],
     ["home", "--apply"],
     ["home", "--apply", "--dry-run"],

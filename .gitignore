@@ -23,6 +23,10 @@
 # legacy WordPress
 /old-wordpress/
 
+# Local media uploads (keep the directory in Git)
+/media/*
+!/media/.gitkeep
+
 # misc
 .DS_Store
 *.pem

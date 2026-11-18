@@ -1,7 +1,7 @@
 ---
 spec: MIR-005
 title: Importador editorial de Dúvidas Frequentes (FAQ) WordPress
-status: proposed
+status: implemented
 date: 2026-11-17
 ---
 
@@ -124,13 +124,30 @@ Nas respostas correspondentes, preservar o conteúdo pedagógico original que es
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline verifica separação exata dos 29 itens e seus conteúdos.
-- [ ] Divisão dos 29 itens em 2 blocos `faqAccordion` válidos perante a restrição de schema `maxRows: 20`.
-- [ ] Eliminação da palavra "anistia" nos títulos das perguntas 1, 14 e 17.
-- [ ] Validação de que nenhuma pergunta ultrapassa 140 caracteres.
-- [ ] Imagens dos 4 canais de atendimento cadastradas e relacionadas em `cards`.
-- [ ] Rascunho criado com segurança e registrado no manifesto.
+- [x] Simulação offline verifica separação exata dos 29 itens e seus conteúdos.
+- [x] Divisão dos 29 itens em 2 blocos `faqAccordion` válidos perante a restrição de schema `maxRows: 20`.
+- [x] Eliminação da palavra "anistia" nos títulos das perguntas 1, 14 e 17.
+- [x] Validação de que nenhuma pergunta ultrapassa 140 caracteres.
+- [x] Imagens dos 4 canais de atendimento cadastradas e relacionadas em `cards`.
+- [x] Rascunho criado com segurança e registrado no manifesto.
 
 ## 13. Registro desta especificação
 
 - Decisões: particionar o acordeão em dois blocos temáticos para evitar quebra do limite de `maxRows: 20` de `FAQBlock` sem alterar o schema do Payload; substituição rigorosa de termos proibidos.
+
+
+## 14. Implementação e validação
+
+Implementado em 18/11/2026; consulte o [guia operacional](../importador-faq.md).
+
+- Origem conferida: post 174/meta 4161; 29 pares extraídos em ordem, perguntas até 140 caracteres e partição 15/14. Seis imagens verificadas, seis blocos gerados.
+- Desvios: explicação didática preservada sem denominação vedada; link corrompido da Lei 15.889/2013 reconstruído da fonte; ilustração 1096 exibida em `imageBlock`; e-mails em texto nos cards por incompatibilidade de `mailto:` com o campo de ação atual, mantendo o link de e-mail na resposta 21. Nenhuma alteração de schema.
+- Validado: simulação real, `npm run typecheck`, `npx eslint src/imports`, `DISABLE_PAYLOAD_HMR=true npm test` (110 passaram, um ignorado), integração PostgreSQL 17 descartável e `git diff --check`.
+- Integração comprovou rascunho, 15/14 itens persistidos, quatro imagens relacionadas aos canais, 32 mídias e 12 pastas após as cinco páginas, reexecução sem gravação, colisão de slug sem manifesto e conflito após edição manual. O container temporário foi removido após a validação.
+- O teste antigo de argumentos, que tratava `faq` como página desconhecida, passou a usar um nome inexistente. As demais proteções do CLI foram preservadas.
+- Pendente: revisão institucional das 29 respostas, prazos, taxas, horários, endereços e contatos; conferência visual e de teclado no Admin/preview. Disponibilidade de links não foi certificada externamente. O banco da instância não recebeu carga nesta implementação.
+
+
+### Correção posterior: manuais locais
+
+As respostas 19 e 23 agora resolvem os links Inicial/Aceite/Pagamento para as URLs reais da Media (anexos 1196/1188/1187), reutilizando os registros da Home pelo manifesto. A versão Inicial de 2021 está ausente no acervo; é usada a versão de 2023 da Home. O plano valida nove arquivos (seis imagens e três PDFs); PDFs novos ficam em `MIR/FAQ/Manuais`. O preview offline mantém links legados até resolver o destino na aplicação. Nenhum schema foi alterado. Detalhes e procedimento de atualização no [guia operacional](../importador-faq.md#correção-dos-links-de-manuais-nas-respostas-19-e-23).

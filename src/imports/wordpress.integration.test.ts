@@ -4,7 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { planHome } from "./wordpress/pages/home.ts";
-import { applyHome } from "./wordpress/shared/apply.ts";
+import { applyHome, applyPage } from "./wordpress/shared/apply.ts";
 import { SNAPSHOT } from "./wordpress/shared/source.ts";
 import type { State } from "./wordpress/shared/migration-manifest.ts";
 
@@ -151,6 +151,182 @@ test(
         assert(
           state.reviews?.["172"].some((s) => s.includes("Destino temporário")),
         );
+        const { planBeneficios, applyBeneficios } =
+          await import("./wordpress/pages/beneficios.ts");
+        const beneficiosPlan = await planBeneficios(
+          "old-wordpress/db/meuimovelregular.sql",
+          "old-wordpress/meuimovelregular/wp-content/uploads",
+        );
+        const sharedBefore = await store.get("media", result.media["712"]);
+        const beneficios = await applyBeneficios(
+          beneficiosPlan,
+          store,
+          state,
+          save,
+        );
+        assert.equal(beneficios.media["712"], result.media["712"]);
+        assert.deepEqual(
+          await store.get("media", result.media["712"]),
+          sharedBefore,
+        );
+        assert.equal((await store.find("media", {})).length, 24);
+        assert.equal((await store.find("payload-folders", {})).length, 8);
+        const savedBeneficios = await store.get(
+          "pages",
+          beneficios.pageId,
+          true,
+        );
+        assert.equal(savedBeneficios._status, "draft");
+        assert.equal(
+          savedBeneficios.slug,
+          "beneficios-de-regularizar-o-imovel",
+        );
+        assert.equal((savedBeneficios.layout as unknown[]).length, 6);
+        const beforeRepeat = saves;
+        await applyBeneficios(beneficiosPlan, store, state, save);
+        assert.equal(saves, beforeRepeat);
+        const withoutBeneficios = structuredClone(state);
+        delete withoutBeneficios.entries["page:210"];
+        await assert.rejects(
+          applyBeneficios(beneficiosPlan, store, withoutBeneficios, save),
+          /preexistente/,
+        );
+        await store.transaction(() =>
+          store.update(beneficios.pageId, {
+            title: "Benefícios revisados no Admin",
+          }),
+        );
+        await assert.rejects(
+          applyBeneficios(beneficiosPlan, store, state, save),
+          /Conflito/,
+        );
+        const { planSituacao, applySituacao } =
+          await import("./wordpress/pages/situacao.ts");
+        const situacaoPlan = await planSituacao(
+          "old-wordpress/db/meuimovelregular.sql",
+          "old-wordpress/meuimovelregular/wp-content/uploads",
+        );
+        const situacao = await applySituacao(situacaoPlan, store, state, save);
+        const savedSituacao = await store.get("pages", situacao.pageId, true);
+        assert.equal(savedSituacao._status, "draft");
+        assert.equal(savedSituacao.slug, "situacao");
+        const layout = savedSituacao.layout as {
+          blockType: string;
+          action?: { url: string; newTab: boolean };
+        }[];
+        assert.deepEqual(
+          layout.map((b) => b.blockType),
+          ["fullWidthImageBanner", "richText", "imageBlock", "richText", "cta"],
+        );
+        assert.equal(layout[4].action?.url, situacaoPlan.url);
+        assert.equal(layout[4].action?.newTab, true);
+        assert.equal((await store.find("media", {})).length, 26);
+        assert.equal((await store.find("payload-folders", {})).length, 10);
+        const beforeSituacaoRepeat = saves;
+        await applySituacao(situacaoPlan, store, state, save);
+        assert.equal(saves, beforeSituacaoRepeat);
+        const withoutSituacao = structuredClone(state);
+        delete withoutSituacao.entries["page:176"];
+        await assert.rejects(
+          applySituacao(situacaoPlan, store, withoutSituacao, save),
+          /preexistente/,
+        );
+        await store.transaction(() =>
+          store.update(situacao.pageId, {
+            title: "Situação revisada no Admin",
+          }),
+        );
+        await assert.rejects(
+          applySituacao(situacaoPlan, store, state, save),
+          /Conflito/,
+        );
+        const { planFaq, applyFaq, faqData } =
+          await import("./wordpress/pages/faq.ts");
+        const faqPlan = await planFaq(
+          "old-wordpress/db/meuimovelregular.sql",
+          "old-wordpress/meuimovelregular/wp-content/uploads",
+        );
+        // Reproduce the previous importer before upgrading only its manual destinations.
+        const previousFaq = await applyPage(
+          {
+            ...faqPlan,
+            assets: faqPlan.assets.filter((a) => a.usage === "content"),
+          },
+          store,
+          state,
+          save,
+          {
+            id: "174",
+            slug: "faq",
+            folders: ["MIR", "MIR/FAQ", "MIR/FAQ/Imagens"],
+            build: (media) => faqData(faqPlan, media),
+          },
+        );
+        const sharedManual = await store.get("media", result.media["1196"]);
+        const faq = await applyFaq(faqPlan, store, state, save);
+        assert.equal(faq.pageId, previousFaq.pageId);
+        for (const id of ["1196", "1188", "1187"])
+          assert.equal(faq.media[id], result.media[id]);
+        assert.deepEqual(
+          await store.get("media", result.media["1196"]),
+          sharedManual,
+        );
+        const savedFaq = await store.get("pages", faq.pageId, true);
+        assert.equal(savedFaq._status, "draft");
+        assert.equal(savedFaq.slug, "faq");
+        const faqLayout = savedFaq.layout as {
+          blockType: string;
+          items?: { image?: number; question?: string; answer?: unknown }[];
+        }[];
+        assert.deepEqual(
+          faqLayout.map((b) => b.blockType),
+          [
+            "fullWidthImageBanner",
+            "richText",
+            "faqAccordion",
+            "faqAccordion",
+            "imageBlock",
+            "cards",
+          ],
+        );
+        assert.deepEqual(
+          [faqLayout[2].items?.length, faqLayout[3].items?.length],
+          [15, 14],
+        );
+        assert.deepEqual(
+          faqLayout[5].items?.map((i) => i.image),
+          [
+            faq.media["733"],
+            faq.media["800"],
+            faq.media["732"],
+            faq.media["734"],
+          ],
+        );
+        for (const index of [3, 7]) {
+          // Answers 19 and 23 in the second accordion.
+          const answer = JSON.stringify(faqLayout[3].items![index].answer);
+          for (const id of ["1196", "1188", "1187"]) {
+            const document = await store.get("media", result.media[id]);
+            assert(answer.includes(document.url as string));
+          }
+          assert.doesNotMatch(answer, /wp-content\/uploads/);
+        }
+        assert.doesNotMatch(JSON.stringify(savedFaq), /anisti/i);
+        assert.equal((await store.find("media", {})).length, 32);
+        assert.equal((await store.find("payload-folders", {})).length, 13);
+        const beforeFaqRepeat = saves;
+        await applyFaq(faqPlan, store, state, save);
+        assert.equal(saves, beforeFaqRepeat);
+        const withoutFaq = structuredClone(state);
+        delete withoutFaq.entries["page:174"];
+        await assert.rejects(
+          applyFaq(faqPlan, store, withoutFaq, save),
+          /preexistente/,
+        );
+        await store.transaction(() =>
+          store.update(faq.pageId, { title: "FAQ revisada no Admin" }),
+        );
+        await assert.rejects(applyFaq(faqPlan, store, state, save), /Conflito/);
       } catch (error) {
         console.error(error);
         throw error;

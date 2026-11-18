@@ -1,7 +1,7 @@
 ---
 spec: MIR-003
 title: Importador editorial de Benefícios de Regularizar o Imóvel WordPress
-status: proposed
+status: implemented
 date: 2026-11-17
 ---
 
@@ -118,12 +118,25 @@ Configuração do destino: `title="Benefícios de Regularizar o Imóvel"`, `slug
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline verifica integridade dos 5 arquivos e listas de conteúdo.
-- [ ] Diagramação alternada (direita/esquerda) nos 4 blocos de público-alvo.
-- [ ] Reuso do anexo 712 comprovado no manifesto e no layout sem duplicação.
-- [ ] Página gerada em rascunho com conteúdo fiel ao original, sem termos vedados.
-- [ ] Testes automatizados de snapshot do layout e verificação de integridade dos links.
+- [x] Simulação offline verifica integridade dos 5 arquivos e listas de conteúdo.
+- [x] Diagramação alternada (direita/esquerda) nos 4 blocos de público-alvo.
+- [x] Reuso do anexo 712 comprovado no manifesto e no layout sem duplicação.
+- [x] Página gerada em rascunho com conteúdo fiel ao original, sem termos vedados.
+- [x] Testes automatizados de snapshot do layout e verificação de integridade dos links.
 
 ## 13. Registro desta especificação
 
 - Decisões: uso de 4 blocos `imageText` para as categorias temáticas com alternância visual de imagem; reuso de imagem já presente na base; listas formatadas semanticamente em Lexical.
+
+
+## 14. Implementação e validação
+
+Implementado em 18/11/2026. Operação e decisões detalhadas no [guia do importador de Benefícios](../importador-beneficios.md).
+
+- Meta `dslc_code` conferida: `4081`; seis seções, cinco imagens e seis blocos.
+- Preservados os itens reais do backup (4/4/5/3), que diferem dos resumos exemplificativos da seção 7. Não foram inventados benefícios de comprovação de endereço, crédito, sucessão ou parcerias ausentes da fonte.
+- Introdução ajustada para não prometer posse, garantia total ou regularidade automática. Benefícios condicionados aos requisitos aplicáveis e referência à Outorga Onerosa qualificada, mantendo revisão editorial pendente.
+- Nenhuma alteração de schema, migration, componente ou Globals. Conteúdo da instância não aplicado durante a implementação.
+- Validação: simulação real; `npm run typecheck`; `npx eslint src/imports`; `DISABLE_PAYLOAD_HMR=true npm test` (104 passaram, um ignorado); integração PostgreSQL 17 descartável (passou); `git diff --check`.
+- Integração confirmou seis blocos persistidos, rascunho, mídia 712 reutilizada sem mudança de metadados/pasta, total de 24 mídias após Home/Entenda/Benefícios, reexecução sem gravação, colisão de slug e conflito após edição manual.
+- Pendentes: revisão institucional do conteúdo, funcionamento do link externo e conferência visual no Admin/preview desktop e mobile. Não houve validação jurídica ou navegação externa.

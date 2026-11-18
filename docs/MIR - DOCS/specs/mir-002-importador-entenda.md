@@ -129,13 +129,13 @@ A seção vazia `$[7]` não gera bloco.
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline (`--dry-run`) valida os 5 assets, hashes e estrutura sem tocar no banco de dados.
-- [ ] Vídeo do YouTube configurado via `videoBlock` sem iframe cru ou scripts incorporados.
-- [ ] Remoção da expressão "anistia" nos títulos institucionais e alinhamento do texto explicativo.
-- [ ] Correção do link da modalidade Declaratória Simplificada para `/regularizacao-declaratoria-simplificada/`.
-- [ ] Reuso bem-sucedido dos assets 712 e 776 já cadastrados pela Home.
-- [ ] Criação da página `entenda` como rascunho (`_status="draft"`), protegendo páginas publicadas.
-- [ ] Testes de unidade cobrindo o parser de conteúdo e a integridade da montagem dos blocos.
+- [x] Simulação offline (`--dry-run`) valida os 5 assets, hashes e estrutura sem tocar no banco de dados.
+- [x] Vídeo do YouTube configurado via `videoBlock` sem iframe cru ou scripts incorporados.
+- [x] Remoção da expressão "anistia" nos títulos institucionais e alinhamento do texto explicativo.
+- [x] Correção do link da modalidade Declaratória Simplificada para `/regularizacao-declaratoria-simplificada/`.
+- [x] Reuso bem-sucedido dos assets 712 e 776 já cadastrados pela Home.
+- [x] Criação da página `entenda` como rascunho (`_status="draft"`), protegendo páginas publicadas.
+- [x] Testes de unidade cobrindo o parser de conteúdo e a integridade da montagem dos blocos.
 
 ## 13. Registro desta especificação
 

@@ -40,7 +40,8 @@ export type PageImport = {
   build: (
     media: Record<string, number>,
     pages: Record<string, number>,
-  ) => Record<string, unknown>;
+  ) => Record<string, unknown> | Promise<Record<string, unknown>>;
+  sourceFingerprint?: (data: Record<string, unknown>) => string;
 };
 export async function applyHome(
   plan: HomePlan,
@@ -232,9 +233,13 @@ export async function applyPage(
   const media = Object.fromEntries(
     plan.assets.map((a) => [a.id, state.entries["asset:" + a.id].id]),
   );
-  const data = page.build(media, pages);
+  const data = await page.build(media, pages);
   const key = pageKey;
-  const inputHash = hash(JSON.stringify(canonical(data)));
+  const inputHash = hash(
+    page.sourceFingerprint
+      ? page.sourceFingerprint(data)
+      : JSON.stringify(canonical(data)),
+  );
   const entry = state.entries[key];
   if (entry) {
     const originalEntry = { ...entry };
