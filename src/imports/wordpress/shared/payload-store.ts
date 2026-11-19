@@ -35,7 +35,11 @@ export async function isolatedAdapter(uri: string, push = false) {
 }
 
 let connectionSequence = 0;
-export async function connectStore(uri: string, actorId: number) {
+export async function connectStore(
+  uri: string,
+  actorId: number,
+  globalSlug: "header" | "footer" = "header",
+) {
   process.env.DISABLE_PAYLOAD_HMR = "true";
   if (process.env.PAYLOAD_DROP_DATABASE === "true")
     throw new Error("PAYLOAD_DROP_DATABASE não pode estar habilitado.");
@@ -84,9 +88,9 @@ export async function connectStore(uri: string, actorId: number) {
     };
     const store: Store = {
       find,
-      getGlobal: async () =>
+      getGlobal: async (slug = "header") =>
         (await payload.findGlobal({
-          slug: "header",
+          slug,
           depth: 0,
           overrideAccess: false,
           req,
@@ -120,9 +124,9 @@ export async function connectStore(uri: string, actorId: number) {
           overrideAccess: false,
           req,
         } as Parameters<Payload["update"]>[0])) as unknown as Doc,
-      updateGlobal: async (data) =>
+      updateGlobal: async (data, slug = "header") =>
         (await payload.updateGlobal({
-          slug: "header",
+          slug,
           data,
           depth: 0,
           overrideAccess: false,
@@ -150,7 +154,9 @@ export async function connectStore(uri: string, actorId: number) {
               >;
             }
           ).sessions[String(id)].db.execute(
-            sql`LOCK TABLE pages, _pages_v, media, payload_folders, header IN SHARE ROW EXCLUSIVE MODE`,
+            globalSlug === "footer"
+              ? sql`LOCK TABLE pages, _pages_v, media, payload_folders, footer IN SHARE ROW EXCLUSIVE MODE`
+              : sql`LOCK TABLE pages, _pages_v, media, payload_folders, header IN SHARE ROW EXCLUSIVE MODE`,
           );
           let result;
           try {
@@ -179,7 +185,7 @@ export async function connectStore(uri: string, actorId: number) {
     // Queries validate columns/relations against the existing schema; no DDL is run.
     for (const collection of ["pages", "media", "payload-folders"])
       await store.find(collection, {});
-    await store.getGlobal?.();
+    await store.getGlobal?.(globalSlug);
     return {
       store,
       close: async () => {

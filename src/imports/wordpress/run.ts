@@ -46,6 +46,7 @@ import {
 } from "./shared/migration-manifest.ts";
 import { SNAPSHOT } from "./shared/source.ts";
 import { applyHeader, headerData, planHeader } from "./globals/header.ts";
+import { applyFooter, footerData, planFooter } from "./globals/footer.ts";
 
 export function argumentsFor(args: string[]) {
   const { values, positionals } = parseArgs({
@@ -65,7 +66,7 @@ export function argumentsFor(args: string[]) {
   });
   if (
     positionals.length !== 1 ||
-    positionals[0] !== "header" &&
+    !["header", "footer"].includes(positionals[0]) &&
     !Object.keys(sitePages).some(
       (key) =>
         key === positionals[0] ||
@@ -74,7 +75,7 @@ export function argumentsFor(args: string[]) {
     )
   )
     throw new Error(
-      "Informe uma página suportada ou header: home, entenda, beneficios, situacao, faq, cartilha ou uma modalidade de regularizacao.",
+      "Informe uma página suportada, header ou footer: home, entenda, beneficios, situacao, faq, cartilha ou uma modalidade de regularizacao.",
     );
   if (values.apply && values["dry-run"])
     throw new Error("Modos incompatíveis.");
@@ -250,7 +251,11 @@ export async function openImportSession(
   );
   try {
     const { connectStore } = await import("./shared/payload-store.ts");
-    const connection = await connectStore(uri, Number(options["actor-id"]));
+    const connection = await connectStore(
+      uri,
+      Number(options["actor-id"]),
+      options.page === "footer" ? "footer" : "header",
+    );
     return {
       store: connection.store,
       state: manifest.state,
@@ -276,26 +281,41 @@ export async function run(
   const source = options.source || "old-wordpress/db/meuimovelregular.sql";
   const uploads =
     options.uploads || "old-wordpress/mir-web/wp-content/uploads";
-  if (options.page === "header") {
-    const plan = await planHeader(source, uploads);
-    const symbolicMedia = Object.fromEntries(plan.assets.map((asset, index) => [asset.id, -(index + 1)]));
-    const symbolicPages = Object.fromEntries(plan.menu.map((item, index) => [item.slug, -(index + 1)]));
+  if (options.page === "header" || options.page === "footer") {
+    const prepared = options.page === "header"
+      ? await (async () => {
+          const plan = await planHeader(source, uploads);
+          const symbolicMedia = Object.fromEntries(plan.assets.map((asset, index) => [asset.id, -(index + 1)]));
+          const symbolicPages = Object.fromEntries(plan.menu.map((item, index) => [item.slug, -(index + 1)]));
+          return {
+            plan,
+            origin: { file: source, postId: plan.postId, metaId: plan.metaId, menuIds: plan.menu.map((item) => item.id) },
+            data: headerData(plan, symbolicMedia, symbolicPages),
+            apply: (store: Store, state: State, save: () => Promise<void>) => applyHeader(plan, store, state, save),
+          };
+        })()
+      : await (async () => {
+          const plan = await planFooter(source, uploads);
+          const symbolicMedia = Object.fromEntries(plan.assets.map((asset, index) => [asset.id, -(index + 1)]));
+          return {
+            plan,
+            origin: { file: source, postId: plan.postId, metaId: plan.metaId },
+            data: footerData(plan, symbolicMedia),
+            apply: (store: Store, state: State, save: () => Promise<void>) => applyFooter(plan, store, state, save),
+          };
+        })();
+    const { plan } = prepared;
     const report: Record<string, unknown> = {
       mode: options.apply ? "apply" : "dry-run",
       snapshot: SNAPSHOT,
       converterVersion: 1,
-      origin: {
-        file: source,
-        postId: plan.postId,
-        metaId: plan.metaId,
-        menuIds: plan.menu.map((item) => item.id),
-      },
+      origin: prepared.origin,
       destinationState: "não verificado",
       assets: plan.assets.map(({ id, title, alt, relative, hash, mimeType, size, usage, folder }) => ({
         id, title, alt, relative, hash, mimeType, size, usage, folder,
       })),
-      menu: plan.menu,
-      header: headerData(plan, symbolicMedia, symbolicPages),
+      ...(options.page === "header" ? { menu: (plan as Awaited<ReturnType<typeof planHeader>>).menu } : {}),
+      [options.page]: prepared.data,
     };
     if (options.report) {
       const target = path.resolve(options.report);
@@ -313,7 +333,7 @@ export async function run(
       if (options.apply) {
         const session = settings.session || (await openImportSession(options));
         try {
-          report.result = await applyHeader(plan, session.store, session.state, session.save);
+          report.result = await prepared.apply(session.store, session.state, session.save);
           report.destinationState = "verificado";
         } finally {
           if (!settings.session) await session.close();

@@ -1,7 +1,7 @@
 ---
 spec: MIR-012
 title: Importador editorial do Rodapé (Footer Global) WordPress
-status: proposed
+status: implemented
 date: 2026-11-18
 ---
 
@@ -139,13 +139,15 @@ Validação offline sem conexão com o banco de dados. Verifica a integridade do
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline (`--dry-run`) valida o arquivo físico do logo PMSP (anexo 179), hash SHA-256 e extração dos textos de endereço e redes sociais sem acesso ao banco de dados.
+- [x] Simulação offline (`--dry-run`) valida o arquivo físico do logo PMSP (anexo 179), hash SHA-256 e extração dos textos de endereço e redes sociais sem acesso ao banco de dados.
 - [ ] O logo PMSP é atribuído a `Footer.logo` e exibido com fidelidade pelo componente `SiteFooter`.
 - [ ] Os campos de e-mail (`meuimovelregular@prefeitura.sp.gov.br`) e telefone (`156`) são configurados e geram links acessíveis (`mailto:` e `tel:`).
-- [ ] As três redes sociais (Twitter/X, Facebook, Instagram) são cadastradas com os ícones correspondentes do catálogo (`x-social`, `facebook`, `instagram`).
-- [ ] Reexecução idêntica é reconhecida como limpa e não executa gravações adicionais.
-- [ ] Testes de unidade cobrindo a extração de contatos e validação de URLs do rodapé.
+- [x] As três redes sociais (Twitter/X, Facebook, Instagram) são cadastradas com os ícones correspondentes do catálogo (`x-social`, `facebook`, `instagram`).
+- [x] Reexecução idêntica é reconhecida como limpa e não executa gravações adicionais.
+- [x] Testes de unidade cobrindo a extração de contatos e validação de URLs do rodapé.
 
 ## 13. Registro desta especificação
 
 - Decisões: mapeamento integral dos dados cívicos de contato e endereço; conversão dos ícones do builder para o sistema de ícones padronizado (`x-social`); inclusão de links institucionais seguros para a administração municipal; preservação do isolamento de apresentação gráfica em relação aos dados do CMS.
+
+Implementação e limites de validação: [guia operacional MIR-012](../relatorio-specs/importador-footer.md). A aplicação no banco da instância não faz parte da implementação do comando.

@@ -14,14 +14,14 @@ import { hash } from "./source.ts";
 export interface Store {
   find(collection: string, where: Record<string, unknown>): Promise<Doc[]>;
   get(collection: string, id: number, draft?: boolean): Promise<Doc>;
-  getGlobal?(): Promise<Doc>;
+  getGlobal?(slug?: "header" | "footer"): Promise<Doc>;
   create(
     collection: string,
     data: Record<string, unknown>,
     file?: string,
   ): Promise<Doc>;
   update(id: number, data: Record<string, unknown>): Promise<Doc>;
-  updateGlobal?(data: Record<string, unknown>): Promise<Doc>;
+  updateGlobal?(data: Record<string, unknown>, slug?: "header" | "footer"): Promise<Doc>;
   transaction<T>(fn: () => Promise<T>): Promise<T>;
 }
 const collectionFor = (key: string) =>

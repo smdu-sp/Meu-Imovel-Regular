@@ -18,6 +18,8 @@ npm run import:wordpress:all -- --apply --actor-id 1 --target-label mir-local
 
 O lote valida todas as fontes antes de gravar, reutiliza o manifesto e faz duas passadas: carga e resolução final das referências. Para ao encontrar conflito, sem sobrescrever conteúdo editado/publicado. Não executa migrations de schema. [Guia do lote e atualização de links](../../docs/MIR%20-%20DOCS/relatorio-specs/importacao-completa.md).
 
+O lote inclui apenas as dez páginas. Execute os Globals Header e Footer separadamente.
+
 ## Home
 
 Simular a importação:
@@ -141,10 +143,28 @@ npm run import:wordpress -- regularizacao-comum --dry-run
 npm run import:wordpress -- regularizacao-comum --apply --actor-id 1 --target-label mir-local
 ```
 
+## Cabeçalho (Header Global)
+
+```bash
+npm run import:wordpress -- header --dry-run
+npm run import:wordpress -- header --apply --actor-id 1 --target-label mir-local
+```
+
+A aplicação exige as cinco páginas de destino já cadastradas e ativas. Importa os logos MIR e SMUL e configura o menu principal. [Guia operacional do Header](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-header.md).
+
+## Rodapé (Footer Global)
+
+```bash
+npm run import:wordpress -- footer --dry-run
+npm run import:wordpress -- footer --apply --actor-id 1 --target-label mir-local
+```
+
+Importa o logo da Prefeitura, contatos, endereço, redes sociais e links institucionais. Reutiliza a pasta de identidade do Header quando ela já consta no manifesto. Confira a vigência dos dados institucionais antes de aplicar em produção. [Guia operacional do Footer](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-footer.md).
+
 ## Parâmetros e resultado
 
 - `--dry-run`: valida os arquivos e mostra a composição, sem conectar ao banco. Os IDs negativos das mídias são referências temporárias da simulação.
-- `--apply`: cria ou atualiza a página como **rascunho**. Confira o resultado no Admin antes de publicar.
+- `--apply`: cria ou atualiza páginas como **rascunho**; para `header` e `footer`, atualiza o Global correspondente. Confira o resultado no Admin.
 - `--actor-id 1`: substitua `1` pelo ID de um administrador existente no CMS.
 - `--target-label mir-local`: identifica o ambiente no manifesto. A conexão efetiva é definida por `DATABASE_URI`, carregada do ambiente do projeto.
 
@@ -153,7 +173,7 @@ A aplicação exige o PostgreSQL disponível e o schema preparado. O importador 
 As fontes padrão precisam estar disponíveis localmente:
 
 - Dump: `old-wordpress/db/meuimovelregular.sql`.
-- Assets: `old-wordpress/meuimovelregular/wp-content/uploads`.
+- Assets: `old-wordpress/mir-web/wp-content/uploads`.
 
 Para salvar a simulação em um arquivo, acrescente `--report`:
 
@@ -175,3 +195,5 @@ O estado das importações fica em `.local/wordpress-import/`. Mantenha esse dir
 - [Operação do importador de Regularização Automática](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-regularizacao-automatica.md).
 - [Operação do importador de Declaratória Simplificada](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-regularizacao-declaratoria-simplificada.md).
 - [Operação de Declaratória e Comum](../../docs/MIR%20-%20DOCS/relatorio-specs/importadores-declaratoria-comum.md).
+- [Operação do importador do Header](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-header.md).
+- [Operação do importador do Footer](../../docs/MIR%20-%20DOCS/relatorio-specs/importador-footer.md).
