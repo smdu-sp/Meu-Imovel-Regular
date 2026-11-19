@@ -78,9 +78,15 @@ export function* sqlRows(source: string, offset: number): Generator<string[]> {
   fail();
 }
 export function readTables(source: string): Record<string, Row[]> {
-  const tables: Record<string, Row[]> = { wp_posts: [], wp_postmeta: [] };
+  const tables: Record<string, Row[]> = {
+    wp_posts: [],
+    wp_postmeta: [],
+    wp_options: [],
+    wp_term_relationships: [],
+    wp_term_taxonomy: [],
+  };
   const header =
-    /^(?:REPLACE|INSERT) INTO `(wp_posts|wp_postmeta)`\s*\(([^)]+)\)\s*VALUES\s*/gm;
+    /^(?:REPLACE|INSERT) INTO `(wp_posts|wp_postmeta|wp_options|wp_term_relationships|wp_term_taxonomy)`\s*\(([^)]+)\)\s*VALUES\s*/gm;
   for (const match of source.matchAll(header)) {
     const columns = [...match[2].matchAll(/`([^`]+)`/g)].map((m) => m[1]);
     for (const values of sqlRows(source, match.index! + match[0].length)) {

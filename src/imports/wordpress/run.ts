@@ -45,6 +45,7 @@ import {
   targetFingerprint,
 } from "./shared/migration-manifest.ts";
 import { SNAPSHOT } from "./shared/source.ts";
+import { applyHeader, headerData, planHeader } from "./globals/header.ts";
 
 export function argumentsFor(args: string[]) {
   const { values, positionals } = parseArgs({
@@ -64,6 +65,7 @@ export function argumentsFor(args: string[]) {
   });
   if (
     positionals.length !== 1 ||
+    positionals[0] !== "header" &&
     !Object.keys(sitePages).some(
       (key) =>
         key === positionals[0] ||
@@ -72,7 +74,7 @@ export function argumentsFor(args: string[]) {
     )
   )
     throw new Error(
-      "Informe uma página suportada: home, entenda, beneficios, situacao, faq, cartilha ou uma modalidade de regularizacao.",
+      "Informe uma página suportada ou header: home, entenda, beneficios, situacao, faq, cartilha ou uma modalidade de regularizacao.",
     );
   if (values.apply && values["dry-run"])
     throw new Error("Modos incompatíveis.");
@@ -273,7 +275,69 @@ export async function run(
   const options = argumentsFor(args);
   const source = options.source || "old-wordpress/db/meuimovelregular.sql";
   const uploads =
-    options.uploads || "old-wordpress/meuimovelregular/wp-content/uploads";
+    options.uploads || "old-wordpress/mir-web/wp-content/uploads";
+  if (options.page === "header") {
+    const plan = await planHeader(source, uploads);
+    const symbolicMedia = Object.fromEntries(plan.assets.map((asset, index) => [asset.id, -(index + 1)]));
+    const symbolicPages = Object.fromEntries(plan.menu.map((item, index) => [item.slug, -(index + 1)]));
+    const report: Record<string, unknown> = {
+      mode: options.apply ? "apply" : "dry-run",
+      snapshot: SNAPSHOT,
+      converterVersion: 1,
+      origin: {
+        file: source,
+        postId: plan.postId,
+        metaId: plan.metaId,
+        menuIds: plan.menu.map((item) => item.id),
+      },
+      destinationState: "não verificado",
+      assets: plan.assets.map(({ id, title, alt, relative, hash, mimeType, size, usage, folder }) => ({
+        id, title, alt, relative, hash, mimeType, size, usage, folder,
+      })),
+      menu: plan.menu,
+      header: headerData(plan, symbolicMedia, symbolicPages),
+    };
+    if (options.report) {
+      const target = path.resolve(options.report);
+      const stateDir = path.resolve(options["state-dir"] || ".local/wordpress-import");
+      if ([
+        path.resolve(source),
+        ...plan.assets.map((asset) => asset.filename),
+        path.join(stateDir, "manifest.json"),
+        path.join(stateDir, "execution.lock"),
+      ].includes(target))
+        throw new Error("Relatório não pode substituir fonte ou estado operacional.");
+    }
+    let failure: unknown;
+    try {
+      if (options.apply) {
+        const session = settings.session || (await openImportSession(options));
+        try {
+          report.result = await applyHeader(plan, session.store, session.state, session.save);
+          report.destinationState = "verificado";
+        } finally {
+          if (!settings.session) await session.close();
+        }
+      }
+    } catch (error) {
+      failure = error;
+      report.error = String(error instanceof Error ? error.message : "Falha na aplicação")
+        .replace(/postgres(?:ql)?:\/\/[^\s]+/gi, "[destino omitido]");
+      report.destinationState = "falha; consultar checkpoints antes de retomar";
+    }
+    const output = JSON.stringify(report, null, 2) + "\n";
+    if (options.report) {
+      await mkdir(path.dirname(options.report), { recursive: true });
+      await writeFile(options.report, output, { mode: 0o600 });
+    } else if (options.apply) {
+      const dir = options["state-dir"] || ".local/wordpress-import";
+      await mkdir(dir, { recursive: true });
+      await writeFile(path.join(dir, `report-${Date.now()}.json`), output, { mode: 0o600 });
+    }
+    if (settings.print !== false) console.log(output);
+    if (failure) throw failure;
+    return report;
+  }
   const prepared = await preparePage(options.page, source, uploads);
   const plan = prepared.plan;
   const symbolic = Object.fromEntries(

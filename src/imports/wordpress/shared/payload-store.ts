@@ -84,6 +84,13 @@ export async function connectStore(uri: string, actorId: number) {
     };
     const store: Store = {
       find,
+      getGlobal: async () =>
+        (await payload.findGlobal({
+          slug: "header",
+          depth: 0,
+          overrideAccess: false,
+          req,
+        })) as unknown as Doc,
       get: async (collection, id, draft = true) =>
         (await payload.findByID({
           collection,
@@ -113,6 +120,14 @@ export async function connectStore(uri: string, actorId: number) {
           overrideAccess: false,
           req,
         } as Parameters<Payload["update"]>[0])) as unknown as Doc,
+      updateGlobal: async (data) =>
+        (await payload.updateGlobal({
+          slug: "header",
+          data,
+          depth: 0,
+          overrideAccess: false,
+          req,
+        } as Parameters<Payload["updateGlobal"]>[0])) as unknown as Doc,
       transaction: async (fn) => {
         if (req.transactionID)
           throw new Error("Transação aninhada não suportada.");
@@ -135,7 +150,7 @@ export async function connectStore(uri: string, actorId: number) {
               >;
             }
           ).sessions[String(id)].db.execute(
-            sql`LOCK TABLE pages, _pages_v, media, payload_folders IN SHARE ROW EXCLUSIVE MODE`,
+            sql`LOCK TABLE pages, _pages_v, media, payload_folders, header IN SHARE ROW EXCLUSIVE MODE`,
           );
           let result;
           try {
@@ -164,6 +179,7 @@ export async function connectStore(uri: string, actorId: number) {
     // Queries validate columns/relations against the existing schema; no DDL is run.
     for (const collection of ["pages", "media", "payload-folders"])
       await store.find(collection, {});
+    await store.getGlobal?.();
     return {
       store,
       close: async () => {

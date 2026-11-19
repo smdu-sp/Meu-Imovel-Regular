@@ -51,6 +51,8 @@ export function projection(doc: Doc, collection: string) {
   const fields =
     collection === "pages"
       ? ["title", "slug", "layout", "seo", "_status", "lifecycleStatus"]
+      : collection === "header"
+        ? ["appearance", "logo", "navigationMode", "enableSearch", "navigation", "menuItems"]
       : collection === "media"
         ? [
             "title",

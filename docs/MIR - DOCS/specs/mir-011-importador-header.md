@@ -1,7 +1,7 @@
 ---
 spec: MIR-011
 title: Importador editorial do Cabeçalho (Header Global) WordPress
-status: proposed
+status: implemented
 date: 2026-11-18
 ---
 
@@ -148,13 +148,15 @@ Os itens de menu exigem relacionamento `page` com a coleção `pages`. O importa
 
 ## 12. Validação e critérios de aceite
 
-- [ ] Simulação offline (`--dry-run`) valida os arquivos físicos dos logos (anexos 356 e 1183), hashes SHA-256 e parsing dos 5 itens de menu no SQL sem acessar o banco de dados.
-- [ ] Os 5 itens de menu são mapeados na ordem exata de `menu_order` (1 a 5), com rótulos corretos e relações resolvidas.
+- [x] Simulação offline (`--dry-run`) valida os arquivos físicos dos logos (anexos 356 e 1183), hashes SHA-256 e parsing dos 5 itens de menu no SQL sem acessar o banco de dados.
+- [x] Os 5 itens de menu são mapeados na ordem exata de `menu_order` (1 a 5), com rótulos corretos e relações resolvidas.
 - [ ] O logo principal é atribuído ao campo `Header.logo` e devidamente renderizado pelo componente `SiteHeader`.
-- [ ] Recusa explícita de aplicação caso o Global `header` tenha sido editado manualmente por um administrador.
-- [ ] Reexecução idêntica não produz gravações ou revalidações redundantes.
-- [ ] Testes de unidade cobrindo a extração dos menus e a resolução de relacionamentos com `pages`.
+- [x] Recusa explícita de aplicação caso o Global `header` tenha sido editado manualmente por um administrador.
+- [x] Reexecução idêntica não produz gravações ou revalidações redundantes.
+- [x] Testes de unidade cobrindo a extração dos menus e a resolução de relacionamentos com `pages`.
 
 ## 13. Registro desta especificação
 
 - Decisões: uso do modo `navigationMode = "normal"` para acomodar perfeitamente os 5 links sem submenus; respeito aos rótulos customizados do menu legado ("Estou regular?" e "Benefícios"); isolamento de CSS arbitrário em prol do design system institucional; armazenamento dos logos institucionais em pasta compartilhada padronizada.
+
+Implementação e limites de validação: [guia operacional MIR-011](../relatorio-specs/importador-header.md). A aplicação no banco da instância não faz parte da implementação do comando.
