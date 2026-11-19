@@ -142,4 +142,20 @@ describe("SEO metadata", () => {
     assert.equal(metadata.description, "Descricao padrao");
     assert.equal((metadata.twitter as { card?: string } | undefined)?.card, "summary");
   });
+
+  it("uses the configured PNG or SVG media as the browser tab icon", () => {
+    const settings = {
+      id: 1,
+      deadline: "2026-12-31T12:00:00.000Z",
+      siteName: "Nome do site",
+      favicon: { ...socialImage, mimeType: "image/png", url: "/api/media/file/icon.png" },
+    } satisfies SiteSetting;
+
+    assert.deepEqual(generateSiteMetadata(settings).icons, {
+      icon: [{ url: "/api/media/file/icon.png", type: "image/png" }],
+    });
+    assert.deepEqual(generateSiteMetadata({ ...settings, favicon: { ...socialImage, mimeType: "application/pdf" } }).icons, {
+      icon: undefined,
+    });
+  });
 });

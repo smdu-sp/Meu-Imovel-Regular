@@ -15,6 +15,18 @@ const items = [{
 }];
 
 describe("Cards custom theme", () => {
+  it("renders the selected grid width and keeps the action at the card base", () => {
+    const markup = renderToStaticMarkup(createElement(CardsBlock, {
+      blockType: "cards",
+      columns: "4",
+      items: [{ ...items[0], link: { label: "Saiba mais", type: "external", url: "https://example.org" } }],
+      variant: "default",
+    } as never));
+
+    assert.match(markup, /lg:grid-cols-4/);
+    assert.match(markup, /mt-auto shrink-0 pt-5/);
+  });
+
   it("applies background, foreground and accent to the card grid", () => {
     const markup = renderToStaticMarkup(createElement(CardsBlock, {
       appearance: {

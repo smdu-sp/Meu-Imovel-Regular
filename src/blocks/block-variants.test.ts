@@ -13,6 +13,7 @@ import {
   normalizeCTAVariant,
 } from "./CTA/Component";
 import {
+  normalizeCardsColumns,
   normalizeCardsSpacing,
   normalizeCardsTone,
   normalizeCardsVariant,
@@ -137,6 +138,8 @@ describe("block variant fallbacks", () => {
   it("keeps ImageText variants and maps legacy image positions", () => {
     assert.equal(normalizeImageTextVariant("image-left"), "image-left");
     assert.equal(normalizeImageTextVariant("image-right"), "image-right");
+    assert.equal(normalizeImageTextVariant("image-top"), "image-top");
+    assert.equal(normalizeImageTextVariant("image-bottom"), "image-bottom");
     assert.equal(normalizeImageTextVariant("left"), "image-left");
     assert.equal(normalizeImageTextVariant("right"), "image-right");
     assert.equal(normalizeImageTextVariant("unknown"), "image-left");
@@ -234,6 +237,20 @@ describe("block variant fallbacks", () => {
     assert.equal(normalizeCardsVariant("default"), "default");
     assert.equal(normalizeCardsVariant("modalities"), "modalities");
     assert.equal(normalizeCardsVariant("unknown"), "default");
+    assert.equal(normalizeCardsColumns("2"), "2");
+    assert.equal(normalizeCardsColumns("4"), "4");
+    assert.equal(normalizeCardsColumns("8"), "8");
+    assert.equal(normalizeCardsColumns(undefined), "3");
+    assert.equal(normalizeCardsColumns("unknown"), "3");
+
+    const columns = CardsBlock.fields.find(
+      (field) => "name" in field && field.name === "columns",
+    );
+    assert.ok(columns && "options" in columns && Array.isArray(columns.options));
+    assert.deepEqual(
+      columns.options.map((option) => typeof option === "object" ? option.value : option),
+      ["2", "3", "4", "8"],
+    );
   });
 
   it("normalizes newly added structural block variants", () => {

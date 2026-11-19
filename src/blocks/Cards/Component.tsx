@@ -8,6 +8,7 @@ import { BlockLink } from "../shared/BlockLink";
 import { PresentedMediaImage } from "../shared/PresentedMediaImage";
 
 type CardsVariant = "default" | "modalities";
+type CardsColumns = "2" | "3" | "4" | "8";
 type CardMediaSource = "icon" | "image" | "none";
 type CardMediaPosition = "left" | "right" | "top";
 type CardImageLayout = "contained" | "fullTop";
@@ -32,7 +33,20 @@ type CardsAppearance = {
 
 type CardsBlockWithAppearanceProps = Omit<CardsBlockProps, "appearance"> & {
   appearance?: CardsAppearance | null;
+  columns?: CardsColumns | string | null;
 };
+
+const cardColumnClasses: Record<CardsColumns, string> = {
+  "2": "sm:grid-cols-2",
+  "3": "sm:grid-cols-2 lg:grid-cols-3",
+  "4": "sm:grid-cols-2 lg:grid-cols-4",
+  "8": "sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8",
+};
+
+export function normalizeCardsColumns(columns?: string | null): CardsColumns {
+  if (columns === "2" || columns === "4" || columns === "8") return columns;
+  return "3";
+}
 
 export function normalizeCardsVariant(
   variant: CardsBlockProps["variant"] | string | null | undefined,
@@ -185,6 +199,7 @@ function CardMedia({
 
 export function CardsBlock({
   appearance,
+  columns,
   description,
   items,
   title,
@@ -216,7 +231,10 @@ export function CardsBlock({
             <Text variant="muted">{description}</Text>
           </div>
         ) : null}
-        <ul className="mt-8 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className={classNames(
+          "mt-8 grid items-stretch gap-6",
+          cardColumnClasses[normalizeCardsColumns(columns)],
+        )}>
           {items.map((item) => {
             const cardItem = item as CardsItem;
             const mediaSource = normalizeCardMediaSource(cardItem);
@@ -227,7 +245,7 @@ export function CardsBlock({
               normalizeCardImageLayout(cardItem.imageLayout) === "fullTop";
 
             return (
-              <li key={item.id}>
+              <li className="h-full" key={item.id}>
                 <Card
                   className={cardInteractionClasses[effectiveInteraction]}
                   fullHeight
@@ -235,6 +253,7 @@ export function CardsBlock({
                 >
                   <div
                     className={classNames(
+                      "flex-1",
                       sideMedia && "flex gap-5",
                       sideMedia && mediaPosition === "right" && "flex-row-reverse",
                     )}
@@ -263,7 +282,7 @@ export function CardsBlock({
                   </div>
                   {item.link?.label ? (
                     <div className={classNames(
-                      "mt-auto pt-5",
+                      "mt-auto shrink-0 pt-5",
                       edgeToEdge && (modalities ? "px-8 pb-8" : "px-6 pb-6"),
                     )}>
                       <BlockLink link={item.link} />

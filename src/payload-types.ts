@@ -884,7 +884,7 @@ export interface ImageTextBlock {
    */
   title?: string | null;
   /**
-   * Texto complementar exibido ao lado da imagem em telas maiores.
+   * Texto complementar exibido ao lado, acima ou abaixo da imagem, conforme a posicao escolhida.
    */
   content: {
     root: {
@@ -902,7 +902,7 @@ export interface ImageTextBlock {
     [k: string]: unknown;
   };
   /**
-   * Imagem principal do bloco. Em celulares, ela aparece antes do texto.
+   * Imagem principal do bloco. A posicao escolhida tambem vale em celulares para as opcoes acima e abaixo.
    */
   image: number | Media;
   /**
@@ -935,9 +935,9 @@ export interface ImageTextBlock {
       | null;
   };
   /**
-   * Escolha o lado da imagem em telas grandes. Em dispositivos moveis, imagem e texto ficam empilhados.
+   * A esquerda e a direita ficam lado a lado em telas grandes. Acima e abaixo mantem a ordem escolhida em todas as telas.
    */
-  variant: 'image-left' | 'image-right';
+  variant: 'image-left' | 'image-right' | 'image-top' | 'image-bottom';
   /**
    * Link opcional exibido apos o texto.
    */
@@ -1011,6 +1011,10 @@ export interface CardsBlock {
    * Padrao cobre listas editoriais gerais; modalidades destaca opcoes de regularizacao sem criar outro tipo de bloco.
    */
   variant: 'default' | 'modalities';
+  /**
+   * Escolha a quantidade de cards por linha em telas grandes. Em telas menores, a grade se adapta automaticamente.
+   */
+  columns?: ('2' | '3' | '4' | '8') | null;
   /**
    * Opcoes semanticas controladas pelo Design System. Nao permite CSS arbitrario.
    */
@@ -2259,6 +2263,7 @@ export interface CardsBlockSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   variant?: T;
+  columns?: T;
   appearance?:
     | T
     | {
@@ -2828,6 +2833,10 @@ export interface SiteSetting {
    */
   siteName: string;
   /**
+   * Selecione uma imagem PNG ou SVG da biblioteca de midia para o icone exibido na aba do portal.
+   */
+  favicon?: (number | null) | Media;
+  /**
    * Data institucional exibida pelo conteudo editorial quando aplicavel. Mantenha este valor alinhado aos atos oficiais.
    */
   deadline: string;
@@ -3014,6 +3023,7 @@ export interface FooterSelect<T extends boolean = true> {
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
+  favicon?: T;
   deadline?: T;
   officialLinks?:
     | T

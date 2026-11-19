@@ -34,6 +34,19 @@ export const SiteSettings: GlobalConfig = {
       },
     },
     {
+      name: "favicon",
+      type: "upload",
+      relationTo: "media",
+      label: "Icone da aba do navegador",
+      filterOptions: {
+        mimeType: { in: ["image/png", "image/svg+xml"] },
+      },
+      admin: {
+        description:
+          "Selecione uma imagem PNG ou SVG da biblioteca de midia para o icone exibido na aba do portal.",
+      },
+    },
+    {
       name: "deadline",
       type: "date",
       label: "Prazo institucional",

@@ -54,7 +54,7 @@ export const ImageTextBlock: Block = {
       admin: {
         ...editorialEditorAdmin(),
         description:
-          "Texto complementar exibido ao lado da imagem em telas maiores.",
+          "Texto complementar exibido ao lado, acima ou abaixo da imagem, conforme a posicao escolhida.",
       },
     },
     {
@@ -65,7 +65,7 @@ export const ImageTextBlock: Block = {
       required: true,
       admin: {
         description:
-          "Imagem principal do bloco. Em celulares, ela aparece antes do texto.",
+          "Imagem principal do bloco. A posicao escolhida tambem vale em celulares para as opcoes acima e abaixo.",
       },
     },
     {
@@ -86,20 +86,22 @@ export const ImageTextBlock: Block = {
     {
       name: "variant",
       type: "select",
-      label: "Posicao da imagem no desktop",
+      label: "Posicao da imagem",
       required: true,
       defaultValue: "image-left",
       validate: closedSelect(
-        ["image-left", "image-right"],
+        ["image-left", "image-right", "image-top", "image-bottom"],
         "Escolha uma posicao de imagem aprovada.",
       ),
       admin: {
         description:
-          "Escolha o lado da imagem em telas grandes. Em dispositivos moveis, imagem e texto ficam empilhados.",
+          "A esquerda e a direita ficam lado a lado em telas grandes. Acima e abaixo mantem a ordem escolhida em todas as telas.",
       },
       options: [
         { label: "Imagem a esquerda", value: "image-left" },
         { label: "Imagem a direita", value: "image-right" },
+        { label: "Imagem acima do texto", value: "image-top" },
+        { label: "Imagem abaixo do texto", value: "image-bottom" },
       ],
     },
     {

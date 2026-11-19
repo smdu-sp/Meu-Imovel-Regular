@@ -83,7 +83,7 @@ export function ImageBlock({
           )}
         >
           <PresentedMediaImage
-            className="rounded-xl border border-(--block-border) bg-muted"
+            className="rounded-xl bg-muted"
             imageClassName="w-full"
             media={media}
             presentation={{ ...presentation, size: "full" }}

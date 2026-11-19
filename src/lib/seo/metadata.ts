@@ -34,6 +34,13 @@ const getMediaUrl = (media?: (number | null) | Media): string | null => {
   }
 };
 
+const resolveFavicon = (media?: (number | null) | Media) => {
+  if (!media || typeof media !== "object") return undefined;
+  if (media.mimeType !== "image/png" && media.mimeType !== "image/svg+xml") return undefined;
+  const url = getMediaUrl(media);
+  return url ? [{ url, type: media.mimeType }] : undefined;
+};
+
 const resolveSeoTitle = (
   page: PageMetadataSource,
   siteSettings: SiteSetting | null,
@@ -118,6 +125,9 @@ export function generateSiteMetadata(siteSettings: SiteSetting | null): Metadata
 
   return {
     description,
+    icons: {
+      icon: resolveFavicon(siteSettings?.favicon),
+    },
     openGraph: {
       description,
       images: socialImage ? [{ url: socialImage }] : undefined,

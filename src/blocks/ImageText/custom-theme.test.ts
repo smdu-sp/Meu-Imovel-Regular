@@ -25,6 +25,29 @@ const content = {
 };
 
 describe("ImageText custom theme", () => {
+  it("stacks the media above or below the text at every viewport width", () => {
+    const render = (variant: "image-top" | "image-bottom") => {
+      const section = ImageTextBlock({
+        blockType: "imageText",
+        content,
+        image: { alt: "Imagem de teste", url: "/imagem.jpg" } as never,
+        imagePresentation: { aspectRatio: "original", fit: "cover", size: "medium" },
+        variant,
+      }) as ReactElement<{ children: ReactElement }>;
+      const container = section.props.children as ReactElement<{ children: ReactElement }>;
+      return container.props.children as ReactElement<{ className: string; children: ReactElement[] }>;
+    };
+
+    const top = render("image-top");
+    const bottom = render("image-bottom");
+    const topImage = top.props.children[0] as ReactElement<{ className: string }>;
+    const bottomImage = bottom.props.children[0] as ReactElement<{ className: string }>;
+    assert.doesNotMatch(top.props.className, /lg:grid-cols-2/);
+    assert.doesNotMatch(bottom.props.className, /lg:grid-cols-2/);
+    assert.doesNotMatch(topImage.props.className, /order-2/);
+    assert.match(bottomImage.props.className, /order-2/);
+  });
+
   it("keeps large narrower than the image column and full at column width", () => {
     const imageClassName = (size: "large" | "full") => {
       const section = ImageTextBlock({

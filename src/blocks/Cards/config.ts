@@ -88,6 +88,26 @@ export const CardsBlock: Block = {
         { label: "Modalidades", value: "modalities" },
       ],
     },
+    {
+      name: "columns",
+      type: "select",
+      label: "Colunas da grade no desktop",
+      defaultValue: "3",
+      validate: closedSelect(
+        ["2", "3", "4", "8"],
+        "Escolha uma quantidade de colunas aprovada.",
+      ),
+      admin: {
+        description:
+          "Escolha a quantidade de cards por linha em telas grandes. Em telas menores, a grade se adapta automaticamente.",
+      },
+      options: [
+        { label: "2 colunas", value: "2" },
+        { label: "3 colunas", value: "3" },
+        { label: "4 colunas", value: "4" },
+        { label: "8 colunas", value: "8" },
+      ],
+    },
     createAppearanceGroup([
       createSchemeField(["default", "surface", "muted", "custom"], "default"),
       createSpacingField(["compact", "default", "spacious"], "default"),
