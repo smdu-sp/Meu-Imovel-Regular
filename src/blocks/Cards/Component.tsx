@@ -8,7 +8,7 @@ import { BlockLink } from "../shared/BlockLink";
 import { PresentedMediaImage } from "../shared/PresentedMediaImage";
 
 type CardsVariant = "default" | "modalities";
-type CardsColumns = "2" | "3" | "4" | "8";
+type CardsColumns = "2" | "3" | "4";
 type CardMediaSource = "icon" | "image" | "none";
 type CardMediaPosition = "left" | "right" | "top";
 type CardImageLayout = "contained" | "fullTop";
@@ -40,11 +40,11 @@ const cardColumnClasses: Record<CardsColumns, string> = {
   "2": "sm:grid-cols-2",
   "3": "sm:grid-cols-2 lg:grid-cols-3",
   "4": "sm:grid-cols-2 lg:grid-cols-4",
-  "8": "sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8",
 };
 
 export function normalizeCardsColumns(columns?: string | null): CardsColumns {
-  if (columns === "2" || columns === "4" || columns === "8") return columns;
+  if (columns === "2") return "2";
+  if (columns === "4" || columns === "8") return "4";
   return "3";
 }
 

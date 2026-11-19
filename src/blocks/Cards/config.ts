@@ -94,9 +94,12 @@ export const CardsBlock: Block = {
       label: "Colunas da grade no desktop",
       defaultValue: "3",
       validate: closedSelect(
-        ["2", "3", "4", "8"],
+        ["2", "3", "4"],
         "Escolha uma quantidade de colunas aprovada.",
       ),
+      hooks: {
+        beforeValidate: [({ value }) => value === "8" ? "4" : value],
+      },
       admin: {
         description:
           "Escolha a quantidade de cards por linha em telas grandes. Em telas menores, a grade se adapta automaticamente.",
@@ -105,7 +108,6 @@ export const CardsBlock: Block = {
         { label: "2 colunas", value: "2" },
         { label: "3 colunas", value: "3" },
         { label: "4 colunas", value: "4" },
-        { label: "8 colunas", value: "8" },
       ],
     },
     createAppearanceGroup([

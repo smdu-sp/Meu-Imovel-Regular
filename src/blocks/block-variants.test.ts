@@ -233,13 +233,13 @@ describe("block variant fallbacks", () => {
     assert.equal(normalizeRichTextVariant("unknown"), "default");
   });
 
-  it("keeps Cards variants and falls back to the general card list", () => {
+  it("keeps Cards variants and converts saved eight-column grids", async () => {
     assert.equal(normalizeCardsVariant("default"), "default");
     assert.equal(normalizeCardsVariant("modalities"), "modalities");
     assert.equal(normalizeCardsVariant("unknown"), "default");
     assert.equal(normalizeCardsColumns("2"), "2");
     assert.equal(normalizeCardsColumns("4"), "4");
-    assert.equal(normalizeCardsColumns("8"), "8");
+    assert.equal(normalizeCardsColumns("8"), "4");
     assert.equal(normalizeCardsColumns(undefined), "3");
     assert.equal(normalizeCardsColumns("unknown"), "3");
 
@@ -249,7 +249,12 @@ describe("block variant fallbacks", () => {
     assert.ok(columns && "options" in columns && Array.isArray(columns.options));
     assert.deepEqual(
       columns.options.map((option) => typeof option === "object" ? option.value : option),
-      ["2", "3", "4", "8"],
+      ["2", "3", "4"],
+    );
+    assert.ok("hooks" in columns && columns.hooks?.beforeValidate?.[0]);
+    assert.equal(
+      await columns.hooks.beforeValidate[0]({ value: "8" } as never),
+      "4",
     );
   });
 

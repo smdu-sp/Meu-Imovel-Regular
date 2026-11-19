@@ -1014,7 +1014,7 @@ export interface CardsBlock {
   /**
    * Escolha a quantidade de cards por linha em telas grandes. Em telas menores, a grade se adapta automaticamente.
    */
-  columns?: ('2' | '3' | '4' | '8') | null;
+  columns?: ('2' | '3' | '4') | null;
   /**
    * Opcoes semanticas controladas pelo Design System. Nao permite CSS arbitrario.
    */
