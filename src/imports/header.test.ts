@@ -6,11 +6,11 @@ import path from "node:path";
 import type { Store } from "./wordpress/shared/apply.ts";
 import { applyHeader, extractHeaderMenu, headerData, planHeader } from "./wordpress/globals/header.ts";
 import { type Doc, type State } from "./wordpress/shared/migration-manifest.ts";
-import { readTables, SNAPSHOT } from "./wordpress/shared/source.ts";
+import { readTables, SNAPSHOT, resolveSourceFile, resolveUploadsRoot } from "./wordpress/shared/source.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
 
-const source = "old-wordpress/db/meuimovelregular.sql";
-const uploads = "old-wordpress/mir-web/wp-content/uploads";
+const source = resolveSourceFile();
+const uploads = resolveUploadsRoot();
 
 test("MIR-011 extracts the five ordered menu items and validates both original logos offline", async () => {
   const plan = await planHeader(source, uploads);

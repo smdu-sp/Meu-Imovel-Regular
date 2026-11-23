@@ -168,12 +168,37 @@ Importa o logo da Prefeitura, contatos, endereço, redes sociais e links institu
 - `--actor-id 1`: substitua `1` pelo ID de um administrador existente no CMS.
 - `--target-label mir-local`: identifica o ambiente no manifesto. A conexão efetiva é definida por `DATABASE_URI`, carregada do ambiente do projeto.
 
+## Estrutura de arquivos de apoio (`old-wordpress/`)
+
+A pasta `old-wordpress/` na raiz do projeto (ignorada pelo versionamento Git) armazena os arquivos legados de apoio à migração.
+
+A estrutura recomendada é:
+
+```text
+old-wordpress/
+├── db/
+│   └── meuimovelregular.sql      # Dump SQL oficial do WordPress (snapshot conferido via SHA-256)
+└── mir-web/                      # Diretório da instalação legada (ou meuimovelregular/)
+    └── wp-content/
+        └── uploads/              # Mídias e PDFs originais
+```
+
+### Resolução automática e desenvolvimento em múltiplas máquinas
+
+Para permitir o desenvolvimento em diferentes máquinas ou ambientes onde a pasta do WordPress legado tenha sido nomeada ou descompactada de forma diferente (ex: `mir-web` ou `meuimovelregular`), os scripts resolvem os caminhos automaticamente:
+
+- **Uploads/Assets**: detecta automaticamente o primeiro diretório existente entre:
+  1. `old-wordpress/mir-web/wp-content/uploads`
+  2. `old-wordpress/meuimovelregular/wp-content/uploads`
+  3. `old-wordpress/wp-content/uploads`
+  4. `old-wordpress/uploads`
+- **Dump SQL**: detecta automaticamente `old-wordpress/db/meuimovelregular.sql` (ou `old-wordpress/meuimovelregular.sql`).
+
+Caso deseje apontar para pastas personalizadas, utilize os argumentos CLI:
+- `--source <caminho>`: caminho customizado para o dump SQL.
+- `--uploads <caminho>`: caminho customizado para a pasta de uploads.
+
 A aplicação exige o PostgreSQL disponível e o schema preparado. O importador não cria o banco nem executa migrations.
-
-As fontes padrão precisam estar disponíveis localmente:
-
-- Dump: `old-wordpress/db/meuimovelregular.sql`.
-- Assets: `old-wordpress/mir-web/wp-content/uploads`.
 
 Para salvar a simulação em um arquivo, acrescente `--report`:
 

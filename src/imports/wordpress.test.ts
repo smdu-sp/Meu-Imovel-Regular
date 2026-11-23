@@ -9,6 +9,8 @@ import {
   readTables,
   safeAsset,
   loadSource,
+  resolveSourceFile,
+  resolveUploadsRoot,
 } from "./wordpress/shared/source.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
 import {
@@ -49,9 +51,9 @@ test("apply CLI loads CommonJS next/env and development overrides before connect
         "--target-label",
         "environment-regression",
         "--source",
-        path.resolve("old-wordpress/db/meuimovelregular.sql"),
+        path.resolve(resolveSourceFile()),
         "--uploads",
-        path.resolve("old-wordpress/meuimovelregular/wp-content/uploads"),
+        path.resolve(resolveUploadsRoot()),
         "--state-dir",
         path.join(dir, "state"),
         "--report",
@@ -154,8 +156,8 @@ test("projection detects content/state changes and revision changes without depe
 });
 test("real snapshot generates nine blocks and eight ordered PDF relationships offline", async () => {
   const plan = await planHome(
-    "old-wordpress/db/meuimovelregular.sql",
-    "old-wordpress/meuimovelregular/wp-content/uploads",
+    resolveSourceFile(),
+    resolveUploadsRoot(),
   );
   assert.equal(plan.assets.length, 17);
   assert.equal(
@@ -209,8 +211,8 @@ test("Home manuals use compact icon grid with eight ordered PDF download actions
   const { createElement } = await import("react");
   const { renderToStaticMarkup } = await import("react-dom/server");
   const plan = await planHome(
-    "old-wordpress/db/meuimovelregular.sql",
-    "old-wordpress/meuimovelregular/wp-content/uploads",
+    resolveSourceFile(),
+    resolveUploadsRoot(),
   );
   const media = Object.fromEntries(plan.assets.map((a, i) => [a.id, i + 1]));
   const grid = homeData(plan, media)

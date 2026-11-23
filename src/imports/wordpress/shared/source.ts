@@ -1,9 +1,47 @@
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 
 export const SNAPSHOT =
   "ea309012c96c456c8c0568959a1f1bce5ae5d077239e9605bc9bdd333986264b";
+
+export const DEFAULT_SOURCE = "old-wordpress/db/meuimovelregular.sql";
+
+export const DEFAULT_UPLOADS_CANDIDATES = [
+  "old-wordpress/mir-web/wp-content/uploads",
+  "old-wordpress/meuimovelregular/wp-content/uploads",
+  "old-wordpress/wp-content/uploads",
+  "old-wordpress/uploads",
+] as const;
+
+export function resolveUploadsRoot(root?: string): string {
+  if (root && existsSync(root)) {
+    return root;
+  }
+  for (const candidate of DEFAULT_UPLOADS_CANDIDATES) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return root || DEFAULT_UPLOADS_CANDIDATES[0];
+}
+
+export function resolveSourceFile(source?: string): string {
+  if (source && existsSync(source)) {
+    return source;
+  }
+  const candidates = [
+    "old-wordpress/db/meuimovelregular.sql",
+    "old-wordpress/meuimovelregular.sql",
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return source || DEFAULT_SOURCE;
+}
 export const hash = (value: string | Buffer): string =>
   createHash("sha256").update(value).digest("hex");
 export type Row = Record<string, string>;
@@ -105,7 +143,7 @@ export function exactly<T>(items: T[], label: string): T {
   return items[0];
 }
 export async function safeAsset(root: string, relative: string) {
-  const base = await realpath(root);
+  const base = await realpath(resolveUploadsRoot(root));
   if (path.isAbsolute(relative) || relative.split(/[\\/]/).includes(".."))
     throw new Error("Asset fora de uploads.");
   const filename = await realpath(path.resolve(base, relative));

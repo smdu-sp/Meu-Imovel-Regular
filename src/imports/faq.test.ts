@@ -9,11 +9,15 @@ import {
 } from "./wordpress/pages/faq.ts";
 import { faqImages, faqManuals } from "./wordpress/pages/faq-content.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
+import {
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./wordpress/shared/source.ts";
 
 test("FAQ real snapshot preserves 29 answers, source links and six media across valid blocks", async () => {
   const plan = await planFaq(
-    "old-wordpress/db/meuimovelregular.sql",
-    "old-wordpress/meuimovelregular/wp-content/uploads",
+    resolveSourceFile(),
+    resolveUploadsRoot(),
   );
   assert.equal(plan.metaId, "4161");
   assert.deepEqual(
@@ -146,8 +150,8 @@ test("FAQ CLI simulates offline without a database", async () => {
 
 test("FAQ manual links use resolved Media URLs in both answers without changing unrelated links", async () => {
   const plan = await planFaq(
-    "old-wordpress/db/meuimovelregular.sql",
-    "old-wordpress/meuimovelregular/wp-content/uploads",
+    resolveSourceFile(),
+    resolveUploadsRoot(),
   );
   const original = JSON.stringify(plan.items);
   const urls = {

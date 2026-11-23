@@ -8,10 +8,15 @@ import {
 import { beneficiosImages } from "./wordpress/pages/beneficios-content.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
 
+import {
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./wordpress/shared/source.ts";
+
 test("Benefícios: snapshot validates images, original lists, link, alternation and reviewed claims", async () => {
   const plan = await planBeneficios(
-    "old-wordpress/db/meuimovelregular.sql",
-    "old-wordpress/meuimovelregular/wp-content/uploads",
+    resolveSourceFile(),
+    resolveUploadsRoot(),
   );
   assert.equal(plan.metaId, "4081");
   assert.deepEqual(

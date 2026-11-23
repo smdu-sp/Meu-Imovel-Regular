@@ -8,8 +8,12 @@ import {
 import { entendaImages } from "./wordpress/pages/entenda-content.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
 import { parseVideoEmbedUrl } from "../blocks/VideoBlock/video-embed.ts";
-const source = "old-wordpress/db/meuimovelregular.sql";
-const uploads = "old-wordpress/meuimovelregular/wp-content/uploads";
+import {
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./wordpress/shared/source.ts";
+const source = resolveSourceFile();
+const uploads = resolveUploadsRoot();
 
 test("Entenda extracts five verified images and eight blocks with source headings and external lists", async () => {
   const plan = await planEntenda(source, uploads);

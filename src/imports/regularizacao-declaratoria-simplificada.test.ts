@@ -7,11 +7,15 @@ import {
 } from "./wordpress/pages/regularizacao-declaratoria-simplificada.ts";
 import { simplificadaAssets } from "./wordpress/pages/regularizacao-declaratoria-simplificada-content.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
+import {
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./wordpress/shared/source.ts";
 
 test("Simplificada snapshot preserves source requirements, nine assets and the critical notice", async () => {
   const plan = await planSimplificada(
-    "old-wordpress/db/meuimovelregular.sql",
-    "old-wordpress/meuimovelregular/wp-content/uploads",
+    resolveSourceFile(),
+    resolveUploadsRoot(),
   );
   assert.equal(plan.metaId, "4109");
   assert.deepEqual(

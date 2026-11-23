@@ -44,7 +44,11 @@ import {
   openManifest,
   targetFingerprint,
 } from "./shared/migration-manifest.ts";
-import { SNAPSHOT } from "./shared/source.ts";
+import {
+  SNAPSHOT,
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./shared/source.ts";
 import { applyHeader, headerData, planHeader } from "./globals/header.ts";
 import { applyFooter, footerData, planFooter } from "./globals/footer.ts";
 
@@ -278,9 +282,8 @@ export async function run(
   settings: { print?: boolean; session?: ImportSession } = {},
 ) {
   const options = argumentsFor(args);
-  const source = options.source || "old-wordpress/db/meuimovelregular.sql";
-  const uploads =
-    options.uploads || "old-wordpress/mir-web/wp-content/uploads";
+  const source = resolveSourceFile(options.source);
+  const uploads = resolveUploadsRoot(options.uploads);
   if (options.page === "header" || options.page === "footer") {
     const prepared = options.page === "header"
       ? await (async () => {
@@ -377,7 +380,7 @@ export async function run(
     snapshot: SNAPSHOT,
     converterVersion: 1,
     origin: {
-      file: options.source || "old-wordpress/db/meuimovelregular.sql",
+      file: source,
       postId: prepared.id,
       metaId: prepared.metaId,
       sections: prepared.sections,
@@ -408,7 +411,7 @@ export async function run(
     );
     if (
       [
-        path.resolve(options.source || "old-wordpress/db/meuimovelregular.sql"),
+        path.resolve(source),
         ...plan.assets.map((a) => a.filename),
         path.join(stateDir, "manifest.json"),
         path.join(stateDir, "execution.lock"),

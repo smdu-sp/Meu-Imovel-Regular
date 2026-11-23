@@ -8,6 +8,10 @@ import {
   openImportSession,
   type ImportSession,
 } from "./run.ts";
+import {
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./shared/source.ts";
 export const importOrder = [
   "home",
   "cartilha",
@@ -25,9 +29,8 @@ export async function importAll(
   settings: { print?: boolean } = {},
 ) {
   const options = argumentsFor(["home", ...args]);
-  const source = options.source || "old-wordpress/db/meuimovelregular.sql";
-  const uploads =
-    options.uploads || "old-wordpress/meuimovelregular/wp-content/uploads";
+  const source = resolveSourceFile(options.source);
+  const uploads = resolveUploadsRoot(options.uploads);
   // Validate every source before the first write, including the two final modalities.
   const plans = [];
   for (const page of importOrder)

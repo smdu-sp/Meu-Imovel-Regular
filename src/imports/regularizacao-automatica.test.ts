@@ -7,11 +7,15 @@ import {
 } from "./wordpress/pages/regularizacao-automatica.ts";
 import { automaticaAssets } from "./wordpress/pages/regularizacao-automatica-content.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
+import {
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./wordpress/shared/source.ts";
 
 test("Automática validates nine assets, source content and four local document actions", async () => {
   const plan = await planAutomatica(
-    "old-wordpress/db/meuimovelregular.sql",
-    "old-wordpress/meuimovelregular/wp-content/uploads",
+    resolveSourceFile(),
+    resolveUploadsRoot(),
   );
   assert.equal(plan.metaId, "4106");
   assert.deepEqual(

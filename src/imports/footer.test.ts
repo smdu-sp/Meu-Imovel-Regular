@@ -6,12 +6,12 @@ import path from "node:path";
 import { validateOfficialHttpsUrl } from "../domain/official-url.ts";
 import { applyFooter, extractFooterContent, footerData, planFooter } from "./wordpress/globals/footer.ts";
 import { projection, type Doc, type State } from "./wordpress/shared/migration-manifest.ts";
-import { readTables, SNAPSHOT } from "./wordpress/shared/source.ts";
+import { readTables, SNAPSHOT, resolveSourceFile, resolveUploadsRoot } from "./wordpress/shared/source.ts";
 import type { Store } from "./wordpress/shared/apply.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
 
-const source = "old-wordpress/db/meuimovelregular.sql";
-const uploads = "old-wordpress/mir-web/wp-content/uploads";
+const source = resolveSourceFile();
+const uploads = resolveUploadsRoot();
 
 test("MIR-012 extracts contact and social links and validates the original logo offline", async () => {
   const plan = await planFooter(source, uploads);

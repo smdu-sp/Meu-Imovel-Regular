@@ -17,8 +17,12 @@ import {
 } from "./wordpress/shared/site-links.ts";
 import { preparePage } from "./wordpress/run.ts";
 import { importOrder } from "./wordpress/all.ts";
-const source = "old-wordpress/db/meuimovelregular.sql",
-  uploads = "old-wordpress/meuimovelregular/wp-content/uploads";
+import {
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./wordpress/shared/source.ts";
+const source = resolveSourceFile(),
+  uploads = resolveUploadsRoot();
 
 test("009 and 010 preserve twelve blocks, shared media, document links and the actual notice", async () => {
   for (const [planPage, dataPage, count, meta] of [

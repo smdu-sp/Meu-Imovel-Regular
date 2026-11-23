@@ -11,10 +11,15 @@ import {
 } from "./wordpress/pages/situacao-content.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
 
+import {
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./wordpress/shared/source.ts";
+
 test("Situação snapshot validates both media and five blocks with official forwarding and portal limits", async () => {
   const plan = await planSituacao(
-    "old-wordpress/db/meuimovelregular.sql",
-    "old-wordpress/meuimovelregular/wp-content/uploads",
+    resolveSourceFile(),
+    resolveUploadsRoot(),
   );
   assert.equal(plan.metaId, "4149");
   assert.deepEqual(

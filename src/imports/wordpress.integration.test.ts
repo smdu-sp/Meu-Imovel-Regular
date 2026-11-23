@@ -5,7 +5,11 @@ import os from "node:os";
 import path from "node:path";
 import { planHome } from "./wordpress/pages/home.ts";
 import { applyHome, applyPage } from "./wordpress/shared/apply.ts";
-import { SNAPSHOT } from "./wordpress/shared/source.ts";
+import {
+  SNAPSHOT,
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./wordpress/shared/source.ts";
 import type { State } from "./wordpress/shared/migration-manifest.ts";
 
 const uri = process.env.MIR_IMPORT_TEST_URI;
@@ -53,8 +57,8 @@ test(
       const { store } = connection;
       try {
         const plan = await planHome(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         const state: State = {
           version: 1,
@@ -121,8 +125,8 @@ test(
         const { planEntenda, applyEntenda } =
           await import("./wordpress/pages/entenda.ts");
         const entendaPlan = await planEntenda(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         const homeEntry = structuredClone(state.entries["page:87"]);
         const entenda = await applyEntenda(entendaPlan, store, state, save);
@@ -154,8 +158,8 @@ test(
         const { planBeneficios, applyBeneficios } =
           await import("./wordpress/pages/beneficios.ts");
         const beneficiosPlan = await planBeneficios(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         const sharedBefore = await store.get("media", result.media["712"]);
         const beneficios = await applyBeneficios(
@@ -203,8 +207,8 @@ test(
         const { planSituacao, applySituacao } =
           await import("./wordpress/pages/situacao.ts");
         const situacaoPlan = await planSituacao(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         const situacao = await applySituacao(situacaoPlan, store, state, save);
         const savedSituacao = await store.get("pages", situacao.pageId, true);
@@ -243,8 +247,8 @@ test(
         const { planFaq, applyFaq, faqData } =
           await import("./wordpress/pages/faq.ts");
         const faqPlan = await planFaq(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         // Reproduce the previous importer before upgrading only its manual destinations.
         const previousFaq = await applyPage(
@@ -330,8 +334,8 @@ test(
         const { planCartilha, applyCartilha } =
           await import("./wordpress/pages/cartilha.ts");
         const cartilhaPlan = await planCartilha(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         const cartilha = await applyCartilha(cartilhaPlan, store, state, save);
         const savedCartilha = await store.get("pages", cartilha.pageId, true);
@@ -386,8 +390,8 @@ test(
         const { planAutomatica, applyAutomatica } =
           await import("./wordpress/pages/regularizacao-automatica.ts");
         const automaticaPlan = await planAutomatica(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         const manualBefore = await store.get("media", result.media["1196"]);
         const automatica = await applyAutomatica(
@@ -447,8 +451,8 @@ test(
         const { planSimplificada, applySimplificada } =
           await import("./wordpress/pages/regularizacao-declaratoria-simplificada.ts");
         const simplificadaPlan = await planSimplificada(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         const flowBefore = await store.get("media", automatica.media["223"]);
         const simplificada = await applySimplificada(
@@ -517,8 +521,8 @@ test(
         const { planComum, applyComum } =
           await import("./wordpress/pages/regularizacao-comum.ts");
         const declaratoriaPlan = await planDeclaratoria(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         const declaratoria = await applyDeclaratoria(
           declaratoriaPlan,
@@ -527,8 +531,8 @@ test(
           save,
         );
         const comumPlan = await planComum(
-          "old-wordpress/db/meuimovelregular.sql",
-          "old-wordpress/meuimovelregular/wp-content/uploads",
+          resolveSourceFile(),
+          resolveUploadsRoot(),
         );
         const comum = await applyComum(comumPlan, store, state, save);
         for (const id of [

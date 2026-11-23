@@ -234,6 +234,9 @@ npm.cmd run typecheck
 npm.cmd test
 npm.cmd run build
 npm.cmd run seed:editorial
+# Importação completa do WordPress para o Payload (consulte src/imports/README.md)
+npm run import:wordpress:all -- --dry-run
+npm run import:wordpress:all -- --apply --actor-id 1 --target-label mir-local
 ```
 
 ### Sincronização do Import Map (Admin UI)

@@ -9,11 +9,15 @@ import { cartilhaAssets } from "./wordpress/pages/cartilha-content.ts";
 import { argumentsFor, run } from "./wordpress/run.ts";
 import { resolveLink } from "../lib/navigation/resolve-link.ts";
 import type { Media } from "../payload-types";
+import {
+  resolveSourceFile,
+  resolveUploadsRoot,
+} from "./wordpress/shared/source.ts";
 
 test("Cartilha snapshot validates the JPEG/PDF, preserves introduction and relates the download CTA", async () => {
   const plan = await planCartilha(
-    "old-wordpress/db/meuimovelregular.sql",
-    "old-wordpress/meuimovelregular/wp-content/uploads",
+    resolveSourceFile(),
+    resolveUploadsRoot(),
   );
   assert.equal(plan.metaId, "4133");
   assert.deepEqual(

@@ -15,7 +15,7 @@ class SiteHeader extends HTMLElement {
           <span class="brand-frame"><strong>Meu<br>Imóvel</strong><span>Regular</span></span>
         </a>
         <nav class="main-nav" aria-label="Navegação principal">
-          ${navItems.map(([label, href]) => `<a ${current===href?'aria-current="page"':''} href="${href}">${label}</a>`).join('')}
+          ${navItems.map(([label, href]) => `<a ${current === href ? 'aria-current="page"' : ''} href="${href}">${label}</a>`).join('')}
         </nav>
         <a class="city-logo" href="index.html" aria-label="Cidade de São Paulo">
           <span class="crest">✦</span>
