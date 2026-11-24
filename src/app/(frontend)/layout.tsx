@@ -15,7 +15,7 @@ import {
 } from "../../lib/theme/google-fonts";
 import { ThemeProvider } from "../../components/ui/ColorScope";
 import { AccessibilityThemeProvider } from "../../components/theme/AccessibilityThemeProvider";
-import { ACCESSIBILITY_THEME_INIT_SCRIPT } from "../../lib/theme/accessible-palettes";
+import { AccessibilityThemeInitScript } from "../../components/theme/AccessibilityThemeInitScript";
 import { SiteFooter } from "../../components/layout/SiteFooter";
 import { SiteHeader } from "../../components/layout/SiteHeader";
 import "./globals.css";
@@ -55,7 +55,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: ACCESSIBILITY_THEME_INIT_SCRIPT }} />
+        <AccessibilityThemeInitScript />
         {fontStylesheets.length > 0 ? (
           <>
             <link href="https://fonts.googleapis.com" rel="preconnect" />
