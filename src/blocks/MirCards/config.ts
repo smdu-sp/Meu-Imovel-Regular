@@ -7,7 +7,7 @@ import { createBlockAdmin } from "../shared/admin";
 export const MirCardsBlock: Block = {
   slug: "mirCards",
   interfaceName: "MirCardsBlock",
-  admin: createBlockAdmin("Conteúdo", {
+  admin: createBlockAdmin("Meu Imóvel Regular", {
     slug: "mir-cards",
     alt: "Composições de cards MIR para modalidades, benefícios e atendimento",
   }),

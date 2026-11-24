@@ -6,7 +6,7 @@ export const MirBannerBlock: Block = {
   ...FullWidthImageBannerBlock,
   slug: "mirBanner",
   interfaceName: "MirBannerBlock",
-  admin: createBlockAdmin("Mídia", {
+  admin: createBlockAdmin("Meu Imóvel Regular", {
     slug: "mir-banner",
     alt: "Banner MIR com imagem responsiva e marca sobreposta",
   }),

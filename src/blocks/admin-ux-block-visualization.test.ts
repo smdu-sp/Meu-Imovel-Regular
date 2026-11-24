@@ -98,6 +98,19 @@ describe("SPEC-024 admin UX and block visualization", () => {
       getBlockSummary({ blockType: "actionBanners", banners: [{}, {}, {}] }),
       "Faixas de ação — 3 chamadas",
     );
+    assert.equal(getBlockSummary({ blockType: "mirBanner" }), "MIR: banner");
+    assert.equal(
+      getBlockSummary({ blockType: "mirCards", style: "homeModality", items: [{ title: "Regularização Automática" }] }),
+      "MIR: modalidades da Home — Regularização Automática — 1 card",
+    );
+    assert.equal(
+      getBlockSummary({ blockType: "mirCards", style: "contact", title: "Canais de atendimento", items: [{}, {}] }),
+      "MIR: atendimento — Canais de atendimento — 2 cards",
+    );
+    assert.equal(
+      getBlockSummary({ blockType: "mirTextMedia", title: "Exigências" }),
+      "MIR: texto e mídia — Exigências",
+    );
   });
 
   it("uses human appearance labels while preserving design-token values", () => {

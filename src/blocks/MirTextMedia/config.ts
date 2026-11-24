@@ -7,7 +7,7 @@ export const MirTextMediaBlock: Block = {
   ...ImageTextBlock,
   slug: "mirTextMedia",
   interfaceName: "MirTextMediaBlock",
-  admin: createBlockAdmin("Mídia", {
+  admin: createBlockAdmin("Meu Imóvel Regular", {
     slug: "mir-text-media",
     alt: "Bloco MIR com texto acima da imagem",
   }),

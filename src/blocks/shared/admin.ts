@@ -9,7 +9,7 @@ type BlockPreview = {
 };
 
 export function createBlockAdmin(
-  group: "Conteúdo" | "Mídia" | "Ações",
+  group: "Conteúdo" | "Mídia" | "Ações" | "Meu Imóvel Regular",
   preview: BlockPreview,
 ): NonNullable<Block["admin"]> {
   return {
