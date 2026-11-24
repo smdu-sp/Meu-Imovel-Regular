@@ -55,6 +55,45 @@ export const Header: GlobalConfig = {
       },
     },
     {
+      name: "secondaryLogo",
+      type: "upload",
+      relationTo: "media",
+      label: "Segunda marca institucional",
+      admin: { description: "Opcional. Exibida na outra extremidade do cabeçalho." },
+    },
+    {
+      name: "logoSize",
+      type: "select",
+      label: "Tamanho das marcas",
+      defaultValue: "medium",
+      options: [
+        { label: "Pequeno", value: "small" },
+        { label: "Médio", value: "medium" },
+        { label: "Grande", value: "large" },
+      ],
+    },
+    {
+      name: "logoPosition",
+      type: "select",
+      label: "Posição da marca principal",
+      defaultValue: "left",
+      options: [
+        { label: "Esquerda", value: "left" },
+        { label: "Direita", value: "right" },
+      ],
+    },
+    {
+      name: "textSize",
+      type: "select",
+      label: "Tamanho do menu",
+      defaultValue: "medium",
+      options: [
+        { label: "Pequeno", value: "small" },
+        { label: "Médio", value: "medium" },
+        { label: "Grande", value: "large" },
+      ],
+    },
+    {
       name: "navigationMode",
       type: "select",
       label: "Tipo de menu",

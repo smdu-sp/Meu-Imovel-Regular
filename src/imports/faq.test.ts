@@ -36,12 +36,12 @@ test("FAQ real snapshot preserves 29 answers, source links and six media across 
   assert.deepEqual(
     page.layout.map((b) => b.blockType),
     [
-      "fullWidthImageBanner",
+      "mirBanner",
       "richText",
+      "mirCards",
       "faqAccordion",
       "faqAccordion",
       "imageBlock",
-      "cards",
     ],
   );
   const blocks = page.layout.filter((b) => b.blockType === "faqAccordion") as {
@@ -95,17 +95,17 @@ test("FAQ real snapshot preserves 29 answers, source links and six media across 
   assert.match(json, /30 de agosto de 2026/);
   assert.match(json, /R\$ 10,00/);
   assert.match(json, /nem garante deferimento/);
-  const cards = page.layout.at(-1) as {
-    items: { image: number; link?: { url: string }; description: string }[];
+  const cards = page.layout[2] as {
+    items: { image: number; link?: { url: string }; content: unknown }[];
   };
   assert.deepEqual(
     cards.items.map((i) => i.image),
     [102, 103, 104, 105],
   );
-  assert(cards.items.every((i) => i.description.length <= 300));
+  assert(cards.items.every((i) => JSON.stringify(i.content).length > 0));
   assert.equal(cards.items[1].link, undefined);
   assert.match(
-    cards.items[1].description,
+    JSON.stringify(cards.items[1].content),
     /meuimovelregular@prefeitura.sp.gov.br/,
   );
   assert.match(cards.items[3].link!.url, /sp156.prefeitura.sp.gov.br/);

@@ -14,6 +14,9 @@ export function SiteFooter({ footer }: { footer?: Footer | null }) {
     (!footer.logo.mimeType || footer.logo.mimeType.startsWith("image/"))
     ? footer.logo
     : null;
+  const secondaryLogo = footer?.secondaryLogo && typeof footer.secondaryLogo === "object" ? footer.secondaryLogo : null;
+  const logoSize = { small: "max-h-12 max-w-40", medium: "max-h-20 max-w-64", large: "max-h-28 max-w-80" }[footer?.logoSize ?? "medium"];
+  const textSize = { small: "text-xs", medium: "text-sm", large: "text-base" }[footer?.textSize ?? "medium"];
   const socialLinks = (footer?.socialLinks ?? []).flatMap((item) => {
     const href = resolveOfficialHttpsUrl(item.url);
     const icon = isSocialIcon(item.icon) ? item.icon : null;
@@ -31,24 +34,21 @@ export function SiteFooter({ footer }: { footer?: Footer | null }) {
     footer?.phone || footer?.email || footer?.address || footer?.inPersonService,
   );
 
-  if (!logo && !hasContact && !socialLinks.length && !institutionalLinks.length) return null;
+  if (!logo && !secondaryLogo && !hasContact && !socialLinks.length && !institutionalLinks.length) return null;
 
   const customTheme = footer?.appearance?.scheme === "custom";
   const content = (
     <ColorScope
       as="footer"
-      className="mt-auto border-t border-(--block-border)"
+      className="mt-auto border-t-4 border-t-[var(--color-brand)]"
       scheme={customTheme ? "default" : normalizeColorScheme(footer?.appearance?.scheme, "muted")}
     >
       <Container size="xl">
-        <div className="grid gap-8 py-10 md:grid-cols-3">
-          {logo ? (
-            <div className="md:col-span-3">
-              <MediaImage
-                className="h-auto max-h-20 w-auto max-w-64 object-contain"
-                media={logo}
-                sizes="256px"
-              />
+        <div className={`grid gap-8 py-10 md:grid-cols-3 ${textSize}`}>
+          {logo || secondaryLogo ? (
+            <div className={`flex flex-wrap items-center gap-6 md:col-span-3 ${footer?.logoPosition === "right" ? "justify-end" : "justify-start"}`}>
+              {logo ? <MediaImage className={`h-auto w-auto object-contain ${logoSize}`} media={logo} sizes="320px" /> : null}
+              {secondaryLogo ? <MediaImage className={`h-auto w-auto object-contain ${logoSize}`} media={secondaryLogo} sizes="320px" /> : null}
             </div>
           ) : null}
           {hasContact ? (
@@ -56,7 +56,7 @@ export function SiteFooter({ footer }: { footer?: Footer | null }) {
               <h2 className="text-lg font-bold text-(--block-heading)" id="footer-contact-title">
                 Atendimento
               </h2>
-              <div className="mt-3 space-y-2 text-sm">
+              <div className="mt-3 space-y-2">
                 {footer?.phone ? (
                   <p><a className="underline underline-offset-4" href={telephoneHref(footer.phone)}>{footer.phone}</a></p>
                 ) : null}
@@ -74,7 +74,7 @@ export function SiteFooter({ footer }: { footer?: Footer | null }) {
               <h2 className="text-lg font-bold text-(--block-heading)" id="footer-institutional-title">
                 Links institucionais
               </h2>
-              <ul className="mt-3 space-y-2 text-sm">
+              <ul className="mt-3 space-y-2">
                 {institutionalLinks.map((link) => (
                   <li key={`${link.href}-${link.label}`}>
                     <a className="underline underline-offset-4" href={link.href}>{link.label}</a>
@@ -89,7 +89,7 @@ export function SiteFooter({ footer }: { footer?: Footer | null }) {
               <h2 className="text-lg font-bold text-(--block-heading)" id="footer-social-title">
                 Redes sociais
               </h2>
-              <ul className="mt-3 space-y-2 text-sm">
+              <ul className="mt-3 space-y-2">
                 {socialLinks.map((link) => (
                   <li key={`${link.href}-${link.label}`}>
                     <a

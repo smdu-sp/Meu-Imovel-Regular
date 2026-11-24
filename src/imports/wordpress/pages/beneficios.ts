@@ -152,7 +152,7 @@ export function beneficiosData(
     lifecycleStatus: "active",
     layout: [
       {
-        blockType: "fullWidthImageBanner",
+        blockType: "mirBanner",
         desktopImage: media["736"],
         imageHeight: "auto",
         overlay: "none",
@@ -161,11 +161,15 @@ export function beneficiosData(
       },
       { blockType: "richText", variant: "default", content: plan.intro },
       ...plan.sections.map((s) => ({
-        blockType: "imageText",
-        title: s.title,
-        content: s.content,
-        image: media[s.image],
-        variant: s.variant,
+        blockType: "mirCards",
+        style: "benefit",
+        items: [{
+          title: s.title,
+          content: s.content,
+          image: media[s.image],
+          imagePresentation: { size: "large", aspectRatio: "original", fit: "cover" },
+          imagePosition: s.variant === "image-right" ? "right" : "left",
+        }],
       })),
     ],
   };

@@ -14,6 +14,9 @@ import { HeroBlock } from "../../blocks/Hero/Component";
 import { IconGridBlock } from "../../blocks/IconGrid/Component";
 import { ImageBlock } from "../../blocks/ImageBlock/Component";
 import { ImageTextBlock } from "../../blocks/ImageText/Component";
+import { MirBannerBlock } from "../../blocks/MirBanner/Component";
+import { MirCardsBlock } from "../../blocks/MirCards/Component";
+import { MirTextMediaBlock } from "../../blocks/MirTextMedia/Component";
 import { RichTextBlock } from "../../blocks/RichText/Component";
 import { VideoBlock } from "../../blocks/VideoBlock/Component";
 
@@ -24,7 +27,8 @@ type RenderablePageBlock =
   | Parameters<typeof GalleryBlock>[0]
   | Parameters<typeof ImageBlock>[0]
   | Parameters<typeof FullWidthImageBannerBlock>[0]
-  | Parameters<typeof VideoBlock>[0];
+  | Parameters<typeof VideoBlock>[0]
+  | Parameters<typeof MirBannerBlock>[0];
 
 type BlockOf<K extends PageBlockSlug> = Extract<RenderablePageBlock, { blockType: K }>;
 
@@ -44,6 +48,9 @@ const blockRenderers = {
   alertBox: (block) => <AlertBoxBlock {...block} />,
   actionBanners: (block) => <ActionBannersBlock {...block} />,
   fullWidthImageBanner: (block) => <FullWidthImageBannerBlock {...block} />,
+  mirBanner: (block) => <MirBannerBlock {...block} />,
+  mirCards: (block) => <MirCardsBlock {...block} />,
+  mirTextMedia: (block) => <MirTextMediaBlock {...block} />,
 } satisfies { [K in PageBlockSlug]: (block: BlockOf<K>) => ReactNode };
 
 export function RenderBlocks({ blocks }: { blocks?: Page["layout"] | null }) {

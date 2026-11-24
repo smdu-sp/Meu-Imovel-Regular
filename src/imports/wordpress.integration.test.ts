@@ -285,20 +285,20 @@ test(
         assert.deepEqual(
           faqLayout.map((b) => b.blockType),
           [
-            "fullWidthImageBanner",
+            "mirBanner",
             "richText",
+            "mirCards",
             "faqAccordion",
             "faqAccordion",
             "imageBlock",
-            "cards",
           ],
         );
         assert.deepEqual(
-          [faqLayout[2].items?.length, faqLayout[3].items?.length],
+          [faqLayout[3].items?.length, faqLayout[4].items?.length],
           [15, 14],
         );
         assert.deepEqual(
-          faqLayout[5].items?.map((i) => i.image),
+          faqLayout[2].items?.map((i) => i.image),
           [
             faq.media["733"],
             faq.media["800"],
@@ -308,7 +308,7 @@ test(
         );
         for (const index of [3, 7]) {
           // Answers 19 and 23 in the second accordion.
-          const answer = JSON.stringify(faqLayout[3].items![index].answer);
+          const answer = JSON.stringify(faqLayout[4].items![index].answer);
           for (const id of ["1196", "1188", "1187"]) {
             const document = await store.get("media", result.media[id]);
             assert(answer.includes(document.url as string));

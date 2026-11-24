@@ -193,7 +193,7 @@ export function homeData(
       : { type: "external", url, label };
   };
   const banner = (id: string) => ({
-    blockType: "fullWidthImageBanner",
+    blockType: "mirBanner",
     desktopImage: media[id],
     imageHeight: "auto",
     overlay: "none",
@@ -230,20 +230,24 @@ export function homeData(
       },
       { blockType: "richText", content: plan.intro, variant: "default" },
       ...plan.sections.map((s) => ({
-        blockType: "imageText",
-        title: s.title,
-        content: s.content,
-        image: media[s.image],
-        variant: s.variant,
-        cta: action(s.url, "Saiba mais"),
+        blockType: "mirCards",
+        style: "homeModality",
+        items: [{
+          title: s.title,
+          content: s.content,
+          image: media[s.image],
+          imagePresentation: { size: "large", aspectRatio: "4:3", fit: "cover" },
+          imagePosition: s.variant === "image-right" ? "left" : "right",
+          link: action(s.url, "Saiba mais"),
+        }],
       })),
       {
-        blockType: "cards",
-        variant: "default",
+        blockType: "mirCards",
+        style: "homeAction",
         items: plan.cards.map((c) => ({
           title: c.title,
-          mediaSource: "image",
           image: media[c.image],
+          imagePresentation: { size: "large", aspectRatio: "4:3", fit: "cover" },
           link: action(c.url, "Confira aqui"),
         })),
       },

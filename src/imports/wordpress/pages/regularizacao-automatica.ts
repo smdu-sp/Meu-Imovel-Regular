@@ -172,7 +172,7 @@ export function automaticaData(
     lifecycleStatus: "active",
     layout: [
       {
-        blockType: "fullWidthImageBanner",
+        blockType: "mirBanner",
         desktopImage: media["727"],
         imageHeight: "auto",
         overlay: "none",
@@ -181,10 +181,9 @@ export function automaticaData(
       },
       { blockType: "richText", variant: "default", content: plan.intro },
       ...plan.topics.map((s) => ({
-        blockType: "imageText",
+        blockType: "mirTextMedia",
         title: s.title,
         image: media[s.image],
-        variant: s.variant,
         content: s.content,
       })),
       { blockType: "richText", variant: "default", content: plan.certificate },

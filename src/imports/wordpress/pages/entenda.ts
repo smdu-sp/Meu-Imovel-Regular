@@ -156,7 +156,7 @@ export function entendaData(
     lifecycleStatus: "active",
     layout: [
       {
-        blockType: "fullWidthImageBanner",
+        blockType: "mirBanner",
         desktopImage: media["735"],
         imageHeight: "auto",
         overlay: "none",
@@ -174,14 +174,17 @@ export function entendaData(
       ...plan.sections.map((s) => {
         const slug = new URL(s.url).pathname.replace(/^\/+|\/+$/g, "");
         return {
-          blockType: "imageText",
-          title: s.title,
-          content: s.content,
-          image: media[s.image],
-          variant: s.variant,
-          cta: pages[slug]
+          blockType: "mirCards",
+          style: "lawModality",
+          items: [{
+            title: s.title,
+            content: s.content,
+            image: media[s.image],
+            imagePresentation: { size: "small", aspectRatio: "1:1", fit: "cover" },
+            link: pages[slug]
             ? { type: "internal", page: pages[slug], label: "Saiba mais" }
             : { type: "external", url: s.url, label: "Saiba mais" },
+          }],
         };
       }),
     ],

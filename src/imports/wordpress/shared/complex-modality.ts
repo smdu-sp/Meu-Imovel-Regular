@@ -168,10 +168,10 @@ export function complexData(
   media: Record<string, number>,
 ) {
   const topicBlocks: Record<string, unknown>[] = plan.topics.map((t) => ({
-    blockType: "imageText",
+    blockType: config.slug === "regularizacao-declaratoria" ? "mirTextMedia" : "imageText",
     title: t.title,
     image: media[t.image],
-    variant: t.variant,
+    ...(config.slug === "regularizacao-declaratoria" ? {} : { variant: t.variant }),
     content: t.content,
   }));
   if (plan.requirements)
@@ -187,7 +187,7 @@ export function complexData(
     lifecycleStatus: "active",
     layout: [
       {
-        blockType: "fullWidthImageBanner",
+        blockType: config.slug === "regularizacao-declaratoria" ? "mirBanner" : "fullWidthImageBanner",
         desktopImage: media[config.assets[0].id],
         imageHeight: "auto",
         overlay: "none",

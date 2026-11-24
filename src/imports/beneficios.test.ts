@@ -36,12 +36,12 @@ test("Benefícios: snapshot validates images, original lists, link, alternation 
   assert.deepEqual(
     page.layout.map((b) => b.blockType),
     [
-      "fullWidthImageBanner",
+      "mirBanner",
       "richText",
-      "imageText",
-      "imageText",
-      "imageText",
-      "imageText",
+      "mirCards",
+      "mirCards",
+      "mirCards",
+      "mirCards",
     ],
   );
   assert.deepEqual(
@@ -52,7 +52,7 @@ test("Benefícios: snapshot validates images, original lists, link, alternation 
     plan.sections.map((s) => s.content.root.children.at(-1)!.children.length),
     [4, 4, 5, 3],
   );
-  assert.equal((page.layout[3] as { image: number }).image, 72);
+  assert.equal((page.layout[3] as { items: { image: number }[] }).items[0].image, 72);
   const json = JSON.stringify(page);
   assert.doesNotMatch(
     json,

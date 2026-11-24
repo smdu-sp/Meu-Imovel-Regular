@@ -283,6 +283,9 @@ export interface Page {
         | AlertBoxBlock
         | ActionBannersBlock
         | FullWidthImageBannerBlock
+        | MirBannerBlock
+        | MirCardsBlock
+        | MirTextMediaBlock
       )[]
     | null;
   /**
@@ -1688,6 +1691,315 @@ export interface FullWidthImageBannerBlock {
   blockType: 'fullWidthImageBanner';
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MirBannerBlock".
+ */
+export interface MirBannerBlock {
+  /**
+   * Imagem principal do banner. Largura minima: 1200px. Ideal: 1920px para full-width. Formatos recomendados: .webp ou .jpg otimizado.
+   */
+  desktopImage: number | Media;
+  /**
+   * Opcional. Use uma composicao alternativa quando a imagem desktop nao for adequada em telas estreitas.
+   */
+  mobileImage?: (number | null) | Media;
+  /**
+   * Ajuste esta ocorrencia da imagem. O arquivo original na biblioteca de Midia nao e alterado.
+   */
+  desktopCanvas?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Ajuste esta ocorrencia da imagem. O arquivo original na biblioteca de Midia nao e alterado.
+   */
+  mobileCanvas?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Opcional. Associe a imagem inteira a uma página do portal, URL externa ou documento PDF.
+   */
+  link?: {
+    enabled?: boolean | null;
+    type?: ('internal' | 'external' | 'document') | null;
+    /**
+     * Pagina de destino dentro do portal. Mudancas de slug nao quebram este relacionamento.
+     */
+    page?: (number | null) | Page;
+    /**
+     * Informe o endereco completo, incluindo http:// ou https://.
+     */
+    url?: string | null;
+    /**
+     * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+     */
+    document?: (number | null) | Media;
+    /**
+     * Recomendado para links externos.
+     */
+    newTab?: boolean | null;
+  };
+  overlay: 'none' | 'light' | 'dark';
+  /**
+   * Automatica preserva a proporcao original. As demais opcoes definem uma altura fixa responsiva para o banner.
+   */
+  imageHeight: 'auto' | 'compact' | 'medium' | 'large' | 'custom';
+  /**
+   * Informe uma altura entre 160 e 900 pixels. O valor controla apenas a apresentação deste banner.
+   */
+  customImageHeight?: number | null;
+  /**
+   * Usado quando a altura e fixa para controlar se a imagem cobre a area ou aparece inteira.
+   */
+  imageFit?: ('cover' | 'contain') | null;
+  /**
+   * Usado quando a altura e fixa para priorizar uma regiao da imagem no corte.
+   */
+  focalPoint?: ('center' | 'top' | 'bottom' | 'left' | 'right') | null;
+  /**
+   * Opcoes semanticas controladas pelo Design System. Nao permite CSS arbitrario.
+   */
+  appearance?: {
+    /**
+     * Seleciona uma combinacao completa de fundo, texto, acao e destaque.
+     */
+    scheme?: ('default' | 'custom') | null;
+    /**
+     * Deixe um campo vazio para herdar o token global. O contraste considera a paleta efetiva. Nao configura elementos individuais.
+     */
+    colors?: {
+      background?: string | null;
+      foreground?: string | null;
+      brand?: string | null;
+      action?: string | null;
+      accent?: string | null;
+    };
+  };
+  /**
+   * Opcional. Exibida sobre o banner, como a marca da Home.
+   */
+  badgeImage?: (number | null) | Media;
+  badgePosition?: ('left' | 'right') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mirBanner';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MirCardsBlock".
+ */
+export interface MirCardsBlock {
+  title?: string | null;
+  style: 'homeModality' | 'homeAction' | 'lawModality' | 'benefit' | 'contact';
+  items: {
+    title: string;
+    content?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    image: number | Media;
+    imagePresentation: {
+      /**
+       * Controla a largura da imagem dentro do espaco do bloco. Em celulares, a imagem sempre ocupa a largura total.
+       */
+      size: 'small' | 'medium' | 'large';
+      /**
+       * Original preserva as proporcoes do arquivo enviado. As demais opcoes recortam a imagem para a proporcao escolhida.
+       */
+      aspectRatio: 'original' | '1:1' | '4:3' | '16:9' | 'portrait';
+      /**
+       * Preencher recorta a imagem para cobrir o espaco; Conter mostra a imagem inteira, podendo sobrar espaco vazio. Usa o ponto focal definido na Midia quando disponivel.
+       */
+      fit?: ('cover' | 'contain') | null;
+      /**
+       * Ajuste esta ocorrencia da imagem. O arquivo original na biblioteca de Midia nao e alterado.
+       */
+      canvas?:
+        | {
+            [k: string]: unknown;
+          }
+        | unknown[]
+        | string
+        | number
+        | boolean
+        | null;
+    };
+    /**
+     * Usado nas composições Home: modalidades e Benefícios.
+     */
+    imagePosition?: ('left' | 'right') | null;
+    textSize?: ('small' | 'medium' | 'large') | null;
+    link?: {
+      /**
+       * Texto visivel para o usuario. Use uma acao clara, como Abrir pagina ou Saiba mais.
+       */
+      label?: string | null;
+      /**
+       * Escolha página interna, URL externa ou documento PDF da biblioteca.
+       */
+      type?: ('internal' | 'external' | 'document') | null;
+      /**
+       * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
+       */
+      page?: (number | null) | Page;
+      /**
+       * Informe o endereco completo, incluindo http:// ou https://.
+       */
+      url?: string | null;
+      /**
+       * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+       */
+      document?: (number | null) | Media;
+      /**
+       * Recomendado para links externos, mantendo o portal aberto na aba atual.
+       */
+      newTab?: boolean | null;
+    };
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mirCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MirTextMediaBlock".
+ */
+export interface MirTextMediaBlock {
+  /**
+   * Opcional. Titulo da secao que acompanha a imagem.
+   */
+  title?: string | null;
+  /**
+   * Texto complementar exibido ao lado, acima ou abaixo da imagem, conforme a posicao escolhida.
+   */
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Imagem principal do bloco. A posicao escolhida tambem vale em celulares para as opcoes acima e abaixo.
+   */
+  image: number | Media;
+  /**
+   * Define como esta imagem é exibida neste bloco. O arquivo original na Mídia não é alterado.
+   */
+  imagePresentation: {
+    /**
+     * Controla a largura da imagem dentro do espaco do bloco. Em celulares, a imagem sempre ocupa a largura total.
+     */
+    size: 'small' | 'medium' | 'large' | 'full';
+    /**
+     * Original preserva as proporcoes do arquivo enviado. As demais opcoes recortam a imagem para a proporcao escolhida.
+     */
+    aspectRatio: 'original' | '1:1' | '4:3' | '16:9' | 'portrait';
+    /**
+     * Preencher recorta a imagem para cobrir o espaco; Conter mostra a imagem inteira, podendo sobrar espaco vazio. Usa o ponto focal definido na Midia quando disponivel.
+     */
+    fit?: ('cover' | 'contain') | null;
+    /**
+     * Ajuste esta ocorrencia da imagem. O arquivo original na biblioteca de Midia nao e alterado.
+     */
+    canvas?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  /**
+   * Link opcional exibido apos o texto.
+   */
+  cta?: {
+    /**
+     * Texto visivel para o usuario. Use uma acao clara, como Abrir pagina ou Saiba mais.
+     */
+    label?: string | null;
+    /**
+     * Escolha página interna, URL externa ou documento PDF da biblioteca.
+     */
+    type?: ('internal' | 'external' | 'document') | null;
+    /**
+     * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
+     */
+    page?: (number | null) | Page;
+    /**
+     * Informe o endereco completo, incluindo http:// ou https://.
+     */
+    url?: string | null;
+    /**
+     * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
+     */
+    document?: (number | null) | Media;
+    /**
+     * Recomendado para links externos, mantendo o portal aberto na aba atual.
+     */
+    newTab?: boolean | null;
+  };
+  /**
+   * Opcoes semanticas controladas pelo Design System. Nao permite CSS arbitrario.
+   */
+  appearance?: {
+    /**
+     * Seleciona uma combinacao completa de fundo, texto, acao e destaque.
+     */
+    scheme?: ('default' | 'surface' | 'muted' | 'custom') | null;
+    /**
+     * Controla a distancia vertical do bloco em relacao aos blocos adjacentes.
+     */
+    spacing?: ('compact' | 'default' | 'spacious') | null;
+    /**
+     * Deixe um campo vazio para herdar o token global. O contraste considera a paleta efetiva. Nao configura elementos individuais.
+     */
+    colors?: {
+      background?: string | null;
+      foreground?: string | null;
+      brand?: string | null;
+      action?: string | null;
+      accent?: string | null;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mirTextMedia';
+}
+/**
  * Crie paletas e tipografias controladas pelo Design System. O tema aplicado ao portal e escolhido nas Configuracoes do site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1925,6 +2237,9 @@ export interface PagesSelect<T extends boolean = true> {
         alertBox?: T | AlertBoxBlockSelect<T>;
         actionBanners?: T | ActionBannersBlockSelect<T>;
         fullWidthImageBanner?: T | FullWidthImageBannerBlockSelect<T>;
+        mirBanner?: T | MirBannerBlockSelect<T>;
+        mirCards?: T | MirCardsBlockSelect<T>;
+        mirTextMedia?: T | MirTextMediaBlockSelect<T>;
       };
   seo?:
     | T
@@ -2549,6 +2864,131 @@ export interface FullWidthImageBannerBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MirBannerBlock_select".
+ */
+export interface MirBannerBlockSelect<T extends boolean = true> {
+  desktopImage?: T;
+  mobileImage?: T;
+  desktopCanvas?: T;
+  mobileCanvas?: T;
+  link?:
+    | T
+    | {
+        enabled?: T;
+        type?: T;
+        page?: T;
+        url?: T;
+        document?: T;
+        newTab?: T;
+      };
+  overlay?: T;
+  imageHeight?: T;
+  customImageHeight?: T;
+  imageFit?: T;
+  focalPoint?: T;
+  appearance?:
+    | T
+    | {
+        scheme?: T;
+        colors?:
+          | T
+          | {
+              background?: T;
+              foreground?: T;
+              brand?: T;
+              action?: T;
+              accent?: T;
+            };
+      };
+  badgeImage?: T;
+  badgePosition?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MirCardsBlock_select".
+ */
+export interface MirCardsBlockSelect<T extends boolean = true> {
+  title?: T;
+  style?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        content?: T;
+        image?: T;
+        imagePresentation?:
+          | T
+          | {
+              size?: T;
+              aspectRatio?: T;
+              fit?: T;
+              canvas?: T;
+            };
+        imagePosition?: T;
+        textSize?: T;
+        link?:
+          | T
+          | {
+              label?: T;
+              type?: T;
+              page?: T;
+              url?: T;
+              document?: T;
+              newTab?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MirTextMediaBlock_select".
+ */
+export interface MirTextMediaBlockSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  image?: T;
+  imagePresentation?:
+    | T
+    | {
+        size?: T;
+        aspectRatio?: T;
+        fit?: T;
+        canvas?: T;
+      };
+  cta?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        page?: T;
+        url?: T;
+        document?: T;
+        newTab?: T;
+      };
+  appearance?:
+    | T
+    | {
+        scheme?: T;
+        spacing?: T;
+        colors?:
+          | T
+          | {
+              background?: T;
+              foreground?: T;
+              brand?: T;
+              action?: T;
+              accent?: T;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "themes_select".
  */
 export interface ThemesSelect<T extends boolean = true> {
@@ -2678,6 +3118,13 @@ export interface Header {
    */
   logo?: (number | null) | Media;
   /**
+   * Opcional. Exibida na outra extremidade do cabeçalho.
+   */
+  secondaryLogo?: (number | null) | Media;
+  logoSize?: ('small' | 'medium' | 'large') | null;
+  logoPosition?: ('left' | 'right') | null;
+  textSize?: ('small' | 'medium' | 'large') | null;
+  /**
    * Normal preserva a navegação atual. Com submenus permite combinar páginas diretas e categorias.
    */
   navigationMode: 'normal' | 'submenus';
@@ -2765,6 +3212,13 @@ export interface Footer {
    * Opcional. Selecione uma midia institucional com texto alternativo adequado.
    */
   logo?: (number | null) | Media;
+  /**
+   * Opcional. Exibida junto da marca principal.
+   */
+  secondaryLogo?: (number | null) | Media;
+  logoSize?: ('small' | 'medium' | 'large') | null;
+  logoPosition?: ('left' | 'right') | null;
+  textSize?: ('small' | 'medium' | 'large') | null;
   /**
    * Opcional. Informe somente se houver canal oficial vigente para atendimento.
    */
@@ -2946,6 +3400,10 @@ export interface HeaderSelect<T extends boolean = true> {
             };
       };
   logo?: T;
+  secondaryLogo?: T;
+  logoSize?: T;
+  logoPosition?: T;
+  textSize?: T;
   navigationMode?: T;
   enableSearch?: T;
   navigation?:
@@ -2994,6 +3452,10 @@ export interface FooterSelect<T extends boolean = true> {
             };
       };
   logo?: T;
+  secondaryLogo?: T;
+  logoSize?: T;
+  logoPosition?: T;
+  textSize?: T;
   phone?: T;
   email?: T;
   address?: T;

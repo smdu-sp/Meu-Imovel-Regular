@@ -12,6 +12,9 @@ import { HeroBlock } from "../blocks/Hero/config.ts";
 import { IconGridBlock } from "../blocks/IconGrid/config.ts";
 import { ImageBlock } from "../blocks/ImageBlock/config.ts";
 import { ImageTextBlock } from "../blocks/ImageText/config.ts";
+import { MirBannerBlock } from "../blocks/MirBanner/config.ts";
+import { MirCardsBlock } from "../blocks/MirCards/config.ts";
+import { MirTextMediaBlock } from "../blocks/MirTextMedia/config.ts";
 import { RichTextBlock } from "../blocks/RichText/config.ts";
 import { VideoBlock } from "../blocks/VideoBlock/config.ts";
 import { pageBlockSlugs, type PageBlockSlug } from "../blocks/catalog.ts";
@@ -48,6 +51,9 @@ const pageBlockConfigs = {
   alertBox: AlertBoxBlock,
   actionBanners: ActionBannersBlock,
   fullWidthImageBanner: FullWidthImageBannerBlock,
+  mirBanner: MirBannerBlock,
+  mirCards: MirCardsBlock,
+  mirTextMedia: MirTextMediaBlock,
 } satisfies Record<PageBlockSlug, Block>;
 
 export const getPageLivePreviewUrl = (data: Record<string, unknown>): string | null => {

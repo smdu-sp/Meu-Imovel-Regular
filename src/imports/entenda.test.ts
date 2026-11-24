@@ -30,14 +30,14 @@ test("Entenda extracts five verified images and eight blocks with source heading
   assert.deepEqual(
     page.layout.map((b) => b.blockType),
     [
-      "fullWidthImageBanner",
+      "mirBanner",
       "richText",
       "videoBlock",
       "richText",
-      "imageText",
-      "imageText",
-      "imageText",
-      "imageText",
+      "mirCards",
+      "mirCards",
+      "mirCards",
+      "mirCards",
     ],
   );
   const json = JSON.stringify(page);
@@ -62,11 +62,11 @@ test("Entenda extracts five verified images and eight blocks with source heading
     "regularizacao-declaratoria-simplificada": 81,
   });
   const linkedModality = linked.layout[5];
-  assert("cta" in linkedModality);
-  assert.equal(linkedModality.cta?.page, 81);
+  assert("items" in linkedModality);
+  assert.equal(linkedModality.items?.[0]?.link?.page, 81);
   const legacyModality = page.layout[5];
-  assert("cta" in legacyModality);
-  assert.equal(legacyModality.cta?.type, "external");
+  assert("items" in legacyModality);
+  assert.equal(legacyModality.items?.[0]?.link?.type, "external");
   assert.deepEqual(
     plan.sections.map((s) => s.variant),
     ["image-right", "image-left", "image-right", "image-left"],

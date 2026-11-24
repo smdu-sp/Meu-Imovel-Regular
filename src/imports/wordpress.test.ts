@@ -171,15 +171,15 @@ test("real snapshot generates nine blocks and eight ordered PDF relationships of
   assert.deepEqual(
     page.layout.map((b) => b.blockType),
     [
-      "fullWidthImageBanner",
-      "fullWidthImageBanner",
+      "mirBanner",
+      "mirBanner",
       "iconGrid",
       "richText",
-      "imageText",
-      "imageText",
-      "imageText",
-      "imageText",
-      "cards",
+      "mirCards",
+      "mirCards",
+      "mirCards",
+      "mirCards",
+      "mirCards",
     ],
   );
   assert(!JSON.stringify(page).match(/anistia|poderão sre/i));

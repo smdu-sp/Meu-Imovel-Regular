@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="title">
+  <title id="title">Texto MIR acima de uma imagem de destaque</title>
+  <rect width="600" height="400" rx="24" fill="#f1f5f9"/>
+  <rect x="36" y="32" width="528" height="336" rx="20" fill="#fff"/>
+  <text x="65" y="76" fill="#0a3299" font-family="Arial, sans-serif" font-size="25" font-weight="700">Texto e mídia MIR</text>
+  <rect x="65" y="98" width="454" height="10" rx="5" fill="#64748b"/>
+  <rect x="65" y="121" width="426" height="10" rx="5" fill="#94a3b8"/>
+  <rect x="65" y="144" width="381" height="10" rx="5" fill="#cbd5e1"/>
+  <rect x="65" y="179" width="470" height="162" rx="14" fill="#c8e5e6"/>
+  <circle cx="444" cy="216" r="25" fill="#5cd6c9"/>
+  <path d="M65 321l105-83 76 42 72-60 85 64 64-45 68 44v58H65z" fill="#6aa9a3"/>
+  <path d="M65 341l100-58 79 27 91-61 93 60 58-33 49 27v38H65z" fill="#0a3299" opacity=".8"/>
+</svg>

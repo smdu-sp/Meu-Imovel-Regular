@@ -31,11 +31,11 @@ test("Automática validates nine assets, source content and four local document 
   assert.deepEqual(
     page.layout.map((b) => b.blockType),
     [
-      "fullWidthImageBanner",
+      "mirBanner",
       "richText",
-      "imageText",
-      "imageText",
-      "imageText",
+      "mirTextMedia",
+      "mirTextMedia",
+      "mirTextMedia",
       "richText",
       "imageBlock",
       "iconGrid",

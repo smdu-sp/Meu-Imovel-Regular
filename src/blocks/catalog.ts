@@ -15,6 +15,9 @@ export const pageBlockSlugs = [
   "alertBox",
   "actionBanners",
   "fullWidthImageBanner",
+  "mirBanner",
+  "mirCards",
+  "mirTextMedia",
 ] as const;
 
 export type PageBlockSlug = (typeof pageBlockSlugs)[number];

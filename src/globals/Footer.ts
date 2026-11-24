@@ -46,6 +46,45 @@ export const Footer: GlobalConfig = {
       },
     },
     {
+      name: "secondaryLogo",
+      type: "upload",
+      relationTo: "media",
+      label: "Segunda marca institucional",
+      admin: { description: "Opcional. Exibida junto da marca principal." },
+    },
+    {
+      name: "logoSize",
+      type: "select",
+      label: "Tamanho das marcas",
+      defaultValue: "medium",
+      options: [
+        { label: "Pequeno", value: "small" },
+        { label: "Médio", value: "medium" },
+        { label: "Grande", value: "large" },
+      ],
+    },
+    {
+      name: "logoPosition",
+      type: "select",
+      label: "Posição das marcas",
+      defaultValue: "left",
+      options: [
+        { label: "Esquerda", value: "left" },
+        { label: "Direita", value: "right" },
+      ],
+    },
+    {
+      name: "textSize",
+      type: "select",
+      label: "Tamanho dos textos",
+      defaultValue: "medium",
+      options: [
+        { label: "Pequeno", value: "small" },
+        { label: "Médio", value: "medium" },
+        { label: "Grande", value: "large" },
+      ],
+    },
+    {
       name: "phone",
       type: "text",
       label: "Telefone",

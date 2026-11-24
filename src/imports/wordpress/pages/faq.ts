@@ -236,7 +236,7 @@ export function faqData(
     lifecycleStatus: "active",
     layout: [
       {
-        blockType: "fullWidthImageBanner",
+        blockType: "mirBanner",
         desktopImage: media["731"],
         imageHeight: "auto",
         overlay: "none",
@@ -244,6 +244,20 @@ export function faqData(
         focalPoint: "center",
       },
       { blockType: "richText", variant: "default", content: plan.intro },
+      {
+        blockType: "mirCards",
+        title: "Canais de atendimento",
+        style: "contact",
+        items: plan.support.map((s) => ({
+          title: s.title,
+          content: lexical(`<p>${s.description}</p>`),
+          image: media[s.image],
+          imagePresentation: { size: "small", aspectRatio: "1:1", fit: "cover" },
+          ...(s.clickable ? {
+            link: { type: "external", url: s.url, label: s.label, newTab: true },
+          } : {}),
+        })),
+      },
       ...[items.slice(0, 15), items.slice(15)].map((items, i) => ({
         blockType: "faqAccordion",
         title: faqTitles[i],
@@ -258,34 +272,6 @@ export function faqData(
           aspectRatio: "original",
           fit: "contain",
         },
-      },
-      {
-        blockType: "cards",
-        title: "Canais de atendimento",
-        variant: "default",
-        items: plan.support.map((s) => ({
-          title: s.title,
-          description: s.description,
-          mediaSource: "image",
-          image: media[s.image],
-          mediaPosition: "top",
-          imageLayout: "contained",
-          imagePresentation: {
-            size: "small",
-            aspectRatio: "original",
-            fit: "contain",
-          },
-          ...(s.clickable
-            ? {
-                link: {
-                  type: "external",
-                  url: s.url,
-                  label: s.label,
-                  newTab: true,
-                },
-              }
-            : {}),
-        })),
       },
     ],
   };
