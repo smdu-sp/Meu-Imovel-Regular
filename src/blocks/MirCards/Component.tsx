@@ -1,89 +1,152 @@
 import type { MirCardsBlock as MirCardsProps } from "../../payload-types";
+import { Container, Section } from "../../components/ui";
 import { BlockLink } from "../shared/BlockLink";
 import { EditorialRichText } from "../shared/EditorialRichText";
 import { PresentedMediaImage } from "../shared/PresentedMediaImage";
-import { Container, Section } from "../../components/ui";
 import type { ImagePresentation } from "../shared/image-presentation";
 
 type Item = MirCardsProps["items"][number];
 
-const textSizes = { small: "text-sm", medium: "text-base", large: "text-lg" } as const;
-const imageWidths = { small: "max-w-48", medium: "max-w-72", large: "max-w-full" } as const;
+const textSizes = {
+  small: "text-sm",
+  medium: "text-base",
+  large: "text-lg",
+} as const;
 
-function CardContent({ item, centered = false }: { item: Item; centered?: boolean }) {
-  const textSize = item.textSize && item.textSize in textSizes ? item.textSize : "medium";
+const fullWidthImageClasses = {
+  small: "w-full",
+  medium: "w-full",
+  large: "w-full",
+  full: "w-full",
+} as const;
+
+function CardAction({ item }: { item: Item }) {
+  return item.link?.label ? (
+    <div className="mir-card-action">
+      <BlockLink appearance="outline" link={item.link} />
+    </div>
+  ) : null;
+}
+
+function CardContent({
+  centered = false,
+  item,
+  showAction = true,
+}: {
+  centered?: boolean;
+  item: Item;
+  showAction?: boolean;
+}) {
+  const textSize =
+    item.textSize && item.textSize in textSizes ? item.textSize : "medium";
+
   return (
-    <div className={`${centered ? "text-center" : ""} ${textSizes[textSize]}`}>
-      <h3 className="mb-3 text-xl font-bold text-[var(--block-heading)] sm:text-2xl">{item.title}</h3>
-      {item.content ? <EditorialRichText className="cms-rich-text" data={item.content} /> : null}
-      {item.link?.label ? <div className="mt-5"><BlockLink appearance="outline" link={item.link} /></div> : null}
+    <div className={`mir-card-copy ${centered ? "mir-card-copy--centered" : ""} ${textSizes[textSize]}`}>
+      <h3 className="mir-card-heading">{item.title}</h3>
+      {item.content ? (
+        <EditorialRichText className="cms-rich-text mir-card-rich-text" data={item.content} />
+      ) : null}
+      {showAction ? <CardAction item={item} /> : null}
     </div>
   );
 }
 
-function CardImage({ item, style, className = "" }: { item: Item; style: MirCardsProps["style"]; className?: string }) {
-  const size = item.imagePresentation?.size;
-  const width = size && size in imageWidths ? imageWidths[size as keyof typeof imageWidths] : imageWidths.medium;
-  const defaultAspectRatio = style === "contact" || style === "lawModality" ? "1:1" : style === "benefit" ? "original" : "4:3";
+function CardImage({
+  className = "",
+  item,
+  style,
+}: {
+  className?: string;
+  item: Item;
+  style: MirCardsProps["style"];
+}) {
+  const size = item.imagePresentation?.size ?? "medium";
+  const defaultAspectRatio =
+    style === "contact" || style === "lawModality"
+      ? "1:1"
+      : style === "benefit"
+        ? "original"
+        : "4:3";
   const presentation = {
     ...item.imagePresentation,
     aspectRatio: item.imagePresentation?.aspectRatio ?? defaultAspectRatio,
     fit: item.imagePresentation?.fit ?? "cover",
   } as ImagePresentation;
+
   return (
-    <PresentedMediaImage
-      className={`${className} ${width} w-full object-cover`}
-      media={item.image}
-      presentation={presentation}
-      sizes="(min-width: 1024px) 40vw, 100vw"
-    />
+    <div className={`mir-card-media mir-card-media--${size} ${className}`}>
+      <PresentedMediaImage
+        className="mir-card-image"
+        media={item.image}
+        presentation={presentation}
+        sizeClassNames={fullWidthImageClasses}
+        sizes="(min-width: 1024px) 40vw, 100vw"
+      />
+    </div>
   );
 }
 
 function MirCard({ item, style }: { item: Item; style: MirCardsProps["style"] }) {
-  const right = item.imagePosition === "right";
-  if (style === "homeModality") return (
-    <article className="relative grid items-center gap-0 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-      <CardImage item={item} style={style} className={`min-h-64 !max-w-none rounded-2xl ${right ? "lg:order-2" : ""}`} />
-      <div className={`relative mx-4 -mt-10 rounded-3xl border-r-4 border-[var(--color-brand)] bg-[var(--color-surface)] p-8 shadow-lg lg:mx-0 lg:mt-0 ${right ? "lg:order-1 lg:-mr-10" : "lg:-ml-10"}`}>
-        <CardContent item={item} centered />
-      </div>
-    </article>
-  );
-  if (style === "benefit") return (
-    <article className="grid items-center gap-0 lg:grid-cols-2">
-      <div className={`rounded-3xl border-2 border-dashed border-[var(--color-brand)] p-8 ${right ? "lg:order-1" : "lg:order-2"}`}><CardContent item={item} /></div>
-      <CardImage item={item} style={style} className={`mx-auto -mt-5 rounded-2xl lg:mt-0 lg:!max-w-none ${right ? "lg:order-2 lg:-ml-5" : "lg:order-1 lg:-mr-5"}`} />
-    </article>
-  );
-  if (style === "lawModality") return (
-    <article className="grid items-center gap-6 rounded-3xl border-2 border-dashed border-[var(--color-brand)] p-6 sm:grid-cols-[8rem_1fr] lg:grid-cols-[10rem_1fr]">
-      <CardImage item={item} style={style} className="aspect-square !max-w-40 rounded-full" />
-      <CardContent item={item} />
-    </article>
-  );
-  if (style === "contact") return (
-    <article className="rounded-b-3xl border-2 border-dashed border-[var(--color-brand)] px-6 pb-8 text-center">
-      <CardImage item={item} style={style} className="mx-auto mb-5 aspect-square !max-w-56 rounded-full" />
-      <CardContent item={item} centered />
-    </article>
-  );
+  const imageOnRight = item.imagePosition === "right";
+
+  if (style === "homeModality") {
+    return (
+      <article className={`mir-home-modality ${imageOnRight ? "mir-home-modality--image-right" : ""}`}>
+        <CardImage className="mir-home-image" item={item} style={style} />
+        <div className="mir-home-panel">
+          <CardContent centered item={item} />
+        </div>
+      </article>
+    );
+  }
+
+  if (style === "benefit") {
+    return (
+      <article className={`mir-benefit ${imageOnRight ? "mir-benefit--image-right" : ""}`}>
+        <div className="mir-benefit-text">
+          <CardContent item={item} />
+        </div>
+        <CardImage className="mir-benefit-image" item={item} style={style} />
+      </article>
+    );
+  }
+
+  if (style === "lawModality") {
+    return (
+      <article className="mir-law-modality">
+        <CardImage className="mir-law-image" item={item} style={style} />
+        <CardContent item={item} showAction={false} />
+        <CardAction item={item} />
+      </article>
+    );
+  }
+
+  if (style === "contact") {
+    return (
+      <article className="mir-contact-card">
+        <CardImage className="mir-contact-image" item={item} style={style} />
+        <CardContent centered item={item} />
+      </article>
+    );
+  }
+
   return (
-    <article className="overflow-hidden rounded-b-3xl border-2 border-dashed border-[var(--color-brand)]">
-      <CardImage item={item} style={style} className="!max-w-none" />
-      <div className="p-8"><CardContent item={item} centered /></div>
+    <article className="mir-action-card">
+      <CardImage className="mir-action-image" item={item} style={style} />
+      <CardContent centered item={item} />
     </article>
   );
 }
 
 export function MirCardsBlock({ title, style, items }: MirCardsProps) {
-  const stacked = style === "homeModality" || style === "benefit" || style === "lawModality";
   return (
-    <Section>
+    <Section spacing="compact">
       <Container size="lg">
-        {title ? <h2 className="mb-8 text-3xl font-bold text-[var(--block-heading)]">{title}</h2> : null}
-        <div className={stacked ? "grid gap-10" : "grid gap-8 md:grid-cols-2 lg:grid-cols-3"}>
-          {items?.map((item, index) => <MirCard item={item} key={item.id ?? index} style={style} />)}
+        {title ? <h2 className="mir-card-section-title">{title}</h2> : null}
+        <div className={`mir-card-list mir-card-list--${style}`}>
+          {items?.map((item, index) => (
+            <MirCard item={item} key={item.id ?? index} style={style} />
+          ))}
         </div>
       </Container>
     </Section>

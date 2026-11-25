@@ -154,7 +154,7 @@ test("projection detects content/state changes and revision changes without depe
   ])
     assert.throws(() => assertIntact({ ...doc, ...change }, "pages", entry));
 });
-test("real snapshot generates nine blocks and eight ordered PDF relationships offline", async () => {
+test("real snapshot groups Home modalities and keeps eight ordered PDF relationships offline", async () => {
   const plan = await planHome(
     resolveSourceFile(),
     resolveUploadsRoot(),
@@ -166,7 +166,7 @@ test("real snapshot generates nine blocks and eight ordered PDF relationships of
   );
   const media = Object.fromEntries(plan.assets.map((a, i) => [a.id, i + 1]));
   const page = homeData(plan, media);
-  assert.equal(page.layout.length, 9);
+  assert.equal(page.layout.length, 6);
   assert.equal(page._status, "draft");
   assert.deepEqual(
     page.layout.map((b) => b.blockType),
@@ -177,11 +177,12 @@ test("real snapshot generates nine blocks and eight ordered PDF relationships of
       "richText",
       "mirCards",
       "mirCards",
-      "mirCards",
-      "mirCards",
-      "mirCards",
     ],
   );
+  const modalities = page.layout[4];
+  assert("items" in modalities);
+  assert.ok(Array.isArray(modalities.items));
+  assert.equal(modalities.items.length, 4);
   assert(!JSON.stringify(page).match(/anistia|poderão sre/i));
   assert.equal(
     plan.cards[0].title,

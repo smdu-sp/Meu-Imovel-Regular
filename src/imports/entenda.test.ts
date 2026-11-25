@@ -15,7 +15,7 @@ import {
 const source = resolveSourceFile();
 const uploads = resolveUploadsRoot();
 
-test("Entenda extracts five verified images and eight blocks with source headings and external lists", async () => {
+test("Entenda extracts five verified images and groups modalities with source headings and external lists", async () => {
   const plan = await planEntenda(source, uploads);
   assert.equal(plan.metaId, "4160");
   assert.equal(plan.assets.length, 5);
@@ -35,11 +35,12 @@ test("Entenda extracts five verified images and eight blocks with source heading
       "videoBlock",
       "richText",
       "mirCards",
-      "mirCards",
-      "mirCards",
-      "mirCards",
     ],
   );
+  const modalities = page.layout[4];
+  assert("items" in modalities);
+  assert.ok(Array.isArray(modalities.items));
+  assert.equal(modalities.items.length, 4);
   const json = JSON.stringify(page);
   assert.doesNotMatch(json, /anistia|<iframe|<script/i);
   assert.match(json, /"tag":"h1"/);
@@ -61,12 +62,12 @@ test("Entenda extracts five verified images and eight blocks with source heading
   const linked = entendaData(plan, ids, {
     "regularizacao-declaratoria-simplificada": 81,
   });
-  const linkedModality = linked.layout[5];
+  const linkedModality = linked.layout[4];
   assert("items" in linkedModality);
-  assert.equal(linkedModality.items?.[0]?.link?.page, 81);
-  const legacyModality = page.layout[5];
+  assert.equal(linkedModality.items?.[1]?.link?.page, 81);
+  const legacyModality = page.layout[4];
   assert("items" in legacyModality);
-  assert.equal(legacyModality.items?.[0]?.link?.type, "external");
+  assert.equal(legacyModality.items?.[1]?.link?.type, "external");
   assert.deepEqual(
     plan.sections.map((s) => s.variant),
     ["image-right", "image-left", "image-right", "image-left"],

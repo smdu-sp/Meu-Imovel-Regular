@@ -171,12 +171,12 @@ export function entendaData(
         aspectRatio: "16:9",
       },
       { blockType: "richText", variant: "default", content: plan.concept },
-      ...plan.sections.map((s) => {
+      {
+        blockType: "mirCards",
+        style: "lawModality",
+        items: plan.sections.map((s) => {
         const slug = new URL(s.url).pathname.replace(/^\/+|\/+$/g, "");
-        return {
-          blockType: "mirCards",
-          style: "lawModality",
-          items: [{
+          return {
             title: s.title,
             content: s.content,
             image: media[s.image],
@@ -184,9 +184,9 @@ export function entendaData(
             link: pages[slug]
             ? { type: "internal", page: pages[slug], label: "Saiba mais" }
             : { type: "external", url: s.url, label: "Saiba mais" },
-          }],
-        };
-      }),
+          };
+        }),
+      },
     ],
   };
 }

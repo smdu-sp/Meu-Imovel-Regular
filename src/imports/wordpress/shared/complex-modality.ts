@@ -168,10 +168,10 @@ export function complexData(
   media: Record<string, number>,
 ) {
   const topicBlocks: Record<string, unknown>[] = plan.topics.map((t) => ({
-    blockType: config.slug === "regularizacao-declaratoria" ? "mirTextMedia" : "imageText",
+    blockType: "imageText",
     title: t.title,
     image: media[t.image],
-    ...(config.slug === "regularizacao-declaratoria" ? {} : { variant: t.variant }),
+    variant: config.slug === "regularizacao-declaratoria" ? "image-bottom" : t.variant,
     content: t.content,
   }));
   if (plan.requirements)

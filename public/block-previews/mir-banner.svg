@@ -1,21 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="title">
-  <title id="title">Banner MIR com imagem para computador, opção móvel e marca sobreposta</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title description">
+  <title id="title">Banner MIR responsivo</title>
+  <desc id="description">Prévia da imagem principal em desktop e celular, com a imagem sobreposta como opção.</desc>
   <defs>
     <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#95c9e8"/><stop offset="1" stop-color="#e6f4f8"/></linearGradient>
-    <linearGradient id="stripe"><stop stop-color="#0a3299"/><stop offset=".3" stop-color="#5cd6c9"/><stop offset=".65" stop-color="#8800e0"/><stop offset="1" stop-color="#eaa031"/></linearGradient>
+    <linearGradient id="stripe"><stop stop-color="#2f5b94"/><stop offset=".28" stop-color="#54b97c"/><stop offset=".53" stop-color="#563e63"/><stop offset=".72" stop-color="#cf342b"/><stop offset="1" stop-color="#e9a12e"/></linearGradient>
   </defs>
-  <rect width="600" height="400" rx="24" fill="#f1f5f9"/>
-  <rect x="30" y="55" width="540" height="278" rx="16" fill="url(#sky)"/>
-  <path d="M30 215l82-54 65 32 64-72 81 62 63-51 79 64 106-40v177H30z" fill="#7daaa3"/>
-  <path d="M30 250l85-42 74 49 80-75 64 50 91-41 72 63 74-41v120H30z" fill="#315f75" opacity=".8"/>
-  <path d="M48 333V260l54-19 54 19v73m21 0v-88l57-24 57 24v88m19 0v-62l41-17 41 17v62m22 0v-79l50-18 50 18v79" fill="#eaf1e8" stroke="#527384" stroke-width="4"/>
-  <rect x="30" y="55" width="540" height="7" fill="url(#stripe)"/>
-  <rect x="374" y="137" width="143" height="133" rx="16" fill="#fff" opacity=".96"/>
-  <rect x="390" y="153" width="111" height="101" rx="5" fill="none" stroke="#0a3299" stroke-width="4"/>
-  <text x="403" y="180" fill="#0a3299" font-family="Arial, sans-serif" font-size="18" font-weight="700">Meu Imóvel</text>
-  <text x="403" y="207" fill="#0a3299" font-family="Arial, sans-serif" font-size="20" font-weight="700">Regular</text>
-  <rect x="43" y="344" width="168" height="28" rx="14" fill="#0a3299"/>
-  <text x="127" y="363" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="13" font-weight="700">Imagem desktop</text>
-  <rect x="427" y="344" width="130" height="28" rx="14" fill="#fff" stroke="#0a3299"/>
-  <text x="492" y="363" text-anchor="middle" fill="#0a3299" font-family="Arial, sans-serif" font-size="13" font-weight="700">Mobile opcional</text>
+  <rect width="800" height="520" rx="22" fill="#f3f7f7"/>
+  <text x="28" y="40" fill="#193d62" font-family="Arial, sans-serif" font-size="24" font-weight="700">MIR: banner</text>
+  <text x="28" y="66" fill="#44576b" font-family="Arial, sans-serif" font-size="13">Imagem principal com versões e enquadramento configuráveis</text>
+
+  <text x="29" y="99" fill="#193d62" font-family="Arial, sans-serif" font-size="15" font-weight="700">Desktop</text>
+  <rect x="28" y="111" width="560" height="305" rx="12" fill="url(#sky)"/>
+  <path d="M28 328l93-69 80 27 66-90 94 57 72-51 79 63 76-39v190H28z" fill="#79a9a5"/>
+  <path d="M28 361l90-45 88 42 84-75 97 52 84-38 117 61v58H28z" fill="#386a7b"/>
+  <rect x="426" y="184" width="128" height="112" rx="7" fill="#fff" opacity=".95"/>
+  <rect x="440" y="198" width="100" height="84" rx="3" fill="none" stroke="#2f5b94" stroke-width="4"/>
+  <text x="448" y="228" fill="#2f5b94" font-family="Arial, sans-serif" font-size="15" font-weight="700">Marca</text>
+  <text x="448" y="250" fill="#2f5b94" font-family="Arial, sans-serif" font-size="12">opcional</text>
+
+  <text x="617" y="99" fill="#193d62" font-family="Arial, sans-serif" font-size="15" font-weight="700">Celular</text>
+  <rect x="615" y="111" width="156" height="305" rx="16" fill="#fff" stroke="#94a3b8" stroke-width="3"/>
+  <rect x="625" y="124" width="136" height="274" rx="7" fill="url(#sky)"/>
+  <path d="M625 307l34-63 23 29 29-56 25 34 25-22v169H625z" fill="#79a9a5"/>
+  <path d="M625 349l38-39 26 22 35-36 37 33v69H625z" fill="#386a7b"/>
+  <rect x="28" y="445" width="560" height="7" fill="url(#stripe)"/>
+  <text x="28" y="478" fill="#44576b" font-family="Arial, sans-serif" font-size="13">Imagem móvel e marca sobreposta são opcionais.</text>
 </svg>

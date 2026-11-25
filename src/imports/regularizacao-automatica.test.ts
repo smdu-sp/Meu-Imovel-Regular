@@ -33,14 +33,20 @@ test("Automática validates nine assets, source content and four local document 
     [
       "mirBanner",
       "richText",
-      "mirTextMedia",
-      "mirTextMedia",
-      "mirTextMedia",
+      "imageText",
+      "imageText",
+      "imageText",
       "richText",
       "imageBlock",
       "iconGrid",
       "alertBox",
     ],
+  );
+  assert.deepEqual(
+    page.layout
+      .slice(2, 5)
+      .map((block) => ("variant" in block ? block.variant : undefined)),
+    ["image-bottom", "image-bottom", "image-bottom"],
   );
   assert.deepEqual(
     plan.topics.map((t) => t.variant),

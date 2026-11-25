@@ -22,7 +22,6 @@ const blockLabels: Record<string, string> = {
   imageText: "Mídia e texto / imagem de destaque",
   mirBanner: "MIR: banner",
   mirCards: "MIR: cards",
-  mirTextMedia: "MIR: texto e mídia",
   richText: "Texto editorial",
 };
 

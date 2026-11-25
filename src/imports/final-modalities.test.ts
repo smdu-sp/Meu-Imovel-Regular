@@ -38,6 +38,13 @@ test("009 and 010 preserve twelve blocks, shared media, document links and the a
     assert.equal(plan.assets.length, count);
     assert.equal(page.layout.length, 12);
     assert.equal(page._status, "draft");
+    if (page.slug === "regularizacao-declaratoria") {
+      const mediaBlocks = page.layout.filter(
+        (block) => block.blockType === "imageText",
+      );
+      assert.equal(mediaBlocks.length, 6);
+      assert.ok(mediaBlocks.every((block) => block.variant === "image-bottom"));
+    }
     const json = JSON.stringify(page);
     assert.match(json, /apenas um comunicado/);
     assert.match(json, /prorrogado/);

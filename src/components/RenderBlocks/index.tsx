@@ -16,7 +16,6 @@ import { ImageBlock } from "../../blocks/ImageBlock/Component";
 import { ImageTextBlock } from "../../blocks/ImageText/Component";
 import { MirBannerBlock } from "../../blocks/MirBanner/Component";
 import { MirCardsBlock } from "../../blocks/MirCards/Component";
-import { MirTextMediaBlock } from "../../blocks/MirTextMedia/Component";
 import { RichTextBlock } from "../../blocks/RichText/Component";
 import { VideoBlock } from "../../blocks/VideoBlock/Component";
 
@@ -50,7 +49,6 @@ const blockRenderers = {
   fullWidthImageBanner: (block) => <FullWidthImageBannerBlock {...block} />,
   mirBanner: (block) => <MirBannerBlock {...block} />,
   mirCards: (block) => <MirCardsBlock {...block} />,
-  mirTextMedia: (block) => <MirTextMediaBlock {...block} />,
 } satisfies { [K in PageBlockSlug]: (block: BlockOf<K>) => ReactNode };
 
 export function RenderBlocks({ blocks }: { blocks?: Page["layout"] | null }) {

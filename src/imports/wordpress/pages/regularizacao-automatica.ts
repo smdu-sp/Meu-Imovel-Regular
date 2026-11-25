@@ -181,7 +181,8 @@ export function automaticaData(
       },
       { blockType: "richText", variant: "default", content: plan.intro },
       ...plan.topics.map((s) => ({
-        blockType: "mirTextMedia",
+        blockType: "imageText",
+        variant: "image-bottom",
         title: s.title,
         image: media[s.image],
         content: s.content,

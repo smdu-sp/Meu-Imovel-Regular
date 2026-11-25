@@ -39,11 +39,12 @@ test("Benefícios: snapshot validates images, original lists, link, alternation 
       "mirBanner",
       "richText",
       "mirCards",
-      "mirCards",
-      "mirCards",
-      "mirCards",
     ],
   );
+  const benefitCards = page.layout[2];
+  assert("items" in benefitCards);
+  assert.ok(Array.isArray(benefitCards.items));
+  assert.equal(benefitCards.items.length, 4);
   assert.deepEqual(
     plan.sections.map((s) => s.variant),
     ["image-right", "image-left", "image-right", "image-left"],
@@ -52,7 +53,7 @@ test("Benefícios: snapshot validates images, original lists, link, alternation 
     plan.sections.map((s) => s.content.root.children.at(-1)!.children.length),
     [4, 4, 5, 3],
   );
-  assert.equal((page.layout[3] as { items: { image: number }[] }).items[0].image, 72);
+  assert.equal(benefitCards.items[1].image, 72);
   const json = JSON.stringify(page);
   assert.doesNotMatch(
     json,

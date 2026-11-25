@@ -285,7 +285,6 @@ export interface Page {
         | FullWidthImageBannerBlock
         | MirBannerBlock
         | MirCardsBlock
-        | MirTextMediaBlock
       )[]
     | null;
   /**
@@ -1884,122 +1883,6 @@ export interface MirCardsBlock {
   blockType: 'mirCards';
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MirTextMediaBlock".
- */
-export interface MirTextMediaBlock {
-  /**
-   * Opcional. Titulo da secao que acompanha a imagem.
-   */
-  title?: string | null;
-  /**
-   * Texto complementar exibido ao lado, acima ou abaixo da imagem, conforme a posicao escolhida.
-   */
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Imagem principal do bloco. A posicao escolhida tambem vale em celulares para as opcoes acima e abaixo.
-   */
-  image: number | Media;
-  /**
-   * Define como esta imagem é exibida neste bloco. O arquivo original na Mídia não é alterado.
-   */
-  imagePresentation: {
-    /**
-     * Controla a largura da imagem dentro do espaco do bloco. Em celulares, a imagem sempre ocupa a largura total.
-     */
-    size: 'small' | 'medium' | 'large' | 'full';
-    /**
-     * Original preserva as proporcoes do arquivo enviado. As demais opcoes recortam a imagem para a proporcao escolhida.
-     */
-    aspectRatio: 'original' | '1:1' | '4:3' | '16:9' | 'portrait';
-    /**
-     * Preencher recorta a imagem para cobrir o espaco; Conter mostra a imagem inteira, podendo sobrar espaco vazio. Usa o ponto focal definido na Midia quando disponivel.
-     */
-    fit?: ('cover' | 'contain') | null;
-    /**
-     * Ajuste esta ocorrencia da imagem. O arquivo original na biblioteca de Midia nao e alterado.
-     */
-    canvas?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-  };
-  /**
-   * Link opcional exibido apos o texto.
-   */
-  cta?: {
-    /**
-     * Texto visivel para o usuario. Use uma acao clara, como Abrir pagina ou Saiba mais.
-     */
-    label?: string | null;
-    /**
-     * Escolha página interna, URL externa ou documento PDF da biblioteca.
-     */
-    type?: ('internal' | 'external' | 'document') | null;
-    /**
-     * Pagina publicada ou em rascunho dentro deste CMS. Mudancas de slug nao quebram este relacionamento.
-     */
-    page?: (number | null) | Page;
-    /**
-     * Informe o endereco completo, incluindo http:// ou https://.
-     */
-    url?: string | null;
-    /**
-     * Selecione um PDF da biblioteca, inclusive por pasta. O link acompanha a URL atual do arquivo.
-     */
-    document?: (number | null) | Media;
-    /**
-     * Recomendado para links externos, mantendo o portal aberto na aba atual.
-     */
-    newTab?: boolean | null;
-  };
-  /**
-   * Opcoes semanticas controladas pelo Design System. Nao permite CSS arbitrario.
-   */
-  appearance?: {
-    /**
-     * Seleciona uma combinacao completa de fundo, texto, acao e destaque.
-     */
-    scheme?: ('default' | 'surface' | 'muted' | 'custom') | null;
-    /**
-     * Controla a distancia vertical do bloco em relacao aos blocos adjacentes.
-     */
-    spacing?: ('compact' | 'default' | 'spacious') | null;
-    /**
-     * Deixe um campo vazio para herdar o token global. O contraste considera a paleta efetiva. Nao configura elementos individuais.
-     */
-    colors?: {
-      background?: string | null;
-      foreground?: string | null;
-      brand?: string | null;
-      action?: string | null;
-      accent?: string | null;
-    };
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'mirTextMedia';
-}
-/**
  * Crie paletas e tipografias controladas pelo Design System. O tema aplicado ao portal e escolhido nas Configuracoes do site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2239,7 +2122,6 @@ export interface PagesSelect<T extends boolean = true> {
         fullWidthImageBanner?: T | FullWidthImageBannerBlockSelect<T>;
         mirBanner?: T | MirBannerBlockSelect<T>;
         mirCards?: T | MirCardsBlockSelect<T>;
-        mirTextMedia?: T | MirTextMediaBlockSelect<T>;
       };
   seo?:
     | T
@@ -2939,50 +2821,6 @@ export interface MirCardsBlockSelect<T extends boolean = true> {
               newTab?: T;
             };
         id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MirTextMediaBlock_select".
- */
-export interface MirTextMediaBlockSelect<T extends boolean = true> {
-  title?: T;
-  content?: T;
-  image?: T;
-  imagePresentation?:
-    | T
-    | {
-        size?: T;
-        aspectRatio?: T;
-        fit?: T;
-        canvas?: T;
-      };
-  cta?:
-    | T
-    | {
-        label?: T;
-        type?: T;
-        page?: T;
-        url?: T;
-        document?: T;
-        newTab?: T;
-      };
-  appearance?:
-    | T
-    | {
-        scheme?: T;
-        spacing?: T;
-        colors?:
-          | T
-          | {
-              background?: T;
-              foreground?: T;
-              brand?: T;
-              action?: T;
-              accent?: T;
-            };
       };
   id?: T;
   blockName?: T;

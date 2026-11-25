@@ -107,10 +107,6 @@ describe("SPEC-024 admin UX and block visualization", () => {
       getBlockSummary({ blockType: "mirCards", style: "contact", title: "Canais de atendimento", items: [{}, {}] }),
       "MIR: atendimento — Canais de atendimento — 2 cards",
     );
-    assert.equal(
-      getBlockSummary({ blockType: "mirTextMedia", title: "Exigências" }),
-      "MIR: texto e mídia — Exigências",
-    );
   });
 
   it("uses human appearance labels while preserving design-token values", () => {

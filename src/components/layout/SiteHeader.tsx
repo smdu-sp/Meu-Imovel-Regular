@@ -25,14 +25,15 @@ export function SiteHeader({
   const content = (
     <ColorScope
       as="header"
-      className="border-b border-(--block-border) border-t-4 border-t-[var(--color-brand)]"
+      className="border-b border-(--block-border)"
       scheme={customTheme ? "default" : normalizeColorScheme(header?.appearance?.scheme)}
     >
+      <div aria-hidden="true" className="mir-brand-stripe" />
       <Container size="xl">
-        <div className="flex min-h-24 items-center justify-between gap-4 py-4">
+        <div className="mir-header-inner">
           <Link
             aria-label={`${name} — página inicial`}
-            className={`inline-flex min-w-0 items-center font-bold text-(--block-heading) no-underline ${logoOnRight ? "order-3" : "order-1"} ${menuSize}`}
+            className={`mir-header-brand font-bold text-(--block-heading) no-underline ${logoOnRight ? "order-3" : "order-1"} ${menuSize}`}
             href="/"
           >
             {header?.logo && typeof header.logo === "object" ? (
@@ -47,10 +48,10 @@ export function SiteHeader({
             )}
           </Link>
 
-          <div className={`order-2 min-w-0 flex-1 ${menuSize}`}>
+          <div className={`mir-header-nav order-2 ${menuSize}`}>
             <HeaderNavigation items={navigation.items} searchEnabled={Boolean(header?.enableSearch)} />
           </div>
-          {secondaryLogo ? <MediaImage className={`${logoSize} ${logoOnRight ? "order-1" : "order-3"} hidden w-auto object-contain lg:block`} media={secondaryLogo} sizes="288px" /> : null}
+          {secondaryLogo ? <MediaImage className={`mir-header-secondary ${logoSize} ${logoOnRight ? "order-1" : "order-3"} hidden w-auto object-contain lg:block`} media={secondaryLogo} sizes="288px" /> : null}
         </div>
       </Container>
     </ColorScope>

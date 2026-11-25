@@ -115,7 +115,7 @@ export function HeaderNavigation({
   if (!hasContent) return null;
 
   return (
-    <div className="relative ml-auto" ref={rootRef}>
+    <div className="relative ml-auto lg:mx-auto" ref={rootRef}>
       <button
         aria-controls="site-header-navigation"
         aria-expanded={mobileOpen}
@@ -136,7 +136,7 @@ export function HeaderNavigation({
       >
         {items.length ? (
           <nav aria-label="Navegação principal">
-            <ul className="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-x-5">
+            <ul className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-center lg:gap-x-5">
               {items.map((item, index) => {
                 if (item.kind === "link") {
                   return (

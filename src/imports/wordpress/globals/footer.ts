@@ -118,7 +118,7 @@ export type FooterPlan = Awaited<ReturnType<typeof planFooter>>;
 
 export function footerData(plan: FooterPlan, media: Record<string, number>) {
   return {
-    appearance: { scheme: "muted" },
+    appearance: { scheme: "inverse" },
     logo: media[footerLogo.id],
     phone: plan.content.phone,
     email: plan.content.email,

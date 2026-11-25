@@ -229,18 +229,18 @@ export function homeData(
         })),
       },
       { blockType: "richText", content: plan.intro, variant: "default" },
-      ...plan.sections.map((s) => ({
+      {
         blockType: "mirCards",
         style: "homeModality",
-        items: [{
+        items: plan.sections.map((s) => ({
           title: s.title,
           content: s.content,
           image: media[s.image],
           imagePresentation: { size: "large", aspectRatio: "4:3", fit: "cover" },
           imagePosition: s.variant === "image-right" ? "left" : "right",
           link: action(s.url, "Saiba mais"),
-        }],
-      })),
+        })),
+      },
       {
         blockType: "mirCards",
         style: "homeAction",

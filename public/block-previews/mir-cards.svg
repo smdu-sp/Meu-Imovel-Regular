@@ -1,24 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="title">
-  <title id="title">Cards MIR com imagem, painel de texto e modalidades</title>
-  <rect width="600" height="400" rx="24" fill="#f1f5f9"/>
-  <text x="32" y="47" fill="#0a3299" font-family="Arial, sans-serif" font-size="24" font-weight="700">Cards MIR</text>
-  <rect x="32" y="69" width="536" height="126" rx="17" fill="#d4e8ea"/>
-  <path d="M32 158l68-51 55 28 48-44 88 67v37H32z" fill="#5c9e97"/>
-  <path d="M32 179l63-38 52 25 57-48 88 56v21H32z" fill="#246479"/>
-  <rect x="288" y="87" width="260" height="93" rx="20" fill="#fff" stroke="#6eb99c" stroke-width="2"/>
-  <rect x="526" y="87" width="4" height="93" rx="2" fill="#0a3299"/>
-  <text x="310" y="120" fill="#0a3299" font-family="Arial, sans-serif" font-size="18" font-weight="700">Modalidade</text>
-  <rect x="310" y="136" width="181" height="7" rx="4" fill="#94a3b8"/>
-  <rect x="310" y="153" width="126" height="7" rx="4" fill="#cbd5e1"/>
-  <rect x="32" y="221" width="251" height="145" rx="20" fill="#fff" stroke="#5bbd94" stroke-width="2" stroke-dasharray="7 5"/>
-  <circle cx="86" cy="293" r="42" fill="#0a3299"/>
-  <path d="M51 310l25-25 19 12 18-17 16 29" fill="none" stroke="#5cd6c9" stroke-width="6"/>
-  <text x="145" y="277" fill="#0a3299" font-family="Arial, sans-serif" font-size="16" font-weight="700">Entenda a Lei</text>
-  <rect x="145" y="292" width="105" height="7" rx="4" fill="#94a3b8"/>
-  <rect x="145" y="309" width="88" height="7" rx="4" fill="#cbd5e1"/>
-  <rect x="306" y="221" width="262" height="145" rx="20" fill="#fff" stroke="#5bbd94" stroke-width="2" stroke-dasharray="7 5"/>
-  <rect x="307" y="222" width="262" height="69" rx="19" fill="#a6d4d4"/>
-  <path d="M307 277l52-32 41 18 46-27 54 30 69-24v49H307z" fill="#4a8994"/>
-  <text x="329" y="318" fill="#0a3299" font-family="Arial, sans-serif" font-size="17" font-weight="700">Benefícios e ações</text>
-  <rect x="329" y="336" width="180" height="7" rx="4" fill="#94a3b8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title description">
+  <title id="title">Composições de cards MIR</title>
+  <desc id="description">Prévia das cinco composições: modalidades da Home, benefícios, modalidades da Lei, chamadas e atendimento.</desc>
+  <defs>
+    <linearGradient id="photo" x2="1" y2="1"><stop stop-color="#b6d3df"/><stop offset="1" stop-color="#497a80"/></linearGradient>
+    <linearGradient id="edge" x2="0" y2="1"><stop stop-color="#2f5b94"/><stop offset=".5" stop-color="#e9a12e"/><stop offset="1" stop-color="#cf342b"/></linearGradient>
+  </defs>
+  <rect width="800" height="520" rx="22" fill="#f3f7f7"/>
+  <text x="28" y="39" fill="#193d62" font-family="Arial, sans-serif" font-size="24" font-weight="700">MIR: cards</text>
+  <text x="28" y="64" fill="#44576b" font-family="Arial, sans-serif" font-size="13">Escolha uma das cinco composições no editor</text>
+
+  <text x="30" y="90" fill="#193d62" font-family="Arial, sans-serif" font-size="14" font-weight="700">Home: modalidades</text>
+  <rect x="30" y="101" width="455" height="123" rx="12" fill="url(#photo)"/>
+  <path d="M30 190l100-68 75 50 80-44 90 55 110-38v79H30z" fill="#4e8c82"/>
+  <rect x="432" y="116" width="337" height="94" rx="22" fill="#fff" stroke="#e3e8e8"/>
+  <path d="M766 116h3v94h-3z" fill="url(#edge)"/>
+  <text x="459" y="148" fill="#193d62" font-family="Arial, sans-serif" font-size="17" font-weight="700">Modalidade</text>
+  <rect x="459" y="161" width="238" height="6" rx="3" fill="#a7b8bd"/>
+  <rect x="459" y="177" width="183" height="6" rx="3" fill="#c5d0d2"/>
+
+  <text x="30" y="256" fill="#193d62" font-family="Arial, sans-serif" font-size="14" font-weight="700">Entenda a Lei</text>
+  <rect x="74" y="269" width="315" height="84" rx="0" fill="#fff" stroke="#5da685" stroke-width="2" stroke-dasharray="7 5"/>
+  <circle cx="74" cy="311" r="42" fill="url(#photo)"/>
+  <text x="133" y="298" fill="#193d62" font-family="Arial, sans-serif" font-size="15" font-weight="700">Modalidade</text>
+  <rect x="133" y="310" width="147" height="6" rx="3" fill="#afbec1"/>
+  <rect x="308" y="303" width="62" height="21" rx="11" fill="#fff" stroke="#5da685"/>
+
+  <text x="430" y="256" fill="#193d62" font-family="Arial, sans-serif" font-size="14" font-weight="700">Benefícios</text>
+  <rect x="430" y="269" width="200" height="84" rx="18" fill="#fff" stroke="#5da685" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="448" y="297" fill="#193d62" font-family="Arial, sans-serif" font-size="15" font-weight="700">Benefício</text>
+  <rect x="448" y="309" width="130" height="6" rx="3" fill="#afbec1"/>
+  <rect x="613" y="279" width="156" height="74" rx="10" fill="url(#photo)"/>
+
+  <text x="30" y="387" fill="#193d62" font-family="Arial, sans-serif" font-size="14" font-weight="700">Home: chamadas</text>
+  <rect x="30" y="399" width="300" height="96" rx="0" fill="#fff" stroke="#5da685" stroke-width="2" stroke-dasharray="7 5"/>
+  <rect x="31" y="400" width="298" height="49" rx="16" fill="url(#photo)"/>
+  <text x="52" y="474" fill="#193d62" font-family="Arial, sans-serif" font-size="15" font-weight="700">Benefícios e ações</text>
+
+  <text x="430" y="387" fill="#193d62" font-family="Arial, sans-serif" font-size="14" font-weight="700">Dúvidas: atendimento</text>
+  <rect x="430" y="430" width="339" height="65" rx="0" fill="#fff" stroke="#5da685" stroke-width="2" stroke-dasharray="7 5"/>
+  <circle cx="488" cy="437" r="38" fill="url(#photo)"/>
+  <text x="547" y="449" fill="#193d62" font-family="Arial, sans-serif" font-size="15" font-weight="700">Canal de atendimento</text>
+  <rect x="547" y="462" width="168" height="6" rx="3" fill="#afbec1"/>
 </svg>

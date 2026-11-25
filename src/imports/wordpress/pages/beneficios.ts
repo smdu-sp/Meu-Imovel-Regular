@@ -160,17 +160,17 @@ export function beneficiosData(
         focalPoint: "center",
       },
       { blockType: "richText", variant: "default", content: plan.intro },
-      ...plan.sections.map((s) => ({
+      {
         blockType: "mirCards",
         style: "benefit",
-        items: [{
+        items: plan.sections.map((s) => ({
           title: s.title,
           content: s.content,
           image: media[s.image],
           imagePresentation: { size: "large", aspectRatio: "original", fit: "cover" },
           imagePosition: s.variant === "image-right" ? "right" : "left",
-        }],
-      })),
+        })),
+      },
     ],
   };
 }

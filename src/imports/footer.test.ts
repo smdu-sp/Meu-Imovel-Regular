@@ -23,6 +23,7 @@ test("MIR-012 extracts contact and social links and validates the original logo 
   assert(plan.content.socialLinks.every((item) => validateOfficialHttpsUrl(item.url) === true));
   assert(plan.content.institutionalLinks.every((item) => validateOfficialHttpsUrl(item.url) === true));
   assert.equal(footerData(plan, { "179": 25 }).logo, 25);
+  assert.equal(footerData(plan, { "179": 25 }).appearance.scheme, "inverse");
   assert.equal(argumentsFor(["footer", "--dry-run"]).page, "footer");
 
   const report = await run(["footer", "--dry-run"], { print: false });
