@@ -1,12 +1,11 @@
 import type {
   ArrayFieldValidation,
   GlobalConfig,
+  Where,
+  FilterOptions,
   RelationshipFieldSingleValidation,
 } from "payload";
-import {
-  canReadHeader,
-  canUpdateHeader,
-} from "../access/policies/globals.ts";
+import { canReadHeader, canUpdateHeader } from "../access/policies/globals.ts";
 import {
   createAppearanceGroup,
   createBlockContrastStatusField,
@@ -19,10 +18,18 @@ import { revalidateSiteShellGlobal } from "../lib/payload/revalidate-site-shell.
 
 const headerColorTokens = ["background", "foreground"] as const;
 
-const availablePageFilter = {
-  _status: { equals: "published" },
-  lifecycleStatus: { equals: "active" },
-} as const;
+const availablePageFilter: FilterOptions = ({ req }): Where => {
+  // Only the trusted Local API importer may associate active drafts before publication.
+  if (
+    req.user?.role === "admin" &&
+    req.context.wordpressImportHeaderDraftLinks === true
+  )
+    return { lifecycleStatus: { equals: "active" } };
+  return {
+    _status: { equals: "published" },
+    lifecycleStatus: { equals: "active" },
+  };
+};
 
 export const Header: GlobalConfig = {
   slug: "header",
@@ -32,8 +39,7 @@ export const Header: GlobalConfig = {
   },
   label: "Cabeçalho",
   admin: {
-    description:
-      "Configure a navegacao principal exibida no topo do portal.",
+    description: "Configure a navegacao principal exibida no topo do portal.",
   },
   hooks: {
     afterChange: [revalidateSiteShellGlobal],
@@ -59,12 +65,18 @@ export const Header: GlobalConfig = {
       type: "upload",
       relationTo: "media",
       label: "Segunda marca institucional",
-      admin: { description: "Opcional. Exibida na outra extremidade do cabeçalho." },
+      admin: {
+        description: "Opcional. Exibida na outra extremidade do cabeçalho.",
+      },
     },
     {
       name: "logoSize",
       type: "select",
-      label: "Tamanho das marcas",
+      label: "Tamanho das logos",
+      admin: {
+        description:
+          "Controla as duas marcas do cabeçalho. O menu permanece centralizado e as imagens se adaptam em telas menores.",
+      },
       defaultValue: "medium",
       options: [
         { label: "Pequeno", value: "small" },
@@ -206,7 +218,8 @@ export const Header: GlobalConfig = {
             description: "Destino interno do item direto.",
           },
           validate: ((value, { siblingData }) =>
-            (siblingData as { type?: string } | undefined)?.type !== "page" || value
+            (siblingData as { type?: string } | undefined)?.type !== "page" ||
+            value
               ? true
               : "Selecione a página deste item.") satisfies RelationshipFieldSingleValidation,
         },
@@ -217,13 +230,15 @@ export const Header: GlobalConfig = {
           maxRows: 8,
           admin: {
             condition: (_data, siblingData) =>
-              (siblingData as { type?: string } | undefined)?.type === "category",
+              (siblingData as { type?: string } | undefined)?.type ===
+              "category",
             description:
               "Links internos exibidos no submenu. Categorias vazias não aparecem no portal.",
             initCollapsed: true,
           },
           validate: ((value, { siblingData }) =>
-            (siblingData as { type?: string } | undefined)?.type !== "category" ||
+            (siblingData as { type?: string } | undefined)?.type !==
+              "category" ||
             (Array.isArray(value) && value.length > 0)
               ? true
               : "Adicione pelo menos um link à categoria.") satisfies ArrayFieldValidation,
@@ -253,4 +268,3 @@ export const Header: GlobalConfig = {
     },
   ],
 };
-

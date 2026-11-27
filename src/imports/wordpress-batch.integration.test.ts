@@ -67,16 +67,20 @@ test(
       ];
       const first = await importAll(args, { print: false });
       assert(first.completed);
-      assert.equal(first.pages.length, 20);
+      assert.equal(first.pages.length, 22);
+      assert.deepEqual(
+        first.pages.slice(-2).map((item) => item.page),
+        ["header", "footer"],
+      );
       let connection = await connectStore(uri!, actorId);
       const revisions: Record<string, unknown> = {};
       try {
         const pages = await connection.store.find("pages", {});
         assert.equal(pages.length, 10);
-        assert.equal((await connection.store.find("media", {})).length, 54);
+        assert.equal((await connection.store.find("media", {})).length, 57);
         assert.equal(
           (await connection.store.find("payload-folders", {})).length,
-          29,
+          31,
         );
         for (const page of pages) {
           assert.equal(page._status, "draft");
@@ -92,6 +96,15 @@ test(
         }
         const home = pages.find((p) => p.slug === "home")!;
         assert.match(JSON.stringify(home.layout), /"type":"internal"/);
+        for (const slug of ["header", "footer"] as const) {
+          const global = await connection.store.getGlobal!(slug);
+          assert(global.logo);
+          revisions[slug] = global.updatedAt;
+          if (slug === "footer") {
+            assert.equal(global.phone, "156");
+            assert.equal((global.socialLinks as unknown[]).length, 3);
+          }
+        }
         const audits = await connection.store.find("audit-logs", {});
         assert(audits.length > 0);
         assert(audits.every((a) => a.actor === actorId));
@@ -104,7 +117,12 @@ test(
       try {
         for (const page of await connection.store.find("pages", {}))
           assert.equal(page.updatedAt, revisions[String(page.id)]);
-        assert.equal((await connection.store.find("media", {})).length, 54);
+        assert.equal((await connection.store.find("media", {})).length, 57);
+        for (const slug of ["header", "footer"] as const)
+          assert.equal(
+            (await connection.store.getGlobal!(slug)).updatedAt,
+            revisions[slug],
+          );
       } finally {
         await connection.close();
       }

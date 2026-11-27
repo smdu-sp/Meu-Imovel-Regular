@@ -46,8 +46,7 @@ export const IconGridBlock: Block = {
       maxLength: 180,
       admin: {
         ...characterLimitAdmin(180, "textarea"),
-        description:
-          "Texto opcional para orientar a leitura antes da grade.",
+        description: "Texto opcional para orientar a leitura antes da grade.",
       },
     },
     {
@@ -72,6 +71,26 @@ export const IconGridBlock: Block = {
     createAppearanceGroup([
       createSchemeField(["default", "surface", "muted", "custom"], "default"),
       createSpacingField(["compact", "default", "spacious"], "default"),
+      {
+        name: "borderStyle",
+        type: "select",
+        label: "Estilo da borda dos cards",
+        defaultValue: "solid",
+        validate: closedSelect(
+          ["solid", "dashed", "dotted", "none"],
+          "Escolha um estilo de borda válido.",
+        ),
+        options: [
+          { label: "Contínua", value: "solid" },
+          { label: "Tracejada", value: "dashed" },
+          { label: "Pontilhada", value: "dotted" },
+          { label: "Sem borda", value: "none" },
+        ],
+        admin: {
+          description:
+            "Aplica o mesmo estilo de borda a todos os cards desta grade.",
+        },
+      },
       ...createControlledColorAppearanceFields(iconGridColorTokens),
       createBlockContrastStatusField(iconGridColorTokens),
     ]),

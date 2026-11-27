@@ -33,3 +33,8 @@ O importador usa `payload.updateGlobal` na Local API com o Admin da sessão. O h
 - `npm run typecheck`, ESLint dos arquivos alterados e `git diff --check`: passaram.
 
 A aplicação real em PostgreSQL e a renderização do logo e dos links no portal ainda precisam ser conferidas em ambiente de homologação. A suíte geral já apresentava falhas de caminhos antigos de uploads e restrições do Windows antes desta spec; ela não foi repetida nesta implementação.
+
+
+## Execução no lote completo — 27/11/2026
+
+`npm run import:wordpress:all` agora executa o Footer após o Header, reutilizando a pasta de identidade. A validação inicial do lote confere também o template e o logo do Footer, antes das gravações. A sessão mantém locks de ambos os Globals e os relatórios incluem seus IDs. As proteções do Footer contra conteúdo não gerenciado/editado continuam ativas. Detalhes no [guia do lote](./importacao-completa.md).

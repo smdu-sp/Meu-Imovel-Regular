@@ -7,9 +7,7 @@ import {
   type EditorialColorOverrides,
 } from "../../lib/theme/block-color-theme";
 import type { ImagePresentation } from "../shared/image-presentation";
-import {
-  getImagePresentationSizeClassName,
-} from "../shared/image-presentation";
+import { getImagePresentationSizeClassName } from "../shared/image-presentation";
 import { PresentedMediaImage } from "../shared/PresentedMediaImage";
 
 type ImageBlockAlignment = "center" | "left" | "right";
@@ -64,15 +62,20 @@ export function ImageBlock({
     canvas: imagePresentation?.canvas,
     fit: imagePresentation?.fit ?? "cover",
   };
-  const presentationSizeClassName = getImagePresentationSizeClassName(presentation, {
-    sizeClassNames: imageSizeClasses,
-  });
+  const presentationSizeClassName = getImagePresentationSizeClassName(
+    presentation,
+    {
+      sizeClassNames: imageSizeClasses,
+    },
+  );
   const customTheme = appearance?.scheme === "custom";
 
   const section = (
     <Section
       spacing="default"
-      scheme={customTheme ? "default" : normalizeColorScheme(appearance?.scheme)}
+      scheme={
+        customTheme ? "default" : normalizeColorScheme(appearance?.scheme)
+      }
     >
       <Container size="lg">
         <figure
@@ -83,7 +86,6 @@ export function ImageBlock({
           )}
         >
           <PresentedMediaImage
-            className="rounded-xl bg-muted"
             imageClassName="w-full"
             media={media}
             presentation={{ ...presentation, size: "full" }}
@@ -92,7 +94,9 @@ export function ImageBlock({
           {caption ? (
             <figcaption className="mt-3">
               <Text variant="small">
-                <span className="whitespace-pre-line break-words">{caption}</span>
+                <span className="whitespace-pre-line break-words">
+                  {caption}
+                </span>
               </Text>
             </figcaption>
           ) : null}
@@ -101,7 +105,9 @@ export function ImageBlock({
     </Section>
   );
 
-  return customTheme
-    ? <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
-    : section;
+  return customTheme ? (
+    <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
+  ) : (
+    section
+  );
 }

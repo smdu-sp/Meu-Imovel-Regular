@@ -8,14 +8,26 @@ import { ImageTextBlock } from "./Component";
 
 const content = {
   root: {
-    children: [{
-      children: [{ detail: 0, format: 0, mode: "normal", style: "", text: "Conteúdo local", type: "text", version: 1 }],
-      direction: null,
-      format: "" as const,
-      indent: 0,
-      type: "paragraph",
-      version: 1,
-    }],
+    children: [
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: "normal",
+            style: "",
+            text: "Conteúdo local",
+            type: "text",
+            version: 1,
+          },
+        ],
+        direction: null,
+        format: "" as const,
+        indent: 0,
+        type: "paragraph",
+        version: 1,
+      },
+    ],
     direction: null,
     format: "" as const,
     indent: 0,
@@ -25,23 +37,58 @@ const content = {
 };
 
 describe("ImageText custom theme", () => {
+  it("renders image media without an outline or decorative frame", () => {
+    const section = ImageTextBlock({
+      blockType: "imageText",
+      content,
+      image: { url: "/imagem.jpg", alt: "Imagem" } as never,
+      variant: "image-right",
+      imagePresentation: {
+        size: "full",
+        aspectRatio: "original",
+        fit: "contain",
+      },
+    }) as ReactElement<{
+      children: ReactElement<{
+        children: ReactElement<{ children: ReactElement[] }>;
+      }>;
+    }>;
+    const image = section.props.children.props.children.props
+      .children[0] as ReactElement<{ className: string }>;
+    assert.doesNotMatch(image.props.className, /border|rounded/);
+    assert.match(image.props.className, /lg:order-2/);
+  });
+
   it("stacks the media above or below the text at every viewport width", () => {
     const render = (variant: "image-top" | "image-bottom") => {
       const section = ImageTextBlock({
         blockType: "imageText",
         content,
         image: { alt: "Imagem de teste", url: "/imagem.jpg" } as never,
-        imagePresentation: { aspectRatio: "original", fit: "cover", size: "medium" },
+        imagePresentation: {
+          aspectRatio: "original",
+          fit: "cover",
+          size: "medium",
+        },
         variant,
       }) as ReactElement<{ children: ReactElement }>;
-      const container = section.props.children as ReactElement<{ children: ReactElement }>;
-      return container.props.children as ReactElement<{ className: string; children: ReactElement[] }>;
+      const container = section.props.children as ReactElement<{
+        children: ReactElement;
+      }>;
+      return container.props.children as ReactElement<{
+        className: string;
+        children: ReactElement[];
+      }>;
     };
 
     const top = render("image-top");
     const bottom = render("image-bottom");
-    const topImage = top.props.children[0] as ReactElement<{ className: string }>;
-    const bottomImage = bottom.props.children[0] as ReactElement<{ className: string }>;
+    const topImage = top.props.children[0] as ReactElement<{
+      className: string;
+    }>;
+    const bottomImage = bottom.props.children[0] as ReactElement<{
+      className: string;
+    }>;
     assert.doesNotMatch(top.props.className, /lg:grid-cols-2/);
     assert.doesNotMatch(bottom.props.className, /lg:grid-cols-2/);
     assert.doesNotMatch(topImage.props.className, /order-2/);
@@ -58,10 +105,19 @@ describe("ImageText custom theme", () => {
         title: "Imagem e texto",
         variant: "image-left",
       }) as ReactElement<{ children: ReactElement }>;
-      const container = section.props.children as ReactElement<{ children: ReactElement }>;
-      const grid = container.props.children as ReactElement<{ children: ReactElement[] }>;
-      const image = grid.props.children[0] as ReactElement<{ sizeClassNames: Record<string, string> }>;
-      return getImagePresentationSizeClassName({ size }, { sizeClassNames: image.props.sizeClassNames });
+      const container = section.props.children as ReactElement<{
+        children: ReactElement;
+      }>;
+      const grid = container.props.children as ReactElement<{
+        children: ReactElement[];
+      }>;
+      const image = grid.props.children[0] as ReactElement<{
+        sizeClassNames: Record<string, string>;
+      }>;
+      return getImagePresentationSizeClassName(
+        { size },
+        { sizeClassNames: image.props.sizeClassNames },
+      );
     };
 
     assert.match(imageClassName("large"), /sm:w-5\/6/);
@@ -69,25 +125,31 @@ describe("ImageText custom theme", () => {
   });
 
   it("applies the local palette to the complete editorial surface", () => {
-    const markup = renderToStaticMarkup(createElement(ImageTextBlock, {
-      appearance: {
-        colors: {
-          accent: "#006644",
-          action: "#003399",
-          background: "#ffffff",
-          brand: "#663399",
-          foreground: "#222222",
+    const markup = renderToStaticMarkup(
+      createElement(ImageTextBlock, {
+        appearance: {
+          colors: {
+            accent: "#006644",
+            action: "#003399",
+            background: "#ffffff",
+            brand: "#663399",
+            foreground: "#222222",
+          },
+          scheme: "custom",
         },
-        scheme: "custom",
-      },
-      blockType: "imageText",
-      content,
-      cta: { label: "", type: "external", url: "" },
-      image: 1,
-      imagePresentation: { aspectRatio: "original", fit: "cover", size: "medium" },
-      title: "Imagem e texto",
-      variant: "image-left",
-    }));
+        blockType: "imageText",
+        content,
+        cta: { label: "", type: "external", url: "" },
+        image: 1,
+        imagePresentation: {
+          aspectRatio: "original",
+          fit: "cover",
+          size: "medium",
+        },
+        title: "Imagem e texto",
+        variant: "image-left",
+      }),
+    );
 
     assert.match(markup, /--block-background:#ffffff/);
     assert.match(markup, /--block-foreground:#222222/);
@@ -96,19 +158,25 @@ describe("ImageText custom theme", () => {
   });
 
   it("ignores stored custom colors after switching to a preset", () => {
-    const markup = renderToStaticMarkup(createElement(ImageTextBlock, {
-      appearance: {
-        colors: { background: "#ff0000", foreground: "#00ff00" },
-        scheme: "muted",
-      },
-      blockType: "imageText",
-      content,
-      cta: { label: "", type: "external", url: "" },
-      image: 1,
-      imagePresentation: { aspectRatio: "original", fit: "cover", size: "medium" },
-      title: "Imagem e texto",
-      variant: "image-left",
-    }));
+    const markup = renderToStaticMarkup(
+      createElement(ImageTextBlock, {
+        appearance: {
+          colors: { background: "#ff0000", foreground: "#00ff00" },
+          scheme: "muted",
+        },
+        blockType: "imageText",
+        content,
+        cta: { label: "", type: "external", url: "" },
+        image: 1,
+        imagePresentation: {
+          aspectRatio: "original",
+          fit: "cover",
+          size: "medium",
+        },
+        title: "Imagem e texto",
+        variant: "image-left",
+      }),
+    );
 
     assert.doesNotMatch(markup, /--block-background:#ff0000/);
     assert.doesNotMatch(markup, /--block-foreground:#00ff00/);

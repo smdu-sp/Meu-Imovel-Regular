@@ -24,6 +24,7 @@ As mudancas de schema registradas neste projeto foram classificadas assim:
 | Area | Mudanca | Classificacao | Migration |
 |---|---|---|---|
 | richText.content, imageText.content, faqAccordion.items[].answer, alertBox.content | Editor e renderer editorial compartilhados; novos campos podem usar os estados opcionais de tipografia e tabelas já suportados | Expansão compatível do JSON Lexical, sem mudança de campos ou relações | Sem migration SQL/backfill. [Contrato e validação](../shared-editorial-editor/README.md). |
+| `iconGrid.appearance.borderStyle` | Novo select opcional `solid`, `dashed`, `dotted`, `none` | Campo opcional e novo enum | Migration incremental `20261127_000000_icon_grid_border_style` adiciona coluna/default em Pages e versões; ausência/valor desconhecido usa borda contínua. Sem backfill de conteúdo ou mudanças de relationships. |
 | `cards.columns` | Novo select opcional de colunas com default visual de 3 | Novo field opcional | Documentos existentes continuam com 3 colunas. Atualizar o schema do banco no deploy; sem backfill. |
 | `cards.columns` (limite de 4) | Retirada do valor `8` do select | Remocao de valor de enum | Antes de atualizar o enum em banco compartilhado, fazer backup e contar ocorrencias de `8` em Pages e versoes; converter essas ocorrencias para `4` e conferir as contagens. O renderer limita registros antigos com `8` a 4 colunas e a validacao converte o valor ao salvar. Atualizar o enum so depois do backfill e validar edicao/publicacao; restaurar o backup se a migracao falhar. A baseline integral de migrations ainda precisa ser estabelecida para executar isso em producao. |
 | `imageText.variant` | Novos valores `image-top` e `image-bottom` no select existente | Expansao de enum | Valores antigos permanecem validos. Atualizar o enum do banco no deploy; sem backfill. |
@@ -145,3 +146,42 @@ em uma base vazia.
 - Nenhuma migration destrutiva foi criada nesta SPEC porque o estado atual nao exige rename, remocao, mudanca de tipo ou mudanca de relationship.
 - `counterNumbers` nao foi convertido em prazo dinamico.
 - `Media & Text` nao foi renomeado destrutivamente; a compatibilidade fica no fallback de `ImageText`.
+
+
+## Ajustes visuais de grade, Header e imagens — 27/11/2026
+
+### Uso no CMS
+
+- Grade de ícones e informações → Aparência e estilo → Estilo da borda dos cards: Contínua, Tracejada, Pontilhada ou Sem borda. O estilo é aplicado à grade inteira. Cards têm largura uniforme por coluna e altura igual à do maior conteúdo, inclusive entre linhas; ações ficam no rodapé sem posicionamento absoluto, sobreposição ou corte de texto.
+- Header → Tamanho das logos: Pequeno, Médio ou Grande. O campo existente `logoSize` continua com os mesmos valores, sem mudança de schema. A altura no desktop é 40/56/80 px na fonte raiz padrão e cresce com a escala tipográfica. Larguras máximas de 160/224/288 px e colunas laterais simétricas mantêm o menu centralizado, com ou sem a marca secundária e com a marca principal em qualquer lado. Em telas estreitas, a altura fica limitada a 48 px e o menu móvel permanece disponível. Menus extensos podem quebrar em mais de uma linha.
+- Imagem e Mídia e Texto: removidas as molduras decorativas, a borda, os cantos arredondados da mídia e o fundo de enquadramento do bloco Imagem. Enquadramento, proporção, posição, legenda e cores da seção continuam configuráveis. Isso não remove bordas que fazem parte do arquivo de imagem nem bordas dos cards.
+
+### Compatibilidade e migration
+
+O campo `appearance.borderStyle` é opcional, com default visual `solid`. Nenhum nome, tipo ou relationship foi removido/renomeado. O Header reutiliza seus controles existentes; a mudança de rótulo não altera valores persistidos. As mudanças de layout atingem também documentos já salvos, sem reimportação do WordPress.
+
+A migration PostgreSQL `src/migrations/20261127_000000_icon_grid_border_style.ts` cria apenas os dois enums e a coluna `appearance_border_style` em `pages_blocks_icon_grid` e `_pages_v_blocks_icon_grid`, com default `solid` e permitindo null. Não depende da geração de uma baseline integral e usa nomes de tabelas conferidos por consulta de metadados. Pode ser reaplicada sem substituir escolhas anteriores. Está registrada após o backfill de roles existente em `src/migrations/index.ts`.
+
+Em ambiente de desenvolvimento com LDAP mock e sem sincronização automática do schema, aplicar as migrations antes de usar o novo campo:
+
+```bash
+NODE_ENV=development npm run payload -- migrate
+```
+
+Em produção, seguir a configuração de ambiente e o processo de deploy/migrations da instância. Não gerar uma migration integral a partir de snapshot vazio para esta alteração. A migration incremental foi testada em PostgreSQL descartável e não foi executada por este trabalho no banco da instância. `down` foi deliberadamente desabilitado para não apagar preferências de borda: a versão anterior pode ignorar as novas colunas; remoção manual exige backup e revisão.
+
+### Arquivos e decisões
+
+`IconGrid/config.ts` e `IconGrid/Component.tsx` definem o controle e a grade uniforme; `components/ui/Card.tsx` aceita estilo de borda com default contínuo para os outros usos. `SiteHeader.tsx`, `HeaderNavigation.tsx` e `styles/mir.css` dimensionam as marcas e centralizam a navegação sem sobrepor conteúdo. `ImageBlock` e `ImageText` removem molduras apenas da mídia. `payload-types.ts` foi regenerado.
+
+Foram preservadas as alterações anteriores do lote e o contexto administrativo de importação do Header. Nenhuma importação de conteúdo ou publicação foi executada. A remoção local de `media/.gitkeep` já estava presente no início e não foi alterada.
+
+### Validação executada
+
+- `npm run typecheck`: aprovado.
+- `npx eslint` nos componentes, configurações, migrations e testes alterados: aprovado.
+- `DISABLE_PAYLOAD_HMR=true npm test`: 135 testes aprovados, 2 ignorados por dependerem de ambientes próprios e nenhuma falha.
+- `MIR_UI_TEST_URI=<PostgreSQL descartável /mir_ui_test> node --import tsx --test src/lib/payload/icon-grid-border-migration.integration.test.ts`: migration aprovada em PostgreSQL 17, preservando conteúdo e versões existentes, aceitando reexecução e mantendo escolhas de borda.
+- Tipos regenerados com `NODE_ENV=development NODE_OPTIONS='--import ./src/seeds/patch-os-userinfo.mjs' npm run payload -- generate:types`.
+- Chromium/Playwright em fixture local com os componentes reais e o CSS compilado: 60 combinações de larguras (320, 375, 768, 1024 e 1440 px), três tamanhos, duas posições de logo e presença/ausência da marca secundária. Conferidos borda pontilhada, dimensões uniformes dos cards, ações no rodapé, centralização desktop, tamanho das logos e ausência de rolagem horizontal. Capturas desktop/mobile também inspecionadas. Ferramentas e fixture ficaram em `/tmp`, sem dependências novas no projeto. Esta verificação não inclui edição manual pelo Admin nem substitui validação do conteúdo publicado.
+- `git diff --check`: aprovado. Build de produção não executado nesta alteração; validação de renderização realizada pela fixture descrita acima.

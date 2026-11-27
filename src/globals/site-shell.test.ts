@@ -6,7 +6,9 @@ import { Footer } from "./Footer";
 import { Header } from "./Header";
 
 function fieldByName(fields: Field[], name: string): Field {
-  const field = fields.find((candidate) => "name" in candidate && candidate.name === name);
+  const field = fields.find(
+    (candidate) => "name" in candidate && candidate.name === name,
+  );
   assert.ok(field, `Expected field ${name}`);
   return field;
 }
@@ -17,11 +19,46 @@ describe("Header and Footer Globals", () => {
     assert.ok("fields" in navigation && Array.isArray(navigation.fields));
     const page = fieldByName(navigation.fields, "page");
     assert.equal(page.type, "relationship");
-    if (page.type !== "relationship") assert.fail("Expected a relationship field");
-    assert.deepEqual(page.filterOptions, {
+    if (page.type !== "relationship")
+      assert.fail("Expected a relationship field");
+    assert.equal(typeof page.filterOptions, "function");
+    if (typeof page.filterOptions !== "function")
+      assert.fail("Expected filter function");
+    assert.deepEqual(page.filterOptions({ req: { context: {} } } as never), {
       _status: { equals: "published" },
       lifecycleStatus: { equals: "active" },
     });
+  });
+
+  it("allows active draft navigation only for the admin import context", () => {
+    const navigation = fieldByName(Header.fields, "navigation");
+    assert("fields" in navigation);
+    const page = fieldByName(navigation.fields, "page");
+    assert(
+      page.type === "relationship" && typeof page.filterOptions === "function",
+    );
+    assert.deepEqual(
+      page.filterOptions({
+        req: {
+          user: { role: "admin" },
+          context: { wordpressImportHeaderDraftLinks: true },
+        },
+      } as never),
+      { lifecycleStatus: { equals: "active" } },
+    );
+    for (const role of [undefined, "editor", "admin"]) {
+      const context =
+        role === "admin" ? {} : { wordpressImportHeaderDraftLinks: true };
+      assert.deepEqual(
+        page.filterOptions({
+          req: { user: role ? { role } : null, context },
+        } as never),
+        {
+          _status: { equals: "published" },
+          lifecycleStatus: { equals: "active" },
+        },
+      );
+    }
   });
 
   it("supports a backwards-compatible submenu mode with controlled depth", () => {
@@ -31,11 +68,31 @@ describe("Header and Footer Globals", () => {
     const menuItems = fieldByName(Header.fields, "menuItems");
 
     assert.equal(mode.type, "select");
-    assert.equal("defaultValue" in mode ? mode.defaultValue : undefined, "normal");
+    assert.equal(
+      "defaultValue" in mode ? mode.defaultValue : undefined,
+      "normal",
+    );
     assert.equal(search.type, "checkbox");
-    assert.equal("defaultValue" in search ? search.defaultValue : undefined, false);
-    assert.equal(navigation.admin?.condition?.({ navigationMode: "normal" }, {}, {} as never), true);
-    assert.equal(navigation.admin?.condition?.({ navigationMode: "submenus" }, {}, {} as never), false);
+    assert.equal(
+      "defaultValue" in search ? search.defaultValue : undefined,
+      false,
+    );
+    assert.equal(
+      navigation.admin?.condition?.(
+        { navigationMode: "normal" },
+        {},
+        {} as never,
+      ),
+      true,
+    );
+    assert.equal(
+      navigation.admin?.condition?.(
+        { navigationMode: "submenus" },
+        {},
+        {} as never,
+      ),
+      false,
+    );
     assert.equal(menuItems.type, "array");
     if (menuItems.type !== "array") assert.fail("Expected submenu items array");
     assert.equal(menuItems.maxRows, 6);
@@ -47,23 +104,34 @@ describe("Header and Footer Globals", () => {
     if (directPage.type !== "relationship" || links.type !== "array") {
       assert.fail("Expected direct Page and category links");
     }
-    assert.deepEqual(directPage.filterOptions, {
-      _status: { equals: "published" },
-      lifecycleStatus: { equals: "active" },
-    });
+    assert.equal(typeof directPage.filterOptions, "function");
+    if (typeof directPage.filterOptions !== "function")
+      assert.fail("Expected filter function");
+    assert.deepEqual(
+      directPage.filterOptions({ req: { context: {} } } as never),
+      {
+        _status: { equals: "published" },
+        lifecycleStatus: { equals: "active" },
+      },
+    );
     assert.equal(links.maxRows, 8);
     const childPage = fieldByName(links.fields, "page");
     assert.equal(childPage.type, "relationship");
-    if (childPage.type !== "relationship") assert.fail("Expected child Page relationship");
+    if (childPage.type !== "relationship")
+      assert.fail("Expected child Page relationship");
     assert.deepEqual(childPage.filterOptions, directPage.filterOptions);
   });
 
   it("requires secure institutional URLs and revalidates both Globals", async () => {
     const institutionalLinks = fieldByName(Footer.fields, "institutionalLinks");
-    assert.ok("fields" in institutionalLinks && Array.isArray(institutionalLinks.fields));
+    assert.ok(
+      "fields" in institutionalLinks &&
+        Array.isArray(institutionalLinks.fields),
+    );
     const url = fieldByName(institutionalLinks.fields, "url");
     assert.equal(url.type, "text");
-    if (url.type !== "text" || !url.validate) assert.fail("Expected URL validation");
+    if (url.type !== "text" || !url.validate)
+      assert.fail("Expected URL validation");
     const validate = url.validate as TextFieldValidation;
 
     assert.equal(await validate("https://example.gov.br", {} as never), true);
@@ -80,12 +148,20 @@ describe("Header and Footer Globals", () => {
     assert.notEqual(logo.required, true);
 
     const socialLinks = fieldByName(Footer.fields, "socialLinks");
-    if (socialLinks.type !== "array") assert.fail("Expected social links array");
+    if (socialLinks.type !== "array")
+      assert.fail("Expected social links array");
     const label = fieldByName(socialLinks.fields, "label");
-    if (label.type !== "text" || !label.validate) assert.fail("Expected social label validation");
+    if (label.type !== "text" || !label.validate)
+      assert.fail("Expected social label validation");
     const validate = label.validate as TextFieldValidation;
-    assert.equal(await validate("", { siblingData: { icon: "instagram" } } as never), true);
-    assert.equal(await validate("Rede oficial", { siblingData: {} } as never), true);
+    assert.equal(
+      await validate("", { siblingData: { icon: "instagram" } } as never),
+      true,
+    );
+    assert.equal(
+      await validate("Rede oficial", { siblingData: {} } as never),
+      true,
+    );
     assert.notEqual(await validate("", { siblingData: {} } as never), true);
   });
 });

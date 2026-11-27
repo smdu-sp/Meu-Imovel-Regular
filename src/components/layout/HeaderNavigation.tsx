@@ -74,7 +74,9 @@ export function HeaderNavigation({
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const categoryButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const categoryButtonRefs = useRef<Record<string, HTMLButtonElement | null>>(
+    {},
+  );
   const hasContent = items.length > 0 || searchEnabled;
 
   const closeNavigation = () => {
@@ -115,7 +117,10 @@ export function HeaderNavigation({
   if (!hasContent) return null;
 
   return (
-    <div className="relative ml-auto lg:mx-auto" ref={rootRef}>
+    <div
+      className="relative ml-auto flex justify-end lg:mx-auto lg:block lg:w-full"
+      ref={rootRef}
+    >
       <button
         aria-controls="site-header-navigation"
         aria-expanded={mobileOpen}
@@ -131,12 +136,12 @@ export function HeaderNavigation({
       </button>
 
       <div
-        className={`${mobileOpen ? "flex" : "hidden"} absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[min(22rem,calc(100vw-2rem))] flex-col gap-4 rounded-lg border border-(--block-border) bg-(--block-background) p-4 shadow-lg lg:static lg:flex lg:w-auto lg:flex-row lg:items-center lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none`}
+        className={`${mobileOpen ? "flex" : "hidden"} absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[min(22rem,calc(100vw-2rem))] flex-col gap-4 rounded-lg border border-(--block-border) bg-(--block-background) p-4 shadow-lg lg:static lg:flex lg:w-auto lg:flex-row lg:flex-wrap lg:items-center lg:justify-center lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none`}
         id="site-header-navigation"
       >
         {items.length ? (
           <nav aria-label="Navegação principal">
-            <ul className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-center lg:gap-x-5">
+            <ul className="flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:justify-center lg:gap-x-5 lg:gap-y-2">
               {items.map((item, index) => {
                 if (item.kind === "link") {
                   return (
@@ -167,7 +172,10 @@ export function HeaderNavigation({
                       type="button"
                     >
                       {item.label}
-                      <span aria-hidden="true" className={expanded ? "rotate-180" : undefined}>
+                      <span
+                        aria-hidden="true"
+                        className={expanded ? "rotate-180" : undefined}
+                      >
                         ▾
                       </span>
                     </button>
@@ -197,7 +205,9 @@ export function HeaderNavigation({
           </nav>
         ) : null}
 
-        {searchEnabled ? <HeaderSearchForm onNavigate={closeNavigation} /> : null}
+        {searchEnabled ? (
+          <HeaderSearchForm onNavigate={closeNavigation} />
+        ) : null}
       </div>
     </div>
   );

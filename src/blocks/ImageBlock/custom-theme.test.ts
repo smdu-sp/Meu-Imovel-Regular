@@ -8,13 +8,36 @@ import { ImageBlock } from "./Component";
 const media = { alt: "Imagem de teste", url: "/imagem.jpg" } as never;
 
 describe("ImageBlock custom theme", () => {
+  it("keeps the image and caption without a decorative frame", () => {
+    const section = ImageBlock({
+      blockType: "imageBlock",
+      media,
+      caption: "Legenda",
+      imagePresentation: { aspectRatio: "original" },
+    }) as ReactElement<{
+      children: ReactElement<{
+        children: ReactElement<{ children: ReactElement[] }>;
+      }>;
+    }>;
+    const figure = section.props.children.props.children;
+    const image = figure.props.children[0] as ReactElement<{
+      className?: string;
+    }>;
+    assert.doesNotMatch(image.props.className || "", /border|rounded|bg-muted/);
+    assert(figure.props.children[1]);
+  });
+
   it("applies distinct display widths from the medium breakpoint", () => {
     const figureClassName = (size: "small" | "medium" | "large" | "full") => {
       const section = ImageBlock({
         blockType: "imageBlock",
         imagePresentation: { aspectRatio: "original", fit: "cover", size },
         media,
-      }) as ReactElement<{ children: ReactElement<{ children: ReactElement<{ className: string }> }> }>;
+      }) as ReactElement<{
+        children: ReactElement<{
+          children: ReactElement<{ className: string }>;
+        }>;
+      }>;
       return section.props.children.props.children.props.className;
     };
 
@@ -33,7 +56,11 @@ describe("ImageBlock custom theme", () => {
       },
       blockType: "imageBlock",
       caption: "Legenda local",
-      imagePresentation: { aspectRatio: "original", fit: "cover", size: "large" },
+      imagePresentation: {
+        aspectRatio: "original",
+        fit: "cover",
+        size: "large",
+      },
       media,
     });
 
@@ -43,7 +70,10 @@ describe("ImageBlock custom theme", () => {
       palette: { background: string; foreground: string };
     }>;
     assert.equal(scopedBlock.type, BlockThemeScope);
-    assert.deepEqual(scopedBlock.props.palette, { background: "#ffffff", foreground: "#222222" });
+    assert.deepEqual(scopedBlock.props.palette, {
+      background: "#ffffff",
+      foreground: "#222222",
+    });
     const section = scopedBlock.props.children;
     assert.equal(section.type, Section);
     assert.equal(section.props.scheme, "default");
@@ -56,7 +86,11 @@ describe("ImageBlock custom theme", () => {
         scheme: "surface",
       },
       blockType: "imageBlock",
-      imagePresentation: { aspectRatio: "original", fit: "cover", size: "large" },
+      imagePresentation: {
+        aspectRatio: "original",
+        fit: "cover",
+        size: "large",
+      },
       media,
     });
 

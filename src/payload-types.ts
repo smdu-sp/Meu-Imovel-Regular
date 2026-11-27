@@ -1271,6 +1271,10 @@ export interface IconGridBlock {
      */
     spacing?: ('compact' | 'default' | 'spacious') | null;
     /**
+     * Aplica o mesmo estilo de borda a todos os cards desta grade.
+     */
+    borderStyle?: ('solid' | 'dashed' | 'dotted' | 'none') | null;
+    /**
      * Deixe um campo vazio para herdar o token global. O contraste considera a paleta efetiva. Nao configura elementos individuais.
      */
     colors?: {
@@ -2562,6 +2566,7 @@ export interface IconGridBlockSelect<T extends boolean = true> {
     | {
         scheme?: T;
         spacing?: T;
+        borderStyle?: T;
         colors?:
           | T
           | {
@@ -2959,6 +2964,9 @@ export interface Header {
    * Opcional. Exibida na outra extremidade do cabeçalho.
    */
   secondaryLogo?: (number | null) | Media;
+  /**
+   * Controla as duas marcas do cabeçalho. O menu permanece centralizado e as imagens se adaptam em telas menores.
+   */
   logoSize?: ('small' | 'medium' | 'large') | null;
   logoPosition?: ('left' | 'right') | null;
   textSize?: ('small' | 'medium' | 'large') | null;

@@ -38,7 +38,7 @@ let connectionSequence = 0;
 export async function connectStore(
   uri: string,
   actorId: number,
-  globalSlug: "header" | "footer" = "header",
+  globalSlug: "header" | "footer" | "both" = "header",
 ) {
   process.env.DISABLE_PAYLOAD_HMR = "true";
   if (process.env.PAYLOAD_DROP_DATABASE === "true")
@@ -128,6 +128,8 @@ export async function connectStore(
         (await payload.updateGlobal({
           slug,
           data,
+          context:
+            slug === "header" ? { wordpressImportHeaderDraftLinks: true } : {},
           depth: 0,
           overrideAccess: false,
           req,
@@ -154,9 +156,11 @@ export async function connectStore(
               >;
             }
           ).sessions[String(id)].db.execute(
-            globalSlug === "footer"
-              ? sql`LOCK TABLE pages, _pages_v, media, payload_folders, footer IN SHARE ROW EXCLUSIVE MODE`
-              : sql`LOCK TABLE pages, _pages_v, media, payload_folders, header IN SHARE ROW EXCLUSIVE MODE`,
+            globalSlug === "both"
+              ? sql`LOCK TABLE pages, _pages_v, media, payload_folders, header, footer IN SHARE ROW EXCLUSIVE MODE`
+              : globalSlug === "footer"
+                ? sql`LOCK TABLE pages, _pages_v, media, payload_folders, footer IN SHARE ROW EXCLUSIVE MODE`
+                : sql`LOCK TABLE pages, _pages_v, media, payload_folders, header IN SHARE ROW EXCLUSIVE MODE`,
           );
           let result;
           try {
@@ -185,7 +189,10 @@ export async function connectStore(
     // Queries validate columns/relations against the existing schema; no DDL is run.
     for (const collection of ["pages", "media", "payload-folders"])
       await store.find(collection, {});
-    await store.getGlobal?.(globalSlug);
+    for (const slug of globalSlug === "both"
+      ? (["header", "footer"] as const)
+      : [globalSlug])
+      await store.getGlobal?.(slug);
     return {
       store,
       close: async () => {

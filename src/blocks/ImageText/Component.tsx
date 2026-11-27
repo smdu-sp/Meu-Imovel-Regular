@@ -12,7 +12,8 @@ import type { ImagePresentation } from "../shared/image-presentation";
 import { PresentedMediaImage } from "../shared/PresentedMediaImage";
 import { BlockLink } from "../shared/BlockLink";
 
-type ImageTextVariant = "image-left" | "image-right" | "image-top" | "image-bottom";
+type ImageTextVariant =
+  "image-left" | "image-right" | "image-top" | "image-bottom";
 
 type ImageTextAppearance = {
   colors?: EditorialColorOverrides | null;
@@ -83,9 +84,11 @@ export function ImageTextBlock({
       scheme={customTheme ? "default" : effectiveTone}
     >
       <Container size="lg">
-        <div className={`grid items-center gap-10 ${imageBesideText ? "lg:grid-cols-2 lg:gap-16" : ""}`}>
+        <div
+          className={`grid items-center gap-10 ${imageBesideText ? "lg:grid-cols-2 lg:gap-16" : ""}`}
+        >
           <PresentedMediaImage
-            className={`rounded-xl border border-(--block-border) ${imageOnRight ? "lg:order-2" : ""} ${imageBelow ? "order-2" : ""}`}
+            className={`${imageOnRight ? "lg:order-2" : ""} ${imageBelow ? "order-2" : ""}`}
             media={image}
             presentation={imagePresentation as ImagePresentation}
             sizeClassNames={imageSizeClasses}

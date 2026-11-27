@@ -1,5 +1,12 @@
 import type { IconGridBlock as IconGridBlockProps } from "../../payload-types";
-import { BlockThemeScope, Card, Container, Heading, Section, Text } from "../../components/ui";
+import {
+  BlockThemeScope,
+  Card,
+  Container,
+  Heading,
+  Section,
+  Text,
+} from "../../components/ui";
 import type { EditorialColorOverrides } from "../../lib/theme/block-color-theme";
 import { BlockIcon } from "../shared/BlockIcon";
 import { BlockLink } from "../shared/BlockLink";
@@ -8,6 +15,7 @@ type IconGridVariant = "compact" | "default";
 
 type IconGridAppearance = {
   colors?: EditorialColorOverrides | null;
+  borderStyle?: "solid" | "dashed" | "dotted" | "none" | string | null;
   spacing?: "compact" | "default" | "spacious" | string | null;
   scheme?: "custom" | "default" | "muted" | "surface" | string | null;
 };
@@ -38,8 +46,17 @@ export function normalizeIconGridSpacing(
   spacing?: string | null,
   fallbackSpacing: "compact" | "default" = "default",
 ): "compact" | "default" | "spacious" {
-  if (spacing === "compact" || spacing === "spacious" || spacing === "default") return spacing;
+  if (spacing === "compact" || spacing === "spacious" || spacing === "default")
+    return spacing;
   return fallbackSpacing;
+}
+
+export function normalizeIconGridBorderStyle(
+  value?: string | null,
+): "solid" | "dashed" | "dotted" | "none" {
+  return value === "dashed" || value === "dotted" || value === "none"
+    ? value
+    : "solid";
 }
 
 export function IconGridBlock({
@@ -59,7 +76,10 @@ export function IconGridBlock({
   );
 
   const section = (
-    <Section spacing={effectiveSpacing} scheme={customTheme ? "default" : effectiveTone}>
+    <Section
+      spacing={effectiveSpacing}
+      scheme={customTheme ? "default" : effectiveTone}
+    >
       <Container size="lg">
         {title ? (
           <Heading level={2} size="lg">
@@ -72,14 +92,20 @@ export function IconGridBlock({
           </div>
         ) : null}
         <ul
-          className={`${title || description ? "mt-8 " : ""}grid gap-4 ${compact ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3"}`}
+          className={`${title || description ? "mt-8 " : ""}grid auto-rows-fr items-stretch gap-4 ${compact ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3"}`}
         >
           {items.map((rawItem) => {
             const item = rawItem as IconGridItem;
             return (
-              <li key={item.id}>
-                <Card fullHeight padding={compact ? "sm" : "md"}>
-                  <div className="flex gap-4">
+              <li className="h-full min-w-0" key={item.id}>
+                <Card
+                  borderStyle={normalizeIconGridBorderStyle(
+                    appearance?.borderStyle,
+                  )}
+                  fullHeight
+                  padding={compact ? "sm" : "md"}
+                >
+                  <div className="flex flex-1 gap-4">
                     <BlockIcon
                       className={`${compact ? "h-9 w-9" : "h-11 w-11"} shrink-0 object-contain`}
                       icon={item.icon}
@@ -88,12 +114,12 @@ export function IconGridBlock({
                       standardIcon={item.standardIcon}
                       tone="accent"
                     />
-                    <div className="min-w-0">
+                    <div className="flex min-w-0 flex-1 flex-col">
                       <Text weight="semibold">
                         <span className="break-words">{item.description}</span>
                       </Text>
                       {item.link?.label ? (
-                        <div className="mt-4">
+                        <div className="mt-auto pt-4">
                           <BlockLink link={item.link} size="sm" />
                         </div>
                       ) : null}
@@ -108,7 +134,9 @@ export function IconGridBlock({
     </Section>
   );
 
-  return customTheme
-    ? <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
-    : section;
+  return customTheme ? (
+    <BlockThemeScope palette={appearance?.colors}>{section}</BlockThemeScope>
+  ) : (
+    section
+  );
 }

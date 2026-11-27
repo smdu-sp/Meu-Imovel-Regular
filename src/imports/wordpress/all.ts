@@ -1,3 +1,5 @@
+import { planHeader } from "./globals/header.ts";
+import { planFooter } from "./globals/footer.ts";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -8,10 +10,7 @@ import {
   openImportSession,
   type ImportSession,
 } from "./run.ts";
-import {
-  resolveSourceFile,
-  resolveUploadsRoot,
-} from "./shared/source.ts";
+import { resolveSourceFile, resolveUploadsRoot } from "./shared/source.ts";
 export const importOrder = [
   "home",
   "cartilha",
@@ -24,6 +23,7 @@ export const importOrder = [
   "entenda",
   "faq",
 ] as const;
+export const globalImportOrder = ["header", "footer"] as const;
 export async function importAll(
   args = process.argv.slice(2),
   settings: { print?: boolean } = {},
@@ -35,6 +35,10 @@ export async function importAll(
   const plans = [];
   for (const page of importOrder)
     plans.push(await preparePage(page, source, uploads));
+  const globals = [
+    await planHeader(source, uploads),
+    await planFooter(source, uploads),
+  ];
   const stateDir = options["state-dir"] || ".local/wordpress-import";
   const batchDir = path.join(
     stateDir,
@@ -45,6 +49,7 @@ export async function importAll(
   const protectedPaths = [
     source,
     ...plans.flatMap((p) => p.plan.assets.map((a) => a.filename)),
+    ...globals.flatMap((plan) => plan.assets.map((asset) => asset.filename)),
     path.join(stateDir, "manifest.json"),
     path.join(stateDir, "execution.lock"),
   ].map((p) => path.resolve(p));
@@ -75,24 +80,30 @@ export async function importAll(
   let failure: unknown;
   let session: ImportSession | undefined;
   try {
-    if (options.apply) session = await openImportSession(options);
-    // A second write pass resolves forward references after all ten drafts exist.
+    if (options.apply) session = await openImportSession(options, "both");
+    const execute = async (target: string, pass: number) => {
+      if (settings.print !== false) console.log(`[${pass}] ${target}`);
+      const reportPath = path.join(batchDir, `${pass}-${target}.json`);
+      const report = await run([target, ...forwarded, "--report", reportPath], {
+        print: false,
+        session,
+      });
+      const result = report.result as
+        { pageId?: number; globalId?: number } | undefined;
+      summary.pages.push({
+        page: target,
+        pass,
+        pageId: result?.pageId,
+        globalId: result?.globalId,
+        report: reportPath,
+        linkAudit: report.linkAudit,
+      });
+    };
+    // Resolve all page references before importing the site shell once.
     for (let pass = 1; pass <= (options.apply ? 2 : 1); pass++)
-      for (const page of importOrder) {
-        if (settings.print !== false) console.log(`[${pass}] ${page}`);
-        const reportPath = path.join(batchDir, `${pass}-${page}.json`);
-        const report = await run([page, ...forwarded, "--report", reportPath], {
-          print: false,
-          session,
-        });
-        summary.pages.push({
-          page,
-          pass,
-          pageId: (report.result as { pageId?: number } | undefined)?.pageId,
-          report: reportPath,
-          linkAudit: report.linkAudit,
-        });
-      }
+      for (const page of importOrder) await execute(page, pass);
+    for (const global of globalImportOrder)
+      await execute(global, options.apply ? 3 : 1);
     if (session) {
       await session.close();
       session = undefined;

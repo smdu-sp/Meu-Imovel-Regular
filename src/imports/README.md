@@ -4,13 +4,13 @@ Execute os comandos abaixo na raiz do projeto.
 
 ## Executar todas as importações
 
-Validar as dez páginas sem conectar ao banco:
+Validar as dez páginas, Header e Footer sem conectar ao banco:
 
 ```bash
 npm run import:wordpress:all -- --dry-run
 ```
 
-Importar as dez páginas como rascunhos e resolver os links entre elas:
+Importar as dez páginas como rascunhos, resolver os links e atualizar os Globals Header e Footer:
 
 ```bash
 npm run import:wordpress:all -- --apply --actor-id 1 --target-label mir-local
@@ -18,7 +18,7 @@ npm run import:wordpress:all -- --apply --actor-id 1 --target-label mir-local
 
 O lote valida todas as fontes antes de gravar, reutiliza o manifesto e faz duas passadas: carga e resolução final das referências. Para ao encontrar conflito, sem sobrescrever conteúdo editado/publicado. Não executa migrations de schema. [Guia do lote e atualização de links](../../docs/MIR%20-%20DOCS/relatorio-specs/importacao-completa.md).
 
-O lote inclui apenas as dez páginas. Execute os Globals Header e Footer separadamente.
+O lote inclui Header e Footer, nessa ordem, após as duas passadas das páginas. Os Globals são atualizados diretamente, sem etapa de publicação; as proteções contra conteúdo editado ou não gerenciado continuam ativas. A simulação também confere os três logos antes de qualquer gravação.
 
 ## Home
 

@@ -1,6 +1,6 @@
 # Importação completa e links locais
 
-Implementado em 18/11/2026. O comando executa as dez importações editoriais WordPress → Payload, em rascunho. Não executa migrations de schema, não limpa banco/manifesto e não publica páginas.
+Implementado em 18/11/2026. O comando executa as dez importações editoriais WordPress → Payload, em rascunho, e depois atualiza Header e Footer. Não executa migrations de schema, não limpa banco/manifesto e não publica páginas.
 
 ```bash
 npm run import:wordpress:all -- --dry-run
@@ -11,9 +11,9 @@ Substitua `1` pelo ID de um Admin existente. O PostgreSQL/schema devem estar pre
 
 ## Ordem e segurança
 
-O comando verifica as dez fontes e todos os arquivos antes da primeira gravação. A aplicação mantém uma sessão do Payload e um lock de manifesto durante todo o lote. Ordem: Home, Cartilha, Situação, Benefícios, Automática, Declaratória Simplificada, Declaratória, Comum, Entenda e FAQ.
+O comando verifica as dez fontes de páginas, os templates do Header/Footer e todos os arquivos, incluindo os três logos, antes da primeira gravação. A aplicação mantém uma sessão do Payload e um lock de manifesto durante todo o lote. As transações do lote também incluem locks nas tabelas Header e Footer. Ordem: Home, Cartilha, Situação, Benefícios, Automática, Declaratória Simplificada, Declaratória, Comum, Entenda e FAQ.
 
-São duas passadas: a primeira cria/reutiliza mídias e rascunhos; a segunda resolve referências que dependiam de páginas ainda não existentes. Com conteúdo e destino intactos, reexecutar não duplica mídias nem cria novas revisões. Um conflito interrompe o lote; checkpoints anteriores permanecem para recuperação. Não é uma transação única entre dez páginas, banco e arquivos.
+São duas passadas: a primeira cria/reutiliza mídias e rascunhos; a segunda resolve referências que dependiam de páginas ainda não existentes. Ao finalizar as duas, executa Header e depois Footer uma única vez, com relatórios e checkpoints próprios (`global:header` e `global:footer`). Esses Globals são atualizados diretamente, sem publicação separada. Com conteúdo e destino intactos, reexecutar não duplica mídias nem cria novas revisões. Um conflito interrompe o lote; checkpoints anteriores permanecem para recuperação. Não é uma transação única entre dez páginas, banco e arquivos.
 
 Edições manuais, versões publicadas, slug sem manifesto e operações indeterminadas mantêm as proteções anteriores. Não há `--force`. Se alguma página já foi editada/publicada, o lote não é um mecanismo para sobrescrevê-la. Nenhum comando foi executado no banco da instância durante esta implementação.
 
@@ -49,3 +49,20 @@ O [inventário de links](../mapas/auditoria-links-internos.md) registra as corre
 - `git diff --check` e links locais dos documentos alterados: conferidos.
 
 Os testes com subprocessos e PostgreSQL foram executados fora do sandbox, em bancos e diretórios temporários, sem usar o banco ou uploads da instância. Os containers temporários foram removidos ao encerrar a validação. Permanecem pendentes preview/navegação manual, revisão institucional e disponibilidade dos serviços externos.
+
+
+## Inclusão de Header e Footer no lote — 27/11/2026
+
+`all.ts` mantém as dez páginas em `importOrder` e acrescenta `globalImportOrder` com Header e Footer. A validação inicial cobre os dois templates e seus logos. Depois das duas passadas das páginas, o Header pode resolver seus cinco destinos e o Footer reutiliza a pasta de identidade criada por ele. O sumário mantém a chave `pages` por compatibilidade, com 22 operações na aplicação: 20 de páginas e duas de Globals. Operações de Global informam `globalId`; a simulação tem 12 operações.
+
+O lote abre uma sessão com escopo `both`, que verifica ambos os Globals antes das gravações e mantém locks de Header/Footer junto aos locks existentes. Comandos isolados continuam usando seu escopo anterior. Não houve alteração de schema, migration ou afrouxamento dos conflitos de conteúdo existente/editado. O banco da instância não foi usado nesta implementação.
+
+
+### Header com páginas recém-importadas em rascunho
+
+O Header filtra normalmente páginas publicadas e ativas. Para o lote conseguir associar os cinco destinos recém-importados, a chamada Local API do importador usa o contexto servidor `wordpressImportHeaderDraftLinks=true`, exigindo também ator Admin. Somente nesse contexto, o filtro permite páginas ativas em rascunho. O seletor normal e usuários sem essa combinação continuam exigindo publicação. A renderização pública continua ocultando destinos em rascunho/inativos.
+
+O ajuste altera apenas o filtro de validação da relação, sem adicionar/remover campos, mudar tipos, alterar `relationTo` ou converter documentos. Não exige migration. O teste de Global cobre ausência de flag, usuário Editor e contexto administrativo de importação; a integração comprova que as dez páginas continuam em rascunho.
+
+
+Validação da inclusão dos Globals: `npm run typecheck`, lint dos seis arquivos TypeScript alterados, `git diff --check` e 28 testes focados passaram. A simulação real confirmou 12 operações, com Header/Footer ao final. A integração PostgreSQL descartável executou as 22 operações de aplicação, confirmou dez rascunhos, ambos os Globals preenchidos, 57 mídias e 31 pastas; uma segunda execução manteve as revisões de páginas e Globals e a contagem de mídias. O container temporário foi removido após a validação. O banco e os arquivos de mídia da instância não foram usados.

@@ -70,13 +70,13 @@ export function argumentsFor(args: string[]) {
   });
   if (
     positionals.length !== 1 ||
-    !["header", "footer"].includes(positionals[0]) &&
-    !Object.keys(sitePages).some(
-      (key) =>
-        key === positionals[0] ||
-        (key === "beneficios-de-regularizar-o-imovel" &&
-          positionals[0] === "beneficios"),
-    )
+    (!["header", "footer"].includes(positionals[0]) &&
+      !Object.keys(sitePages).some(
+        (key) =>
+          key === positionals[0] ||
+          (key === "beneficios-de-regularizar-o-imovel" &&
+            positionals[0] === "beneficios"),
+      ))
   )
     throw new Error(
       "Informe uma página suportada, header ou footer: home, entenda, beneficios, situacao, faq, cartilha ou uma modalidade de regularizacao.",
@@ -235,6 +235,7 @@ export type ImportSession = {
 };
 export async function openImportSession(
   options: ReturnType<typeof argumentsFor>,
+  globalScope?: "header" | "footer" | "both",
 ): Promise<ImportSession> {
   if (!process.env.NODE_ENV)
     Object.assign(process.env, { NODE_ENV: "development" });
@@ -258,7 +259,7 @@ export async function openImportSession(
     const connection = await connectStore(
       uri,
       Number(options["actor-id"]),
-      options.page === "footer" ? "footer" : "header",
+      globalScope ?? (options.page === "footer" ? "footer" : "header"),
     );
     return {
       store: connection.store,
@@ -285,28 +286,46 @@ export async function run(
   const source = resolveSourceFile(options.source);
   const uploads = resolveUploadsRoot(options.uploads);
   if (options.page === "header" || options.page === "footer") {
-    const prepared = options.page === "header"
-      ? await (async () => {
-          const plan = await planHeader(source, uploads);
-          const symbolicMedia = Object.fromEntries(plan.assets.map((asset, index) => [asset.id, -(index + 1)]));
-          const symbolicPages = Object.fromEntries(plan.menu.map((item, index) => [item.slug, -(index + 1)]));
-          return {
-            plan,
-            origin: { file: source, postId: plan.postId, metaId: plan.metaId, menuIds: plan.menu.map((item) => item.id) },
-            data: headerData(plan, symbolicMedia, symbolicPages),
-            apply: (store: Store, state: State, save: () => Promise<void>) => applyHeader(plan, store, state, save),
-          };
-        })()
-      : await (async () => {
-          const plan = await planFooter(source, uploads);
-          const symbolicMedia = Object.fromEntries(plan.assets.map((asset, index) => [asset.id, -(index + 1)]));
-          return {
-            plan,
-            origin: { file: source, postId: plan.postId, metaId: plan.metaId },
-            data: footerData(plan, symbolicMedia),
-            apply: (store: Store, state: State, save: () => Promise<void>) => applyFooter(plan, store, state, save),
-          };
-        })();
+    const prepared =
+      options.page === "header"
+        ? await (async () => {
+            const plan = await planHeader(source, uploads);
+            const symbolicMedia = Object.fromEntries(
+              plan.assets.map((asset, index) => [asset.id, -(index + 1)]),
+            );
+            const symbolicPages = Object.fromEntries(
+              plan.menu.map((item, index) => [item.slug, -(index + 1)]),
+            );
+            return {
+              plan,
+              origin: {
+                file: source,
+                postId: plan.postId,
+                metaId: plan.metaId,
+                menuIds: plan.menu.map((item) => item.id),
+              },
+              data: headerData(plan, symbolicMedia, symbolicPages),
+              apply: (store: Store, state: State, save: () => Promise<void>) =>
+                applyHeader(plan, store, state, save),
+            };
+          })()
+        : await (async () => {
+            const plan = await planFooter(source, uploads);
+            const symbolicMedia = Object.fromEntries(
+              plan.assets.map((asset, index) => [asset.id, -(index + 1)]),
+            );
+            return {
+              plan,
+              origin: {
+                file: source,
+                postId: plan.postId,
+                metaId: plan.metaId,
+              },
+              data: footerData(plan, symbolicMedia),
+              apply: (store: Store, state: State, save: () => Promise<void>) =>
+                applyFooter(plan, store, state, save),
+            };
+          })();
     const { plan } = prepared;
     const report: Record<string, unknown> = {
       mode: options.apply ? "apply" : "dry-run",
@@ -314,29 +333,61 @@ export async function run(
       converterVersion: 1,
       origin: prepared.origin,
       destinationState: "não verificado",
-      assets: plan.assets.map(({ id, title, alt, relative, hash, mimeType, size, usage, folder }) => ({
-        id, title, alt, relative, hash, mimeType, size, usage, folder,
-      })),
-      ...(options.page === "header" ? { menu: (plan as Awaited<ReturnType<typeof planHeader>>).menu } : {}),
+      assets: plan.assets.map(
+        ({
+          id,
+          title,
+          alt,
+          relative,
+          hash,
+          mimeType,
+          size,
+          usage,
+          folder,
+        }) => ({
+          id,
+          title,
+          alt,
+          relative,
+          hash,
+          mimeType,
+          size,
+          usage,
+          folder,
+        }),
+      ),
+      ...(options.page === "header"
+        ? { menu: (plan as Awaited<ReturnType<typeof planHeader>>).menu }
+        : {}),
       [options.page]: prepared.data,
     };
     if (options.report) {
       const target = path.resolve(options.report);
-      const stateDir = path.resolve(options["state-dir"] || ".local/wordpress-import");
-      if ([
-        path.resolve(source),
-        ...plan.assets.map((asset) => asset.filename),
-        path.join(stateDir, "manifest.json"),
-        path.join(stateDir, "execution.lock"),
-      ].includes(target))
-        throw new Error("Relatório não pode substituir fonte ou estado operacional.");
+      const stateDir = path.resolve(
+        options["state-dir"] || ".local/wordpress-import",
+      );
+      if (
+        [
+          path.resolve(source),
+          ...plan.assets.map((asset) => asset.filename),
+          path.join(stateDir, "manifest.json"),
+          path.join(stateDir, "execution.lock"),
+        ].includes(target)
+      )
+        throw new Error(
+          "Relatório não pode substituir fonte ou estado operacional.",
+        );
     }
     let failure: unknown;
     try {
       if (options.apply) {
         const session = settings.session || (await openImportSession(options));
         try {
-          report.result = await prepared.apply(session.store, session.state, session.save);
+          report.result = await prepared.apply(
+            session.store,
+            session.state,
+            session.save,
+          );
           report.destinationState = "verificado";
         } finally {
           if (!settings.session) await session.close();
@@ -344,8 +395,9 @@ export async function run(
       }
     } catch (error) {
       failure = error;
-      report.error = String(error instanceof Error ? error.message : "Falha na aplicação")
-        .replace(/postgres(?:ql)?:\/\/[^\s]+/gi, "[destino omitido]");
+      report.error = String(
+        error instanceof Error ? error.message : "Falha na aplicação",
+      ).replace(/postgres(?:ql)?:\/\/[^\s]+/gi, "[destino omitido]");
       report.destinationState = "falha; consultar checkpoints antes de retomar";
     }
     const output = JSON.stringify(report, null, 2) + "\n";
@@ -355,7 +407,9 @@ export async function run(
     } else if (options.apply) {
       const dir = options["state-dir"] || ".local/wordpress-import";
       await mkdir(dir, { recursive: true });
-      await writeFile(path.join(dir, `report-${Date.now()}.json`), output, { mode: 0o600 });
+      await writeFile(path.join(dir, `report-${Date.now()}.json`), output, {
+        mode: 0o600,
+      });
     }
     if (settings.print !== false) console.log(output);
     if (failure) throw failure;

@@ -37,3 +37,8 @@ O importador usa `payload.updateGlobal` com o Admin autenticado pela sessão Loc
 - `npm test`: 340 testes executados, 324 passaram, 14 falharam e 2 foram ignorados. Os 6 testes novos da MIR-011 passaram. As falhas restantes estão em testes anteriores: caminhos de uploads que ainda apontam para `old-wordpress/meuimovelregular/wp-content/uploads`, resolução relativa de `NODE_OPTIONS` em um processo filho e criação de symlink bloqueada no Windows (`EPERM`).
 
 Docker não ficou acessível neste ambiente, por isso não foi executada uma aplicação em PostgreSQL descartável. A instância do portal não foi usada para validação.
+
+
+## Execução no lote completo — 27/11/2026
+
+O comando `npm run import:wordpress:all` agora chama Header e Footer depois de concluir as duas passadas das dez páginas. Na chamada administrativa do importador, o contexto servidor permite associar destinos ativos em rascunho, sem publicá-los. O seletor normal do Header continua restrito a destinos publicados/ativos e o portal não exibe links para rascunhos. A estrutura persistida e as relações não mudaram; não há migration necessária. Detalhes no [guia do lote](./importacao-completa.md).

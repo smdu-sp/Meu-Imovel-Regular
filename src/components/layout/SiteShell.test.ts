@@ -19,10 +19,14 @@ const page = {
 } as Page;
 
 function containsElement(node: ReactNode, type: unknown): boolean {
-  if (Array.isArray(node)) return node.some((child) => containsElement(child, type));
+  if (Array.isArray(node))
+    return node.some((child) => containsElement(child, type));
   if (!isValidElement(node)) return false;
   if (node.type === type) return true;
-  return containsElement((node.props as { children?: ReactNode }).children, type);
+  return containsElement(
+    (node.props as { children?: ReactNode }).children,
+    type,
+  );
 }
 
 describe("public site shell", () => {
@@ -44,6 +48,60 @@ describe("public site shell", () => {
     assert.match(markup, /href="\/orientacoes"/);
     assert.doesNotMatch(markup, /Rascunho/);
     assert.match(markup, /Meu Imóvel Regular — página inicial/);
+  });
+
+  it("uses the configured logo size and reserves balanced desktop tracks even without a second logo", () => {
+    for (const [logoSize, height, width] of [
+      ["small", "2.5rem", "10rem"],
+      ["medium", "3.5rem", "14rem"],
+      ["large", "5rem", "18rem"],
+    ] as const) {
+      const header = {
+        id: 1,
+        logoSize,
+        logoPosition: "right",
+        logo: {
+          id: 1,
+          url: "/logo.svg",
+          mimeType: "image/svg+xml",
+          alt: "Logo principal",
+          width: 300,
+          height: 100,
+        },
+        navigation: [{ id: "link", label: "Orientações", page }],
+      } as Header;
+      const tree = SiteHeader({ header });
+      const elements: import("react").ReactElement<Record<string, unknown>>[] =
+        [];
+      const visit = (node: ReactNode) => {
+        if (Array.isArray(node)) {
+          node.forEach(visit);
+          return;
+        }
+        if (!isValidElement(node)) return;
+        const element = node as import("react").ReactElement<
+          Record<string, unknown>
+        >;
+        elements.push(element);
+        visit(element.props.children as ReactNode);
+      };
+      visit(tree);
+      const layout = elements.find((element) =>
+        String(element.props.className).includes("mir-header-inner"),
+      )!;
+      const variables = layout.props.style as Record<string, string>;
+      assert.equal(variables["--mir-header-logo-height"], height);
+      assert.equal(variables["--mir-header-logo-width"], width);
+      assert.match(
+        String(layout.props.className),
+        /mir-header-inner--logo-right/,
+      );
+      const image = elements.find((element) => element.type === MediaImage)!;
+      assert.equal(
+        (image.props.style as Record<string, string>).height,
+        "var(--mir-header-logo-height)",
+      );
+    }
   });
 
   it("renders direct links, categorized submenus and the optional search form", () => {
@@ -112,12 +170,26 @@ describe("public site shell", () => {
       email: "contato@example.gov.br",
       phone: "(11) 1234-5678",
       socialLinks: [
-        { id: "valid", icon: "instagram", label: "Rede oficial", url: "https://example.gov.br/rede" },
-        { id: "unknown-icon", icon: "<svg>", label: "Outra rede", url: "https://example.gov.br/outra" },
+        {
+          id: "valid",
+          icon: "instagram",
+          label: "Rede oficial",
+          url: "https://example.gov.br/rede",
+        },
+        {
+          id: "unknown-icon",
+          icon: "<svg>",
+          label: "Outra rede",
+          url: "https://example.gov.br/outra",
+        },
         { id: "invalid", label: "Link inseguro", url: "javascript:alert(1)" },
       ],
       institutionalLinks: [
-        { id: "service", label: "Serviço oficial", url: "https://example.gov.br/servico" },
+        {
+          id: "service",
+          label: "Serviço oficial",
+          url: "https://example.gov.br/servico",
+        },
       ],
     } as Footer;
     const markup = renderToStaticMarkup(createElement(SiteFooter, { footer }));
@@ -138,8 +210,18 @@ describe("public site shell", () => {
     const footer = {
       id: 1,
       socialLinks: [
-        { id: "icon-only", icon: "instagram", label: null, url: "https://example.gov.br/instagram" },
-        { id: "invalid", icon: null, label: null, url: "https://example.gov.br/invalid" },
+        {
+          id: "icon-only",
+          icon: "instagram",
+          label: null,
+          url: "https://example.gov.br/instagram",
+        },
+        {
+          id: "invalid",
+          icon: null,
+          label: null,
+          url: "https://example.gov.br/invalid",
+        },
       ],
     } as Footer;
     const markup = renderToStaticMarkup(createElement(SiteFooter, { footer }));
@@ -151,15 +233,29 @@ describe("public site shell", () => {
   it("renders a footer containing only a populated logo", () => {
     const footer = {
       id: 1,
-      logo: { id: 2, alt: "Logo institucional", url: "/api/media/file/logo.png" },
+      logo: {
+        id: 2,
+        alt: "Logo institucional",
+        url: "/api/media/file/logo.png",
+      },
     } as Footer;
     const tree = SiteFooter({ footer });
     assert.ok(tree);
     assert.equal(containsElement(tree, MediaImage), true);
-    assert.equal(SiteFooter({ footer: {
-      id: 1,
-      logo: { id: 3, alt: "Arquivo PDF", url: "/logo.pdf", mimeType: "application/pdf" },
-    } as Footer }), null);
+    assert.equal(
+      SiteFooter({
+        footer: {
+          id: 1,
+          logo: {
+            id: 3,
+            alt: "Arquivo PDF",
+            url: "/logo.pdf",
+            mimeType: "application/pdf",
+          },
+        } as Footer,
+      }),
+      null,
+    );
   });
 
   it("keeps footer text readable when the global foreground matches its muted background", () => {
